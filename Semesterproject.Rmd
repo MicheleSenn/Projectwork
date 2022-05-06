@@ -1,7 +1,7 @@
 ---
 title: Scare-off measures against wild boars 
 subtitle: computational movement analysis
-author: Lia Bachmann and Michele Senn
+author: Lia Baumann and Michele Senn
 output: html_document
 
 ---
