@@ -29,6 +29,8 @@ update.packages(cli)
 #install.packages("devtools") # <- if you havent installed devtools already
 library(devtools)
 devtools::install_github("ComputationalMovementAnalysis/ComputationalMovementAnalysisData")
+library(ComputationalMovementAnalysisData)
+head(wildschwein_BE)
 ```
 
 ## Abstract
