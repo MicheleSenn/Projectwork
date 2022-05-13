@@ -29,7 +29,8 @@ Result: It might be interesting to build a time series of returning animals afte
 2. We expect some kind of social behavior, e.g. meeting of and communication between individuals.
 Result: Model meeting patterns, maybe followed by an analysis of lead-and-follow or flocking patterns.
 
-Bonus: 3. We are interested if there are differences between the animals' natures such as very courageous vs. very fearful individuals.
+Bonus:
+3. We are interested if there are differences between the animals' natures such as very courageous vs. very fearful individuals.
 Result: This information could be obtained when conceptualizing the time of return and their general movement radius compared between the individuals. Option 2: Relating biology to their behavior (influences such as mating season, etc.)
 
 ## Data
