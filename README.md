@@ -14,8 +14,9 @@ Analysis Geo 880**
 <!-- (50-60 words) --> Lia
 
 ## Research Questions
-<!-- (50-60 words) --> Michèle
+<!-- (50-60 words) --> 
 <!--at least 2 research questions -->
+Once a scare-off measure has proven to have an effect and cause the wild boars to relocate, it needs to be examined how long the effect lasts. Therefore, the two following research questions were formulated:
 1. How can the long-term effects of scare-off measures be modelled?
 2. Can a trend of returning to the scare-off location be detected or even conceptualized?
 
