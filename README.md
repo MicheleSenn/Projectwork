@@ -50,8 +50,10 @@ new idea: --> for interpretation and some context, what about weather data? or b
 - (Small  multiples of) trajectories or locations comparing seasons, time of day or individuals
 
 ## R concepts
-<!-- Which R concepts, functions, packages will you mainly use. What additional spatial analysis methods will you be using? --> Michèle
-...Spatial objects with sf, raster data and background map, plotly, ggplot2, tidyverse
+<!-- Which R concepts, functions, packages will you mainly use. What additional spatial analysis methods will you be using? --> 
+The modeling will be done using the following concepts and packages:
+- Spatial objects with the r-package "sf"
+- raster data and background maps with these r-packages: "plotly", "ggplot2", "tidyverse"
 
 ## Risk analysis
 <!-- What could be the biggest challenges/problems you might face? What is your plan B? Lia --> 
