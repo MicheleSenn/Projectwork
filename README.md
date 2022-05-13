@@ -35,10 +35,10 @@ Bonus:
 Result: This information could be obtained when conceptualizing the time of return and their general movement radius compared between the individuals. Option 2: Relating biology to their behavior (influences such as mating season, etc.)
 
 ## Data
-<!-- What data will you use? Will you require additional context data? Where do you get this data from? Do you already have all the data? --> Michèle
-Long-term data for movement trajectories will be necessary (at least 6 weeks), different times of day, several individuals in a similar location
-+ mapdata
-new idea: --> for interpretation and some context, what about weather data? or background info on their social behavior / seasonal movements etc.
+<!-- What data will you use? Will you require additional context data? Where do you get this data from? Do you already have all the data? --> 
+Long-term data for movement trajectories will be necessary (at least 6 weeks). Data should be of different times of day and of several individuals in a similar location. WHERE WE GET THAT DATA FROM IS A QUESTION.
+Furthermore, mapdata will be needed, which can be aquired from open sources.
+Weather data would help to put the visualiziations into context and would help for a better interpretation. This could be aquired from open sources. Some background information on the boars social behavior and seasonal movements would also be interesting and help for a better understanding of the data. It could be difficult to get that data though.
 
 ## Analytical concepts
 <!-- Which analytical concepts will you use? What conceptual movement spaces and respective modelling approaches of trajectories will you be using? What additional spatial analysis methods will you be using?  Lia -->
@@ -52,8 +52,9 @@ new idea: --> for interpretation and some context, what about weather data? or b
 ## R concepts
 <!-- Which R concepts, functions, packages will you mainly use. What additional spatial analysis methods will you be using? --> 
 The modeling will be done using the following concepts and packages:
-- Spatial objects with the r-package "sf"
-- raster data and background maps with these r-packages: "plotly", "ggplot2", "tidyverse"
+- Spatial objects will be created with the r-package "sf"
+- raster data and background maps will be plotted and visuallized with these r-packages: "plotly", "ggplot2"
+- For the reshaping and transforming of date the r-package "tidyverse" will be used
 
 ## Risk analysis
 <!-- What could be the biggest challenges/problems you might face? What is your plan B? Lia --> 
@@ -64,3 +65,4 @@ The modeling will be done using the following concepts and packages:
 
 ## Questions?
 <!-- Which questions would you like to discuss at the coaching session? --> Both
+Long-term data for movement trajectories will be necessary (at least 6 weeks). Data should be of different times of day and of several individuals in a similar location. WHERE CAN WE GET THAT?
