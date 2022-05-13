@@ -22,13 +22,16 @@ output: html_document
 
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 ```
-```{r load wild boar data}
-install.packages("backports"); install.packages("devtools")
-install.packages("cli")
-update.packages(cli)
+```{r load wild boar data, message=FALSE, warning=FALSE}
+#install.packages("backports"); install.packages("devtools")
+#install.packages("cli") #issues with downloading devtools, that's why I used this additionally
+#install.packages("remote")
+#update.packages(cli)
 #install.packages("devtools") # <- if you havent installed devtools already
 library(devtools)
 devtools::install_github("ComputationalMovementAnalysis/ComputationalMovementAnalysisData")
+library(ComputationalMovementAnalysisData)
+head(wildschwein_BE)
 ```
 
 ## Abstract
