@@ -32,6 +32,7 @@ Result: It might be interesting to build a time series of returning animals afte
 Result: Model meeting patterns, maybe followed by an analysis of lead-and-follow or flocking patterns.
 
 Bonus:
+
 3. We are interested if there are differences between the animals' natures such as very courageous vs. very fearful individuals.
 Result: This information could be obtained when conceptualizing the time of return and their general movement radius compared between the individuals. Option 2: Relating biology to their behavior (influences such as mating season, etc.)
 
@@ -66,5 +67,7 @@ The modeling will be done using the following concepts and packages:
 - Possibly, the different measures don't show the same effects. We might need to distinguish between measures in order to draw inferences.
 
 ## Questions?
-<!-- Which questions would you like to discuss at the coaching session? --> Both
-Long-term data for movement trajectories will be necessary (at least 6 weeks). Data should be of different times of day and of several individuals in a similar location. WHERE CAN WE GET THAT?
+<!-- Which questions would you like to discuss at the coaching session? -->
+- Long-term data for movement trajectories will be necessary (at least 6 weeks).
+- Data should be of different times of day and of several individuals in a similar location.
+- Where to get weather data
