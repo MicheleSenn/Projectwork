@@ -38,9 +38,11 @@ Result: This information could be obtained when conceptualizing the time of retu
 
 ## Data
 <!-- What data will you use? Will you require additional context data? Where do you get this data from? Do you already have all the data? --> 
-Long-term data for movement trajectories will be necessary (at least 6 weeks). Data should be of different times of day and of several individuals in a similar location. WHERE WE GET THAT DATA FROM IS A QUESTION.
-Furthermore, mapdata will be needed, which can be aquired from open sources.
-Weather data would help to put the visualiziations into context and would help for a better interpretation. This could be acquired from open sources. Some background information on the boars social behavior and seasonal movements would also be interesting and help for a better understanding of the data. It could be difficult to get that data though.
+- Long-term data for movement trajectories will be necessary (at least 6 weeks).
+- Data should be of different times of day and of several individuals in a similar location --> we need to find these sources.
+- Furthermore, mapdata will be needed, which can be aquired from open sources.
+- Weather data would help to put the visualiziations into context and would help for a better interpretation. This could be acquired from open sources.
+- Some background information on the boars social behavior and seasonal movements would also be interesting and help for a better understanding of the data. It could be difficult to get that data though.
 
 ## Analytical concepts
 <!-- Which analytical concepts will you use? What conceptual movement spaces and respective modelling approaches of trajectories will you be using? What additional spatial analysis methods will you be using? -->
@@ -70,4 +72,4 @@ The modeling will be done using the following concepts and packages:
 <!-- Which questions would you like to discuss at the coaching session? -->
 - Long-term data for movement trajectories will be necessary (at least 6 weeks).
 - Data should be of different times of day and of several individuals in a similar location.
-- Where to get weather data
+- Where to get weather data / background data
