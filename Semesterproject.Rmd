@@ -22,7 +22,7 @@ output: html_document
 
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 ```
-```{r load wild boar data}
+```{r load wild boar data, include=FALSE}
 #install.packages("backports"); install.packages("devtools")
 #install.packages("cli")
 #update.packages(cli)
@@ -50,7 +50,7 @@ Society philosophy merciful selfish sexuality depths overcome madness. Morality 
 <!-- the following is just a placeholder text, remove it!-->
 Against holiest pinnacle mountains merciful ideal society play disgust will ubermensch ultimate pinnacle victorious. Snare value law gains battle pious intentions revaluation strong. Insofar snare faith ideal oneself.
 
-```{r packages}
+```{r packages, include=FALSE}
 library(ComputationalMovementAnalysisData)
 library(ggplot2)
 library(dplyr)
@@ -58,7 +58,7 @@ library(sf)
 
 # Include tables with the function "kable"
 
-knitr::kable(head(wildschwein_BE))
+#knitr::kable(head(wildschwein_BE))
 ```
 ```{r temporal overlap}
 sampling_periods <- wildschwein_BE %>%
@@ -121,7 +121,7 @@ ggplot() +
   geom_sf(data=wildschwein_sf,aes(fill=TierID)) +
   geom_sf(data=schreck_locations_sf, aes(color=region)) +
   coord_sf(datum=2056)
-#Die Tiere sind nur von Schrecks in Fanel beeinträchtigt (kann das sein?)
+#Die Tiere sind nur von Schrecks in der Region Fanel beeinträchtigt (kann das sein?)
 
 #alle anderen rausfiltern
 schreck_locations_sf_fanel <- schreck_locations_sf %>%
@@ -139,6 +139,40 @@ agenda_fanel <- inner_join(schreck_locations_sf_fanel, schreck_agenda, by="id")
 #show when the schrecks in fanel were used
 ggplot(agenda_fanel, aes(xmin = datum_on, xmax = datum_off, y=id )) +
   geom_errorbarh()
+```
+```{r temporally close animals}
+#Idee: Alle Monate, wo der Schreck lief zusammen joinen mit allen Monaten, wo die Wildschweine getrackt wurden. So können wir schon mal zeitlich sagen, welche überhaupt mit dem Schreck beeinflusst hätten sein können (nur zeitlich)
+
+#Achtung, es fehlen noch einige Monate dazwischen -> herausfinden wie diese zu finden sind!
+fanel_months <- agenda_fanel %>%
+  mutate(month_start=paste(lubridate::month(datum_on),"-",lubridate::year(datum_on)),
+         month_end=paste(lubridate::month(datum_off),"-",lubridate::year(datum_off)),
+         N_days=difftime(datum_off,datum_on,tz="UTC")) %>%
+  select(id,month_start,month_end) %>%
+  tidyr::pivot_longer(2:3,values_to="month_year")
+    #da es sich z.T. um mehrere Monate handelt
+agenda_fanel_months <- st_join(agenda_fanel,fanel_months,by="id") %>%
+  select(-id.y,-name)
+
+#eine gröbere Filtermöglichkeit mit Jahr darstellen
+Fanel_years <- agenda_fanel %>%
+  mutate(roundToYear = lubridate::year(datum_on))
+
+wildschwein_months_years <- wildschwein_sf %>%
+  group_by(TierName,month_year = paste(lubridate::month(DatetimeUTC),"-",
+                          lubridate::year(DatetimeUTC)),
+           year=lubridate::year(DatetimeUTC)) %>%
+  summarize() %>%
+  as.data.frame()
+   
+join_fanel_wildschwein_months <- inner_join(fanel_months,wildschwein_months_years,by = "month_year")  
+knitr::kable(join_fanel_wildschwein_months %>%
+               group_by(year,TierName) %>%
+         summarize(n=n())) #diese Tiere kommen möglicherweise beim Schreck vorbei, während er ON ist.
+```
+```{r distance to Schreck}
+#Idee: mit dem obigen Join kann man nun die Datasets einschränken / wurde nun eingeschränkt.
+#Danach muss die Distanz zum jeweiligen Schreck gerechnet und dargestellt werden
 ```
 <!-- the following is just a placeholder text, remove it!-->
 Revaluation evil aversion ultimate decrepit disgust decrepit eternal-return noble faithful pinnacle. Truth ascetic inexpedient decrepit free. Ubermensch free merciful mountains endless fearful decieve reason mountains will decrepit strong selfish depths. Overcome faith snare gains oneself transvaluation.
