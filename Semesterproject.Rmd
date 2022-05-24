@@ -31,6 +31,15 @@ library(devtools)
 devtools::install_github("ComputationalMovementAnalysis/ComputationalMovementAnalysisData")
 library(ComputationalMovementAnalysisData)
 head(wildschwein_BE)
+summary(wildschwein_BE)
+head(schreck_agenda)
+summary(schreck_agenda)
+schreck_agenda %>%
+  group_by(id) %>%
+  summarise(n=n()) #they were used once or twice each
+head(schreck_locations)
+head(wildschwein_metadata)
+head(wildschwein_overlap_temp)
 ```
 
 ## Abstract
@@ -44,15 +53,97 @@ Society philosophy merciful selfish sexuality depths overcome madness. Morality 
 <!-- the following is just a placeholder text, remove it!-->
 Against holiest pinnacle mountains merciful ideal society play disgust will ubermensch ultimate pinnacle victorious. Snare value law gains battle pious intentions revaluation strong. Insofar snare faith ideal oneself.
 
-```{r}
+```{r packages}
 library(ComputationalMovementAnalysisData)
 library(ggplot2)
+library(dplyr)
+library(sf)
 
 # Include tables with the function "kable"
 
 knitr::kable(head(wildschwein_BE))
 ```
+```{r temporal overlap}
+sampling_periods <- wildschwein_BE %>%
+  group_by(TierID, TierName, CollarID) %>%
+  summarise(
+    min = min(DatetimeUTC),
+    max = max(DatetimeUTC)
+  )
 
+
+wildschwein_overlap_temp <- wildschwein_overlap_temp %>%
+  left_join(sampling_periods, by = c("TierID", "TierName", "CollarID"))
+
+
+wildschwein_overlap_temp %>%
+mutate(TierCollar = paste(TierName, CollarID)) %>%
+  ggplot(aes(xmin = min, xmax = max, y = TierCollar)) +
+  geom_errorbarh() +
+  facet_grid(Groups~., scales = "free_y", space = "free_y")
+
+```
+```{r spatial overlap}
+wildschwein_sf <- wildschwein_BE %>%
+  st_as_sf(coords = c("E", "N"), crs = 2056) %>%
+  mutate(tiercollar = paste(TierID, TierName, CollarID)) 
+
+
+wildschwein_convex_hull <- wildschwein_sf %>%
+  group_by(TierID, TierName, CollarID) %>%
+  summarise() %>%
+  st_convex_hull()
+
+
+wildschwein_convex_hull %>%
+  mutate(tiercollar = paste(TierID, TierName, CollarID)) %>%
+  ggplot(aes(fill = factor(TierID))) + geom_sf(alpha = 0.1) +
+  coord_sf(datum = 2056) +
+  facet_wrap(~tiercollar) +
+  theme(legend.position = "none")
+
+
+st_overlaps(wildschwein_convex_hull, sparse = FALSE)[1:5, 1:5]
+```
+
+```{r EDA}
+#looking at all data points
+ggplot(wildschwein_BE, aes(E,N, colour = TierID)) +
+  geom_point() +
+  theme(legend.position = "none")
+
+#schreck_locations needs to be transformed into the same coordinate system
+schreck_locations_sf <- schreck_locations %>%
+  st_as_sf(coords = c("lon", "lat"), crs = 4326) %>%
+  st_transform(2056)
+
+head(schreck_locations_sf)
+
+#plot wildschweins and schrecks together to see their spatial overlap
+ggplot() +
+  geom_sf(data=wildschwein_sf,aes(fill=TierID)) +
+  geom_sf(data=schreck_locations_sf, aes(color=region)) +
+  coord_sf(datum=2056)
+#Die Tiere sind nur von Schrecks in Fanel beeinträchtigt (kann das sein?)
+
+#alle anderen rausfiltern
+schreck_locations_sf_fanel <- schreck_locations_sf %>%
+  filter(region=="fanel")
+
+#testen, ob dies stimmt
+ggplot() +
+  geom_sf(data=wildschwein_sf,aes(fill=TierID)) +
+  geom_sf(data=schreck_locations_sf_fanel, aes(color=region)) +
+  coord_sf(datum=2056)
+```
+```{r join schreck agendas fanel}
+agenda_fanel <- inner_join(schreck_locations_sf_fanel, schreck_agenda, by="id")
+
+#show when the schrecks in fanel were used
+ggplot(agenda_fanel, aes(xmin = datum_on, xmax = datum_off, y=id )) +
+  geom_errorbarh()
+
+```
 <!-- the following is just a placeholder text, remove it!-->
 Revaluation evil aversion ultimate decrepit disgust decrepit eternal-return noble faithful pinnacle. Truth ascetic inexpedient decrepit free. Ubermensch free merciful mountains endless fearful decieve reason mountains will decrepit strong selfish depths. Overcome faith snare gains oneself transvaluation.
 
