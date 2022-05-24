@@ -23,9 +23,9 @@ output: html_document
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 ```
 ```{r load wild boar data}
-install.packages("backports"); install.packages("devtools")
-install.packages("cli")
-update.packages(cli)
+#install.packages("backports"); install.packages("devtools")
+#install.packages("cli")
+#update.packages(cli)
 #install.packages("devtools") # <- if you havent installed devtools already
 library(devtools)
 devtools::install_github("ComputationalMovementAnalysis/ComputationalMovementAnalysisData")
@@ -34,9 +34,6 @@ head(wildschwein_BE)
 summary(wildschwein_BE)
 head(schreck_agenda)
 summary(schreck_agenda)
-schreck_agenda %>%
-  group_by(id) %>%
-  summarise(n=n()) #they were used once or twice each
 head(schreck_locations)
 head(wildschwein_metadata)
 head(wildschwein_overlap_temp)
@@ -142,21 +139,9 @@ agenda_fanel <- inner_join(schreck_locations_sf_fanel, schreck_agenda, by="id")
 #show when the schrecks in fanel were used
 ggplot(agenda_fanel, aes(xmin = datum_on, xmax = datum_off, y=id )) +
   geom_errorbarh()
-
 ```
 <!-- the following is just a placeholder text, remove it!-->
 Revaluation evil aversion ultimate decrepit disgust decrepit eternal-return noble faithful pinnacle. Truth ascetic inexpedient decrepit free. Ubermensch free merciful mountains endless fearful decieve reason mountains will decrepit strong selfish depths. Overcome faith snare gains oneself transvaluation.
-
-```{r}
-# include plots automatically
-
-ggplot(schreck_locations, aes(E, N)) +
-  geom_point() +
-  coord_map()
-
-```
-
-
 
 
 
