@@ -85,7 +85,6 @@ wildschwein_sf <- wildschwein_BE %>%
   st_as_sf(coords = c("E", "N"), crs = 2056) %>%
   mutate(tiercollar = paste(TierID, TierName, CollarID)) 
 
-
 wildschwein_convex_hull <- wildschwein_sf %>%
   group_by(TierID, TierName, CollarID) %>%
   summarise() %>%
@@ -141,15 +140,29 @@ ggplot(agenda_fanel, aes(xmin = datum_on, xmax = datum_off, y=id )) +
 ```{r temporally close animals}
 #Idee: Alle Monate, wo der Schreck lief zusammen joinen mit allen Monaten, wo die Wildschweine getrackt wurden. So können wir schon mal zeitlich sagen, welche überhaupt mit dem Schreck beeinflusst hätten sein können (nur zeitlich)
 
-#Achtung, es fehlen noch einige Monate dazwischen -> herausfinden wie diese zu finden sind!
+
 fanel_months <- agenda_fanel %>%
   mutate(month_start=paste(lubridate::month(datum_on),"-",lubridate::year(datum_on)),
          month_end=paste(lubridate::month(datum_off),"-",lubridate::year(datum_off)),
          N_days=difftime(datum_off,datum_on,tz="UTC")) %>%
   select(id,month_start,month_end) %>%
   tidyr::pivot_longer(2:3,values_to="month_year")
-    #da es sich z.T. um mehrere Monate handelt
-agenda_fanel_months <- st_join(agenda_fanel,fanel_months,by="id") %>%
+#da es sich z.T. um mehrere Monate handelt
+
+#die Monate dazwischen setze ich nun manuell dazu...
+fanel_months_all <- fanel_months %>%
+  add_row(id="WSS_2014_04", name="month_2", month_year = "6 - 2014") %>%
+  add_row(id="WSS_2014_04", name="month_3", month_year = "7 - 2014") %>%
+  add_row(id="WSS_2014_04", name="month_4", month_year = "8 - 2014") %>%
+  add_row(id="WSS_2014_04", name="month_5", month_year = "9 - 2014") %>%
+  add_row(id="WSS_2014_05", name="month_2", month_year = "6 - 2014") %>%
+  add_row(id="WSS_2014_05", name="month_3", month_year = "7 - 2014") %>%
+  add_row(id="WSS_2014_05", name="month_4", month_year = "8 - 2014") %>%
+  add_row(id="WSS_2014_05", name="month_5", month_year = "9 - 2014") %>%
+  add_row(id="WSS_2014_06", name="month_2", month_year = "6 - 2014") %>%
+  arrange(id, month_year)
+  
+agenda_fanel_months <- st_join(agenda_fanel,fanel_months_all,by="id") %>%
   select(-id.y,-name)
 
 #eine gröbere Filtermöglichkeit mit Jahr darstellen
@@ -163,14 +176,36 @@ wildschwein_months_years <- wildschwein_sf %>%
   summarize() %>%
   as.data.frame()
    
-join_fanel_wildschwein_months <- inner_join(fanel_months,wildschwein_months_years,by = "month_year")  
+join_fanel_wildschwein_months <- inner_join(fanel_months_all,wildschwein_months_years,by = "month_year")  
 knitr::kable(join_fanel_wildschwein_months %>%
                group_by(year,TierName) %>%
-         summarize(n=n())) #diese Tiere kommen möglicherweise beim Schreck vorbei, während er ON ist.
+         summarize(n=n())) #diese Tiere kommen möglicherweise beim Schreck vorbei, während er ON ist (zeitlich)
 ```
 ```{r distance to Schreck}
+#Function for euclidean distance:
+CalculateEuclideanDistance <- function(vect1, vect2) sqrt(sum((vect1 - vect2)^2))
+ #x=E, y=N
+
 #Idee: mit dem obigen Join kann man nun die Datasets einschränken / wurde nun eingeschränkt.
-#Danach muss die Distanz zum jeweiligen Schreck gerechnet und dargestellt werden
+#Nun muss die Distanz zum jeweiligen Schreck gerechnet und dargestellt werden.
+
+
+#Ich schaue mir einmal Ueli ein wenig genauer an
+Ueli <- wildschwein_sf %>%
+  filter(TierName == "Ueli" & lubridate::year(DatetimeUTC) == 2014)
+ggplot(Ueli,aes(DatetimeUTC,moonilumination)) + geom_point()
+
+Ueli_Schreck <- join_fanel_wildschwein_months %>%
+  filter(TierName =="Ueli" & year == 2014)
+
+#alle Schrecks in Spalten mit der jeweiligen Geometrie. Damit können sie nachher mit den Wildschwein locations verbunden werden
+schreck_locations_pivot <- schreck_locations_sf_fanel %>%
+  select(id) %>%
+  tidyr::pivot_wider(names_from="id", values_from="geometry")
+#hier komme ich noch nicht weiter --> will die Spalten aus schreck_locations_pivot hier anfügen oder zumindest eine davon (am liebsten ohne join)
+#Ueli_distance <- Ueli %>%
+#  bind_cols(schreck_locations_pivot) %>%
+#  mutate(distanceToSchreck = CalculateEuclideanDistance(WSS_2014_04_geometry,geometry))
 ```
 <!-- the following is just a placeholder text, remove it!-->
 Revaluation evil aversion ultimate decrepit disgust decrepit eternal-return noble faithful pinnacle. Truth ascetic inexpedient decrepit free. Ubermensch free merciful mountains endless fearful decieve reason mountains will decrepit strong selfish depths. Overcome faith snare gains oneself transvaluation.
