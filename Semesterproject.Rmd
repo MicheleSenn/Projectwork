@@ -176,6 +176,17 @@ ggplot(wildschwein_schreck1_close, aes(DatetimeUTC,distance, color=TierName)) + 
   ggplot(aes(DatetimeUTC,distance)) + geom_line())
 # he came back after a while, even almost to 1000 m to the Schreck
 ```
+
+```{r facet plot of the returning patterns to Schreck 1}
+(All_schreck1 <- wildschwein_schreck1_close %>%
+  ggplot(aes(DatetimeUTC,distance)) + geom_line()) + facet_grid(rows=vars(TierName))
+
+(AllButUeli_schreck1 <- wildschwein_schreck1_close %>%
+    filter(TierName !="Ueli") %>%
+  ggplot(aes(DatetimeUTC,distance)) + geom_line()) + facet_grid(rows=vars(TierName))
+```
+
+
 ```{r Coaching von Nils}
 forest <- read_sf("Feldaufnahmen_Fanel.gpkg")
 ```
