@@ -159,11 +159,23 @@ ggplot(wildschwein_schreck1, aes(DatetimeUTC, distance)) + geom_point()
 wildschwein_schreck1_close <- wildschwein_schreck1 %>%
   filter(distance < 2000)
 
-ggplot() + geom_sf(data=wildschwein_schreck1_close, aes(color=TierName)) + coord_sf(datum=2056)
+ggplot() + geom_sf(data=wildschwein_schreck1_close, aes(color=TierName)) +
+  geom_sf(data=schreck1,aes(fill=id)) + coord_sf(datum=2056)
 
-ggplot(wildschwein_schreck1_close, aes(DatetimeUTC,distance, color=TierName)) + geom_point()
+ggplot(wildschwein_schreck1_close, aes(DatetimeUTC,distance, color=TierName)) + geom_line()
 ```
+```{r Ueli only with Schreck1}
+(Ueli_schreck1 <- wildschwein_schreck1_close %>%
+  dplyr::filter(TierName=="Ueli") %>%
+  ggplot(aes(DatetimeUTC,distance)) + geom_line())
+# Ueli heard the sound for about 2 weeks and started going further away
+#plot not only distance of 2000m but more:
 
+(Ueli_schreck1 <- wildschwein_schreck1 %>%
+  dplyr::filter(TierName=="Ueli") %>%
+  ggplot(aes(DatetimeUTC,distance)) + geom_line())
+# he came back after a while, even almost to 1000 m to the Schreck
+```
 ```{r Coaching von Nils}
 forest <- read_sf("Feldaufnahmen_Fanel.gpkg")
 ```
