@@ -147,13 +147,21 @@ schreck1 <- agenda_fanel[1,]
 wildschwein_schreck1 <- filter(wildschwein_sf,DatetimeUTC>schreck1$datum_on,DatetimeUTC<schreck1$datum_off)
 
 #Distanz zwischen dem Schreck und den wildschweinen
-st_distance(wildschwein_schreck1,schreck1)[,1]
+#st_distance(wildschwein_schreck1,schreck1)[,1]
 #rechnet geometrische Punkte selbst aus statt über euclidean distance
 
 #Distanz als zusätzliche Spalte hinzusetzen
 wildschwein_schreck1$distance <- as.numeric(st_distance(wildschwein_schreck1,schreck1)[,1])
 
+ggplot(wildschwein_schreck1, aes(DatetimeUTC, distance)) + geom_point()
+#Alle Tiere, welche während der Laufzeit bis zu 2000m nah am Schreck 1 waren, hätten ihn hören können (Entscheidung Lia)
 
+wildschwein_schreck1_close <- wildschwein_schreck1 %>%
+  filter(distance < 2000)
+
+ggplot() + geom_sf(data=wildschwein_schreck1_close, aes(color=TierName)) + coord_sf(datum=2056)
+
+ggplot(wildschwein_schreck1_close, aes(DatetimeUTC,distance, color=TierName)) + geom_point()
 ```
 
 ```{r Coaching von Nils}
