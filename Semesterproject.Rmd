@@ -60,7 +60,7 @@ library(sf)
 
 #knitr::kable(head(wildschwein_BE))
 ```
-```{r temporal overlap}
+```{r temporal overlap, eval=FALSE, include=FALSE}
 sampling_periods <- wildschwein_BE %>%
   group_by(TierID, TierName, CollarID) %>%
   summarise(
@@ -80,7 +80,7 @@ mutate(TierCollar = paste(TierName, CollarID)) %>%
   facet_grid(Groups~., scales = "free_y", space = "free_y")
 
 ```
-```{r spatial overlap}
+```{r spatial overlap, include=FALSE}
 wildschwein_sf <- wildschwein_BE %>%
   st_as_sf(coords = c("E", "N"), crs = 2056) %>%
   mutate(tiercollar = paste(TierID, TierName, CollarID)) 
@@ -171,6 +171,10 @@ Ueli_distance <- wildschwein_sf %>%
 
 Ueli_distance$distance <- as.numeric(st_distance(Ueli_distance,schreck1)[,1])
 
+Ueli_schreck1 <- wildschwein_schreck1 %>%
+  dplyr::filter(TierName=="Ueli") %>%
+  mutate(Schreck=schreck1$id)
+
 ggplot() + geom_point(data=Ueli_distance,aes(DatetimeUTC,distance)) +
   geom_point(data=Ueli_schreck1,aes(DatetimeUTC,distance, color="red"))
 #Ueli doesn't return to the Schreck1 location until 1.5 years later when he was sampled again
@@ -186,10 +190,6 @@ ggplot() + geom_point(data=Ueli_distance_2014,aes(DatetimeUTC,distance)) +
 
 # Ueli heard the sound for about 2 weeks and started going further away
 #plot not only distance of 2000m but more:
-
-Ueli_schreck1 <- wildschwein_schreck1 %>%
-  dplyr::filter(TierName=="Ueli") %>%
-  mutate(Schreck=schreck1$id)
 
 ggplot(Ueli_schreck1, aes(DatetimeUTC,distance)) + geom_line()
 # he came back after a while, even almost to 1000 m to the Schreck. But after the sound stopped, he wasn't sampled anymore --> we don't know if he returned in the meantime
@@ -276,10 +276,7 @@ reduce_schreck1_Sabine <- reduce_schreck1_withoutUeli %>%
 reduce_schreck2_Sabine <- reduce_schreck2_withoutUeli %>%
   filter(TierName =="Sabine")
 
-ggplot(reduce_schreck1_close, aes(DatetimeUTC,distance, color=TierName)) + geom_line() + labs(title="Distance of the affected boars to Schreck WSS_2014_04")
-
 #inspect pattern of the two Schrecks together
-
 ggplot() +
   geom_line(data=reduce_schreck1_Sabine, aes(DatetimeUTC,distance, colour=Schreck), linetype="twodash") +
   geom_line(data=reduce_schreck2_Sabine, aes(DatetimeUTC,distance, colour=Schreck), linetype="twodash") +
@@ -313,7 +310,7 @@ ggplot() + geom_sf(data=wildschwein_schreck4, aes(color=TierName)) +
 
 ggplot(wildschwein_schreck4, aes(DatetimeUTC,distance, color=Schreck)) + geom_line() + labs(title="Distance of the only affected boar Ueli to Schreck WSS_2014_06 (aggressive)")
 
-reduce_Ueli_schreck4 <- Ueli_schreck4 %>% dplyr::filter(row_number() %% 50 == 0)
+reduce_Ueli_schreck4 <- wildschwein_schreck4 %>% dplyr::filter(row_number() %% 50 == 0)
 
 #inspect pattern of 3 Schrecks on Ueli
 
@@ -383,8 +380,99 @@ ggplot() +
   labs(title="Close Boar's distance to Schrecks changing from standard to aggressive mode, sampling size reduced")
 #They start to move further away, initially, but come back later anyways
 ```
+```{r distance to Schreck 7 & 8}
+#Nächste Schrecks mit verschiedenen Lautstärken anschauen
+
+#5. bzw. 6. Schreck rausfiltern
+schreck7 <- agenda_fanel[7,]
+schreck8 <- agenda_fanel[8,]
+
+#Die Wildschweine zwischen dem Start und Ende der entsprechenden schrecks finden
+wildschwein_schreck7 <- filter(wildschwein_sf,DatetimeUTC>schreck7$datum_on,DatetimeUTC<schreck7$datum_off)
+
+wildschwein_schreck8 <- filter(wildschwein_sf,DatetimeUTC>schreck8$datum_on,DatetimeUTC<schreck8$datum_off)
+
+#Distanz als zusätzliche Spalte hinzusetzen
+wildschwein_schreck7$distance <- as.numeric(st_distance(wildschwein_schreck7,schreck7)[,1])
+wildschwein_schreck8$distance <- as.numeric(st_distance(wildschwein_schreck8,schreck8)[,1])
+
+wildschwein_schreck7$Schreck <- schreck7$id
+wildschwein_schreck8$Schreck <- schreck8$id
+
+ggplot() + geom_sf(data=wildschwein_schreck7, aes(color=TierName)) +
+  geom_sf(data=schreck7,aes(fill=id)) + coord_sf(datum=2056)
+
+reduce_schreck7 <- wildschwein_schreck7 %>% dplyr::filter(row_number() %% 50 == 0)
+reduce_schreck8 <- wildschwein_schreck8 %>% dplyr::filter(row_number() %% 50 == 0)
+
+ggplot() + geom_line(data=reduce_schreck7, aes(DatetimeUTC,distance, color=TierName)) +
+  geom_line(data=reduce_schreck8, aes(DatetimeUTC,distance, color=TierName)) +
+  labs(title="Distance of the affected boars to Schreck WSS_2015_03 (standard & aggressive)")
+
+#Now I'll filter out the boars that are too far away:
+reduce_schreck7_close <- reduce_schreck7 %>%
+  filter(TierName == "Ruth")
+reduce_schreck8_close <- reduce_schreck8 %>%
+  filter(TierName == "Ruth")
+
+#inspect pattern of the two Schrecks together (after each other) to see what happens
+#when the sound changes from standard to aggressive
+
+ggplot() +
+  geom_line(data=reduce_schreck7_close, aes(DatetimeUTC,distance, colour=TierName)) +
+  geom_line(data=reduce_schreck8_close, aes(DatetimeUTC,distance, colour=TierName), linetype="twodash") +
+  labs(title="Ruth's distance to Schreck WSS_2015_03 changing from standard to aggressive mode, sampling size reduced")
+#sometimes she stays away a bit more but even the aggressive sound doesn't help much
+```
+
+```{r distance to Schreck 9 & 10}
+#Nächste Schrecks mit verschiedenen Lautstärken anschauen
+
+# Schreck rausfiltern
+schreck9 <- agenda_fanel[9,]
+schreck10 <- agenda_fanel[10,]
+
+#Die Wildschweine zwischen dem Start und Ende der entsprechenden schrecks finden
+wildschwein_schreck9 <- filter(wildschwein_sf,DatetimeUTC>schreck9$datum_on,DatetimeUTC<schreck9$datum_off)
+
+wildschwein_schreck10 <- filter(wildschwein_sf,DatetimeUTC>schreck10$datum_on,DatetimeUTC<schreck10$datum_off)
+
+#Distanz als zusätzliche Spalte hinzusetzen
+wildschwein_schreck9$distance <- as.numeric(st_distance(wildschwein_schreck9,schreck9)[,1])
+wildschwein_schreck10$distance <- as.numeric(st_distance(wildschwein_schreck10,schreck10)[,1])
+
+wildschwein_schreck9$Schreck <- schreck9$id
+wildschwein_schreck10$Schreck <- schreck10$id
+
+ggplot() + geom_sf(data=wildschwein_schreck9, aes(color=TierName)) +
+  geom_sf(data=schreck9,aes(fill=id)) + coord_sf(datum=2056)
+
+reduce_schreck9 <- wildschwein_schreck9 %>% dplyr::filter(row_number() %% 150 == 0)
+reduce_schreck10 <- wildschwein_schreck10 %>% dplyr::filter(row_number() %% 150 == 0)
+
+reduce_schreck9_close <- wildschwein_schreck9 %>%
+  filter(distance < 2700)
+reduce_schreck10_close <- wildschwein_schreck10 %>%
+  filter(distance < 2700)
+
+ggplot() + geom_line(data=reduce_schreck9_close, aes(DatetimeUTC,distance, color=TierName)) +
+  labs(title="Distance of the affected boars to Schreck WSS_2015_04 (standard)")
+
+ggplot() + geom_line(data=reduce_schreck10_close, aes(DatetimeUTC,distance, color=TierName)) + labs(title="Distance of the affected boars to Schreck WSS_2015_04 (louder)")
+
+#inspect pattern of the two Schrecks together (after each other) to see what happens
+#when the sound changes from standard to aggressive
+
+ggplot() +
+  geom_line(data=reduce_schreck9_close, aes(DatetimeUTC,distance, colour=TierName)) +
+  geom_line(data=reduce_schreck10_close, aes(DatetimeUTC,distance, colour=TierName), linetype="twodash") +
+  labs(title="Ruth's distance to Schreck WSS_2015_03 changing from standard to aggressive mode, sampling size reduced")
+#sometimes she stays away a bit more but even the aggressive sound doesn't help much
+```
+
 ```{r comparison of Schrecks 1-6}
-#Idea: give IDs to concurrent observations and try to see if the distances follow the same pattern
+#Idea: use index instead of DatetimeUTC to compare observations and try to see if the distances follow the same pattern
+
 
 ```
 
