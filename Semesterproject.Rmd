@@ -162,19 +162,37 @@ wildschwein_schreck1_close <- wildschwein_schreck1 %>%
 ggplot() + geom_sf(data=wildschwein_schreck1_close, aes(color=TierName)) +
   geom_sf(data=schreck1,aes(fill=id)) + coord_sf(datum=2056)
 
-ggplot(wildschwein_schreck1_close, aes(DatetimeUTC,distance, color=TierName)) + geom_line()
+ggplot(wildschwein_schreck1_close, aes(DatetimeUTC,distance, color=TierName)) + geom_line() + labs(title="Distance of the affected boars to Schreck WSS_2014_04")
 ```
 ```{r Ueli only with Schreck1}
-(Ueli_schreck1 <- wildschwein_schreck1_close %>%
+#establish baseline distance of Ueli to Schreck1
+Ueli_distance <- wildschwein_sf %>%
+  filter(TierName == "Ueli")
+
+Ueli_distance$distance <- as.numeric(st_distance(Ueli_distance,schreck1)[,1])
+
+ggplot() + geom_point(data=Ueli_distance,aes(DatetimeUTC,distance)) +
+  geom_point(data=Ueli_schreck1,aes(DatetimeUTC,distance, color="red"))
+#Ueli doesn't return to the Schreck1 location until 1.5 years later when he was sampled again
+#Zoom in on the timeline:
+Ueli_distance_2014 <- Ueli_distance %>%
+  filter(lubridate::year(DatetimeUTC) == 2014)
+ggplot() + geom_point(data=Ueli_distance_2014,aes(DatetimeUTC,distance)) +
+  geom_point(data=Ueli_schreck1,aes(DatetimeUTC,distance, color="red"))
+
+(Ueli_schreck1_close <- wildschwein_schreck1_close %>%
   dplyr::filter(TierName=="Ueli") %>%
   ggplot(aes(DatetimeUTC,distance)) + geom_line())
+
 # Ueli heard the sound for about 2 weeks and started going further away
 #plot not only distance of 2000m but more:
 
-(Ueli_schreck1 <- wildschwein_schreck1 %>%
+Ueli_schreck1 <- wildschwein_schreck1 %>%
   dplyr::filter(TierName=="Ueli") %>%
-  ggplot(aes(DatetimeUTC,distance)) + geom_line())
-# he came back after a while, even almost to 1000 m to the Schreck
+  mutate(Schreck=schreck1$id)
+
+ggplot(Ueli_schreck1, aes(DatetimeUTC,distance)) + geom_line()
+# he came back after a while, even almost to 1000 m to the Schreck. But after the sound stopped, he wasn't sampled anymore --> we don't know if he returned in the meantime
 ```
 
 ```{r facet plot of the returning patterns to Schreck 1}
@@ -186,6 +204,55 @@ ggplot(wildschwein_schreck1_close, aes(DatetimeUTC,distance, color=TierName)) + 
   ggplot(aes(DatetimeUTC,distance)) + geom_line()) + facet_grid(rows=vars(TierName))
 ```
 
+```{r distance to Schreck 2}
+#Zweiten Schreck modellieren
+
+#2. Schreck rausfiltern
+schreck2 <- agenda_fanel[2,]
+
+#Die Wildschweine zwischen dem Start und Ende des zweiten schrecks finden
+wildschwein_schreck2 <- filter(wildschwein_sf,DatetimeUTC>schreck2$datum_on,DatetimeUTC<schreck2$datum_off)
+
+#Distanz zwischen dem Schreck und den wildschweinen
+#st_distance(wildschwein_schreck1,schreck1)[,1]
+#rechnet geometrische Punkte selbst aus statt über euclidean distance
+
+#Distanz als zusätzliche Spalte hinzusetzen
+wildschwein_schreck2$distance <- as.numeric(st_distance(wildschwein_schreck2,schreck2)[,1])
+
+ggplot(wildschwein_schreck2, aes(DatetimeUTC, distance)) + geom_point()
+#Alle Tiere, welche während der Laufzeit bis zu 2000m nah am Schreck 2 waren, hätten ihn hören können (Entscheidung Lia)
+
+wildschwein_schreck2_close <- wildschwein_schreck2 %>%
+  filter(distance < 2000)
+
+Ueli_schreck2 <- wildschwein_schreck2 %>%
+  dplyr::filter(TierName=="Ueli") %>%
+  mutate(Schreck = schreck2$id)
+
+ggplot() + geom_sf(data=wildschwein_schreck2_close, aes(color=TierName)) +
+  geom_sf(data=schreck2,aes(fill=id)) + coord_sf(datum=2056)
+
+ggplot(wildschwein_schreck2_close, aes(DatetimeUTC,distance, color=TierName)) + geom_line() + labs(title="Distance of the affected boars to Schreck WSS_2014_05 (without fence)")
+
+#comparison between Schreck 1 & Schreck 2
+ggplot() +
+  geom_line(data=Ueli_schreck1, aes(DatetimeUTC,distance,color=1)) +
+  geom_line(data=Ueli_schreck2, aes(DatetimeUTC,distance)) +
+  labs(title="Ueli's distance to concurrently sounding Schrecks")
+```
+
+```{r reduction in sampling size concurrent Schrecks 1 + 2}
+
+#use only every 40th observation point to reduce complexity
+reduce_Ueli_schreck1 <- Ueli_schreck1 %>% dplyr::filter(row_number() %% 50 == 0)
+reduce_Ueli_schreck2 <- Ueli_schreck2 %>% dplyr::filter(row_number() %% 50 == 0)
+
+ggplot() +
+  geom_line(data=reduce_Ueli_schreck1, aes(DatetimeUTC,distance, colour=Schreck), linetype="twodash") +
+  geom_line(data=reduce_Ueli_schreck2, aes(DatetimeUTC,distance, colour=Schreck), linetype="twodash") +
+  labs(title="Ueli's distance to concurrently sounding Schrecks, sampling size reduced")
+```
 
 ```{r Coaching von Nils}
 forest <- read_sf("Feldaufnahmen_Fanel.gpkg")
