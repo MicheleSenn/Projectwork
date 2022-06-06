@@ -254,6 +254,40 @@ ggplot() +
   labs(title="Ueli's distance to concurrently sounding Schrecks, sampling size reduced")
 ```
 
+```{r distance to Schreck 1 & 2 all animals except Ueli}
+wildschwein_schreck1$Schreck <- schreck1$id
+wildschwein_schreck2$Schreck <- schreck2$id
+
+reduce_schreck1 <- wildschwein_schreck1 %>% dplyr::filter(row_number() %% 150 == 0)
+reduce_schreck2 <- wildschwein_schreck2 %>% dplyr::filter(row_number() %% 150 == 0)
+
+reduce_schreck1_withoutUeli <- reduce_schreck1 %>%
+  filter(TierName != "Ueli")
+reduce_schreck2_withoutUeli <- reduce_schreck2 %>%
+  filter(TierName != "Ueli")
+
+ggplot(reduce_schreck1_withoutUeli, aes(DatetimeUTC,distance, color=TierName)) + geom_line() + labs(title="Distance of the other affected boars to Schreck WSS_2014_04")
+
+ggplot(reduce_schreck2_withoutUeli, aes(DatetimeUTC,distance, color=TierName)) + geom_line() + labs(title="Distance of the affected boars to Schreck WSS_2014_05")
+
+#Now we'll look at Sabine alone (the others don't show a useful pattern)
+reduce_schreck1_Sabine <- reduce_schreck1_withoutUeli %>%
+  filter(TierName =="Sabine")
+reduce_schreck2_Sabine <- reduce_schreck2_withoutUeli %>%
+  filter(TierName =="Sabine")
+
+ggplot(reduce_schreck1_close, aes(DatetimeUTC,distance, color=TierName)) + geom_line() + labs(title="Distance of the affected boars to Schreck WSS_2014_04")
+
+#inspect pattern of the two Schrecks together
+
+ggplot() +
+  geom_line(data=reduce_schreck1_Sabine, aes(DatetimeUTC,distance, colour=Schreck), linetype="twodash") +
+  geom_line(data=reduce_schreck2_Sabine, aes(DatetimeUTC,distance, colour=Schreck), linetype="twodash") +
+  labs(title="Sabine's distance to concurrent Schrecks, sampling size reduced")
+
+#They start to move further away, initially, but come back later anyways
+```
+
 ```{r distance to Schreck 4}
 #Nächste Schrecks mit verschiedenen Lautstärken anschauen
 
@@ -346,9 +380,14 @@ ggplot() +
 ggplot() +
   geom_line(data=reduce_schreck5_close, aes(DatetimeUTC,distance, colour=TierName)) +
   geom_line(data=reduce_schreck6_close, aes(DatetimeUTC,distance, colour=TierName), linetype="twodash") +
-  labs(title="Close Boar's distance to Schrecks changing from standard to aggressive sound, sampling size reduced")
+  labs(title="Close Boar's distance to Schrecks changing from standard to aggressive mode, sampling size reduced")
 #They start to move further away, initially, but come back later anyways
 ```
+```{r comparison of Schrecks 1-6}
+#Idea: give IDs to concurrent observations and try to see if the distances follow the same pattern
+
+```
+
 
 ```{r Coaching von Nils}
 forest <- read_sf("Feldaufnahmen_Fanel.gpkg")
