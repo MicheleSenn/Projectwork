@@ -470,10 +470,8 @@ ggplot() +
 #sometimes she stays away a bit more but even the aggressive sound doesn't help much
 ```
 
-```{r comparison of Schrecks 1-6}
-#Idea: use index instead of DatetimeUTC to compare observations and try to see if the distances follow the same pattern
-
-
+```{r comparison of Schrecks that have a different time scale}
+#no idea yet
 ```
 
 
