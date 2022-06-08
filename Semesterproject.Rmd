@@ -125,7 +125,7 @@ ggplot() +
 ```
 As a result, it was found that the animals were only tracked around the Schreck in the region of Fanel. As a consequence, all other Schreck data points were removed and the spatial overlap replotted.
 
-```{r filter all but region = Fanel}
+```{r filter all but region Fanel}
 #alle anderen rausfiltern
 schreck_locations_sf_fanel <- schreck_locations_sf %>%
   filter(region=="fanel")
