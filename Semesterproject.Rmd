@@ -199,7 +199,12 @@ For a reduction in data points, all distances bigger than 2000m were removed. Th
 schreck1 <- agenda_fanel[1,]
 
 #Die Wildschweine zwischen dem Start und Ende des ersten schrecks finden
+
 wildschwein_schreck1 <- filter(wildschwein_sf,DatetimeUTC>schreck1$datum_on,DatetimeUTC<schreck1$datum_off)
+
+#for the whole period
+wildschwein_schreck1_long <- filter(wildschwein_sf,DatetimeUTC>schreck1$datum_on)
+
 
 #Distanz zwischen dem Schreck und den wildschweinen
 #st_distance(wildschwein_schreck1,schreck1)[,1]
@@ -208,17 +213,26 @@ wildschwein_schreck1 <- filter(wildschwein_sf,DatetimeUTC>schreck1$datum_on,Date
 #Distanz als zusätzliche Spalte hinzusetzen
 wildschwein_schreck1$distance <- as.numeric(st_distance(wildschwein_schreck1,schreck1)[,1])
 
+wildschwein_schreck1_long$distance <- as.numeric(st_distance(wildschwein_schreck1_long,schreck1)[,1])
+
 #ggplot(wildschwein_schreck1, aes(DatetimeUTC, distance)) + geom_point()
 #Alle Tiere, welche während der Laufzeit bis zu 2000m nah am Schreck 1 waren, hätten ihn hören können (Entscheidung Lia)
 
 wildschwein_schreck1_close <- wildschwein_schreck1 %>%
-  filter(distance < 2000)
+  filter(distance < 200)
+
+#whole time
+wildschwein_schreck1_close_long <-
+  wildschwein_schreck1_long%>%
+  filter(distance < 200)
 
 #ggplot() + geom_sf(data=wildschwein_schreck1_close, aes(color=TierName)) +
 #  geom_sf(data=schreck1,aes(fill=id)) + coord_sf(datum=2056)
 
 ggplot(wildschwein_schreck1_close, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2014_04")
 ```
+Only these two boars were close enough to Schreck WSS_2014_04 during the time of the Schreck running to potentially have been affected.
+
 #Step 4
 Ueli looks like an interesting candidate for further inspection.
 His corresponding location data to "Schreck time 1" were filtered and visualized in different ways.
@@ -253,15 +267,29 @@ ggplot() + geom_point(data=Ueli_distance_2014,aes(DatetimeUTC,distance)) +
 ggplot(Ueli_schreck1, aes(DatetimeUTC,distance)) + geom_line()
 # he came back after a while, even almost to 1000 m to the Schreck. But after the sound stopped, he wasn't sampled anymore --> we don't know if he returned in the meantime
 ```
+Same thing with Isabelle and Sabine who should have been near enough to hear the schreck
+
+```{r Sabine and Isabell only with Schreck1}
+#establish baseline distance of Sabine and Isabelle to Schreck1
+SabineIsablle_distance <- wildschwein_schreck1_close_long %>%
+  filter(TierName == c("Sabine","Isabelle"))
+
+SabineIsablle_distance$distance <- as.numeric(st_distance(SabineIsabelle_distance,schreck1)[,1])
+
+#!!!!!!!!!Warum zeigt es das Datum nicht richtig an? Theoretisch sollte dies die gesamte Trackingzeit plotten. und wie es aussieht waren sie die ganze Zeit nie weiter als 200 m von Schreck 1 entfernt. Wenn das stimmt, waren sie von Schreck 1 komplett unbeeindruckt. Aber von deiner GRafik her weiss ich ja dass das nicht stimmt. Findest du den Fehler?
+ggplot(SabineIsablle_distance, aes(DatetimeUTC,distance)) + geom_line()
+
+```
+
 #Step 5
 The other animals around Schreck 1 seemed to move in a different way. In order to see more of it, a facet grid was created.
 To increase resolution and to show only the concurrently affected boars, Ueli was filtered out in a second facet grid visualization.
 
 ```{r facet plot of the returning patterns to Schreck 1}
-(All_schreck1 <- wildschwein_schreck1_close %>%
+(All_schreck1 <- wildschwein_schreck1_close_long%>%
   ggplot(aes(DatetimeUTC,distance)) + geom_line()) + facet_grid(rows=vars(TierName))
 
-(AllButUeli_schreck1 <- wildschwein_schreck1_close %>%
+(AllButUeli_schreck1 <- wildschwein_schreck1_close_long%>%
     filter(TierName !="Ueli") %>%
   ggplot(aes(DatetimeUTC,distance)) + geom_line()) + facet_grid(rows=vars(TierName))
 ```
