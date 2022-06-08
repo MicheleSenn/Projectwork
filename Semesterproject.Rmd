@@ -42,13 +42,48 @@ head(wildschwein_overlap_temp)
 ## Abstract
 
 <!-- the following is just a placeholder text, remove it!-->
-Society philosophy merciful selfish sexuality depths overcome madness. Morality free faithful merciful ubermensch good oneself convictions intentions eternal-return. Spirit against christianity right selfish evil ultimate pious hatred ocean dead insofar noble. Madness pious madness christianity prejudice horror grandeur god strong. Ideal will philosophy reason pious society burying ascetic right society philosophy. Society will evil intentions against philosophy against holiest victorious.
+This project aims at modelling the behavior of wild boars after scare-off measures. It is hypothesized that they will return within a few days back to the scare-off location and this returning pattern will be analysed.
 
 
-## Introduction
+## Research Question
 
 <!-- the following is just a placeholder text, remove it!-->
-Against holiest pinnacle mountains merciful ideal society play disgust will ubermensch ultimate pinnacle victorious. Snare value law gains battle pious intentions revaluation strong. Insofar snare faith ideal oneself.
+Once a scare-off measure has proven to have an effect and cause the wild boars to relocate, it needs to be examined how long the effect lasts. Therefore, the following research question was formulated:
+
+How can the returning of the boars be modelled?
+
+##Data
+
+Long-term data for movement trajectories will be necessary (at least 6 weeks).
+Data should be of different times of day and of several individuals in a similar location.
+Furthermore, mapdata will be needed.
+Some background information on the boars social behavior and seasonal movements would also be interesting and help for a better understanding of the data.
+
+##Analytical concepts
+
+EDA: plotting data in order to get an idea of what the data looks like and finding patterns like which individual is Schrecked by what
+Calculating distances to Scare-Off-Location over time using the ST_Distance() function, which returns the shortest distance that separates two geometries
+Trajectories with Moving Window Method to remove static points
+Plot spatial and time overlaps between the tracked animals
+Find returning patterns by building a "In the Field / not in the Field" vs. distance to Schreck graph
+
+##R concepts
+
+The modeling will be done using the following concepts and packages:
+
+Spatial objects will be created with the r-package "sf"
+raster data and background maps will be plotted and visuallized with these r-packages: "plotly", "ggplot2"
+For the reshaping and transforming of date the r-package "tidyverse" will be used
+
+##Risk analysis
+
+We consider the scope a bit of a risk because of the amount of behaviors we could potentially analyse --> we need to be clear on what we really want to find out and stick to it.
+Interpretation of behaviors might be vague or non-causal because we assume that patterns can be detected when nothing is happening at all in reality (--> semantic annotations)
+Surprisingly, no differences between seasons / locations / individuals detected --> we can still focus on time series analysis
+Technical difficulties, e.g. when handling too much data, choosing irrelevant thresholds or interpretation issues.
+Possibly, the different measures don't show the same effects. We might need to distinguish between measures in order to draw inferences.
+
+## Results
 
 ```{r packages, include=FALSE}
 library(ComputationalMovementAnalysisData)
@@ -231,7 +266,7 @@ To increase resolution and to show only the concurrently affected boars, Ueli wa
   ggplot(aes(DatetimeUTC,distance)) + geom_line()) + facet_grid(rows=vars(TierName))
 ```
 
-#Step 5
+#Step 6
 Now, looking at the distances of Schreck 1 was interesting. Since we are trying to find general patterns (if possible) and later want to look at the returning patterns, all other Schrecks are about to be visualized in a similar fashion.
 
 ```{r distance to Schreck 2}
@@ -272,7 +307,7 @@ ggplot() +
   labs(title="Ueli's distance to concurrently sounding Schrecks")
 ```
 
-# Step 6
+# Step 7
 As a measure to reduce data point density, only every 50th observation was used. The loss in data granularity has an effect for readability and observability of a general movement trend, and it doesn't seem that a lot of the information is lost on the way.
 
 In the following graph, distances from Ueli to the two first Schrecks are visualized with a much lower resolution.
@@ -289,7 +324,7 @@ ggplot() +
   labs(title="Ueli's distance to concurrently sounding Schrecks, sampling size reduced")
 ```
 
-#Step 7
+#Step 8
 A similar approach was used for the other boars affected by Schreck 1 and 2, but even reducing their data points to every 150th.
 
 
@@ -327,7 +362,7 @@ ggplot() +
 #They start to move further away, initially, but come back later anyways
 ```
 
-# Step 8
+# Step 9
 No animal was around at the "Schreck time" of Schreck 3 so it will be omitted for further analyses.
 Schreck 4 could only affect our friend Ueli so he will be analysed on his own.
 Apparently, this Schreck was active almost at the same time as Schreck 1 and 2, so all distances to the 3 Schrecks were visualized together for Ueli.
@@ -369,7 +404,7 @@ ggplot() +
   labs(title="Ueli's distance to concurrently sounding Schrecks, sampling size reduced")
 ```
 
-#Step 9
+#Step 10
 Schreck 5 and 6 are the same but move from standard to aggressive mode.
 Their distances were visualized with the close animals (ca. <1300m) and only every 50th observation was plotted.
 The change in mode was visualized using a different line style.
@@ -433,7 +468,7 @@ ggplot() +
   labs(title="Close Boar's distance to Schrecks changing from standard to aggressive mode, sampling size reduced")
 #They start to move further away, initially, but come back later anyways
 ```
-#Step 10
+#Step 11
 A similar thing was done with Schreck 7 & 8, and only Ruth was close enough to possibly hear the Schreck sound (<1500m).
 
 ```{r distance to Schreck 7 & 8}
@@ -481,7 +516,7 @@ ggplot() +
 #sometimes she stays away a bit more but even the aggressive sound doesn't help much
 ```
 
-#Step 11
+#Step 12
 
 
 ```{r distance to Schreck 9 & 10}
@@ -538,23 +573,10 @@ ggplot() +
 forest <- read_sf("Feldaufnahmen_Fanel.gpkg")
 ```
 
-<!-- the following is just a placeholder text, remove it!-->
-Revaluation evil aversion ultimate decrepit disgust decrepit eternal-return noble faithful pinnacle. Truth ascetic inexpedient decrepit free. Ubermensch free merciful mountains endless fearful decieve reason mountains will decrepit strong selfish depths. Overcome faith snare gains oneself transvaluation.
 
 
-
-## Material and Methods
-
-<!-- the following is just a placeholder text, remove it!-->
-Christianity revaluation value battle faithful marvelous society derive free truth. Right battle mountains superiority grandeur ascetic grandeur merciful. Derive against intentions burying salvation ocean. Right intentions dead victorious ideal spirit evil ultimate joy. Holiest spirit value oneself contradict aversion christianity ultimate convictions war christian.
-
-## Results
-
-<!-- the following is just a placeholder text, remove it!-->
-Philosophy oneself passion play fearful self noble zarathustra deceptions sexuality. Endless ocean of oneself dead ocean. Selfish decrepit.
 
 ## Discussion
 
-<!-- the following is just a placeholder text, remove it!-->
-Justice convictions spirit sexuality insofar free marvelous joy. Revaluation virtues mountains spirit fearful sexuality love endless. Society intentions will noble burying aversion moral. Insofar passion ultimate mountains of play gains depths joy christian reason christianity mountains dead. Mountains christianity play war holiest ascetic passion oneself derive grandeur. Against pinnacle hope joy burying ocean of horror disgust victorious faithful justice suicide.
+
 
