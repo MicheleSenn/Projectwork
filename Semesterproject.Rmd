@@ -102,11 +102,14 @@ wildschwein_convex_hull %>%
 st_overlaps(wildschwein_convex_hull, sparse = FALSE)[1:5, 1:5]
 ```
 
+#Step 1
+To find out, which boars were affected by which Schreck, the datasets were both transformed into the same coordinate system using st_transform(2056). They were subsequently plotted on top of each other to visualize the spatial overlap.
+
 ```{r EDA}
 #looking at all data points
-ggplot(wildschwein_BE, aes(E,N, colour = TierID)) +
-  geom_point() +
-  theme(legend.position = "none")
+#ggplot(wildschwein_BE, aes(E,N, colour = TierID)) +
+#  geom_point() +
+#  theme(legend.position = "none")
 
 #schreck_locations needs to be transformed into the same coordinate system
 schreck_locations_sf <- schreck_locations %>%
@@ -119,7 +122,10 @@ ggplot() +
   geom_sf(data=schreck_locations_sf, aes(color=region)) +
   coord_sf(datum=2056)
 #Die Tiere sind nur von Schrecks in der Region Fanel beeinträchtigt (kann das sein?)
+```
+As a result, it was found that the animals were only tracked around the Schreck in the region of Fanel. As a consequence, all other Schreck data points were removed and the spatial overlap replotted.
 
+```{r filter all but region = Fanel}
 #alle anderen rausfiltern
 schreck_locations_sf_fanel <- schreck_locations_sf %>%
   filter(region=="fanel")
@@ -130,6 +136,13 @@ ggplot() +
   geom_sf(data=schreck_locations_sf_fanel, aes(color=region)) +
   coord_sf(datum=2056)
 ```
+
+
+#Step 2
+
+In order to combine the data about the Schreck locations and their corresponding agenda, or sounding time, they were joined by their matching column "id" with an inner join.
+Following this join, the agenda of all the "Schreck time" was visualized using an errorbar plot.
+
 ```{r join schreck agendas fanel}
 agenda_fanel <- inner_join(schreck_locations_sf_fanel, schreck_agenda, by="id")
 
@@ -137,6 +150,13 @@ agenda_fanel <- inner_join(schreck_locations_sf_fanel, schreck_agenda, by="id")
 ggplot(agenda_fanel, aes(xmin = datum_on, xmax = datum_off, y=id )) +
   geom_errorbarh()
 ```
+
+# Step 3
+In order to understand which animals were active during the period of "Schreck time", the boar data was filtered by the dates in which the first Schreck (WSS_2014_04) was active.
+For the affected boars, a distance between their coordinates and the Schreck coordinate could be calculated using st_distance().
+For a reduction in data points, all distances bigger than 2000m were removed. The remaining distances were plotted against the DatetimeUTC column.
+5 animals were close to Schreck 1 during "Schreck time".
+
 ```{r distance to Schreck 1}
 #Idee: Nur mal mit einem Schreck beginnen
 
@@ -153,17 +173,21 @@ wildschwein_schreck1 <- filter(wildschwein_sf,DatetimeUTC>schreck1$datum_on,Date
 #Distanz als zusätzliche Spalte hinzusetzen
 wildschwein_schreck1$distance <- as.numeric(st_distance(wildschwein_schreck1,schreck1)[,1])
 
-ggplot(wildschwein_schreck1, aes(DatetimeUTC, distance)) + geom_point()
+#ggplot(wildschwein_schreck1, aes(DatetimeUTC, distance)) + geom_point()
 #Alle Tiere, welche während der Laufzeit bis zu 2000m nah am Schreck 1 waren, hätten ihn hören können (Entscheidung Lia)
 
 wildschwein_schreck1_close <- wildschwein_schreck1 %>%
   filter(distance < 2000)
 
-ggplot() + geom_sf(data=wildschwein_schreck1_close, aes(color=TierName)) +
-  geom_sf(data=schreck1,aes(fill=id)) + coord_sf(datum=2056)
+#ggplot() + geom_sf(data=wildschwein_schreck1_close, aes(color=TierName)) +
+#  geom_sf(data=schreck1,aes(fill=id)) + coord_sf(datum=2056)
 
-ggplot(wildschwein_schreck1_close, aes(DatetimeUTC,distance, color=TierName)) + geom_line() + labs(title="Distance of the affected boars to Schreck WSS_2014_04")
+ggplot(wildschwein_schreck1_close, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2014_04")
 ```
+#Step 4
+Ueli looks like an interesting candidate for further inspection.
+His corresponding location data to "Schreck time 1" were filtered and visualized in different ways.
+
 ```{r Ueli only with Schreck1}
 #establish baseline distance of Ueli to Schreck1
 Ueli_distance <- wildschwein_sf %>%
@@ -175,8 +199,8 @@ Ueli_schreck1 <- wildschwein_schreck1 %>%
   dplyr::filter(TierName=="Ueli") %>%
   mutate(Schreck=schreck1$id)
 
-ggplot() + geom_point(data=Ueli_distance,aes(DatetimeUTC,distance)) +
-  geom_point(data=Ueli_schreck1,aes(DatetimeUTC,distance, color="red"))
+#ggplot() + geom_point(data=Ueli_distance,aes(DatetimeUTC,distance)) +
+#  geom_point(data=Ueli_schreck1,aes(DatetimeUTC,distance, color="red"))
 #Ueli doesn't return to the Schreck1 location until 1.5 years later when he was sampled again
 #Zoom in on the timeline:
 Ueli_distance_2014 <- Ueli_distance %>%
@@ -194,6 +218,9 @@ ggplot() + geom_point(data=Ueli_distance_2014,aes(DatetimeUTC,distance)) +
 ggplot(Ueli_schreck1, aes(DatetimeUTC,distance)) + geom_line()
 # he came back after a while, even almost to 1000 m to the Schreck. But after the sound stopped, he wasn't sampled anymore --> we don't know if he returned in the meantime
 ```
+#Step 5
+The other animals around Schreck 1 seemed to move in a different way. In order to see more of it, a facet grid was created.
+To increase resolution and to show only the concurrently affected boars, Ueli was filtered out in a second facet grid visualization.
 
 ```{r facet plot of the returning patterns to Schreck 1}
 (All_schreck1 <- wildschwein_schreck1_close %>%
@@ -203,6 +230,9 @@ ggplot(Ueli_schreck1, aes(DatetimeUTC,distance)) + geom_line()
     filter(TierName !="Ueli") %>%
   ggplot(aes(DatetimeUTC,distance)) + geom_line()) + facet_grid(rows=vars(TierName))
 ```
+
+#Step 5
+Now, looking at the distances of Schreck 1 was interesting. Since we are trying to find general patterns (if possible) and later want to look at the returning patterns, all other Schrecks are about to be visualized in a similar fashion.
 
 ```{r distance to Schreck 2}
 #Zweiten Schreck modellieren
@@ -233,7 +263,7 @@ Ueli_schreck2 <- wildschwein_schreck2 %>%
 ggplot() + geom_sf(data=wildschwein_schreck2_close, aes(color=TierName)) +
   geom_sf(data=schreck2,aes(fill=id)) + coord_sf(datum=2056)
 
-ggplot(wildschwein_schreck2_close, aes(DatetimeUTC,distance, color=TierName)) + geom_line() + labs(title="Distance of the affected boars to Schreck WSS_2014_05 (without fence)")
+#ggplot(wildschwein_schreck2_close, aes(DatetimeUTC,distance, color=TierName)) + geom_line() + labs(title="Distance of the affected boars to Schreck WSS_2014_05 (without fence)")
 
 #comparison between Schreck 1 & Schreck 2
 ggplot() +
@@ -242,9 +272,14 @@ ggplot() +
   labs(title="Ueli's distance to concurrently sounding Schrecks")
 ```
 
+# Step 6
+As a measure to reduce data point density, only every 50th observation was used. The loss in data granularity has an effect for readability and observability of a general movement trend, and it doesn't seem that a lot of the information is lost on the way.
+
+In the following graph, distances from Ueli to the two first Schrecks are visualized with a much lower resolution.
+
 ```{r reduction in sampling size concurrent Schrecks 1 + 2}
 
-#use only every 40th observation point to reduce complexity
+#use only every 50th observation point to reduce complexity
 reduce_Ueli_schreck1 <- Ueli_schreck1 %>% dplyr::filter(row_number() %% 50 == 0)
 reduce_Ueli_schreck2 <- Ueli_schreck2 %>% dplyr::filter(row_number() %% 50 == 0)
 
@@ -253,6 +288,10 @@ ggplot() +
   geom_line(data=reduce_Ueli_schreck2, aes(DatetimeUTC,distance, colour=Schreck), linetype="twodash") +
   labs(title="Ueli's distance to concurrently sounding Schrecks, sampling size reduced")
 ```
+
+#Step 7
+A similar approach was used for the other boars affected by Schreck 1 and 2, but even reducing their data points to every 150th.
+
 
 ```{r distance to Schreck 1 & 2 all animals except Ueli}
 wildschwein_schreck1$Schreck <- schreck1$id
@@ -269,7 +308,10 @@ reduce_schreck2_withoutUeli <- reduce_schreck2 %>%
 ggplot(reduce_schreck1_withoutUeli, aes(DatetimeUTC,distance, color=TierName)) + geom_line() + labs(title="Distance of the other affected boars to Schreck WSS_2014_04")
 
 ggplot(reduce_schreck2_withoutUeli, aes(DatetimeUTC,distance, color=TierName)) + geom_line() + labs(title="Distance of the affected boars to Schreck WSS_2014_05")
+```
+Only Sabine seems to have an interesting pattern or was close enough to be affected so here is Sabine's distance to the first 2 Schrecks:
 
+```{r Sabine against Schreck 1,2}
 #Now we'll look at Sabine alone (the others don't show a useful pattern)
 reduce_schreck1_Sabine <- reduce_schreck1_withoutUeli %>%
   filter(TierName =="Sabine")
