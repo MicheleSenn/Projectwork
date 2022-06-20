@@ -207,22 +207,22 @@ wildschwein_schreck1 <- filter(wildschwein_sf,DatetimeUTC>schreck1$datum_on,Date
 #Distanz als zusätzliche Spalte hinzusetzen
 wildschwein_schreck1$distance <- as.numeric(st_distance(wildschwein_schreck1,schreck1)[,1])
 
-#Alle Tiere, welche während der Laufzeit bis zu 200m nah am Schreck 1 waren, hätten ihn hören können 
+#Distanz der Hörweite ist unklar, daher nicht rausfiltern
 
-wildschwein_schreck1_close <- wildschwein_schreck1 %>%
-  filter(distance < 200)
+#wildschwein_schreck1_close <- wildschwein_schreck1 %>%
+ # filter(distance < 200)
 
 #ggplot
 
-ggplot(wildschwein_schreck1_close, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2014_04")
+ggplot(wildschwein_schreck1, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2014_04")
 ```
-Only these two boars were close enough to Schreck WSS_2014_04 during the time of the Schreck running to potentially have been affected.
+Since we don't know, how close you would need to be to hear the Schreck, all of the five boars Caroline, Isabelle, Nicole, Sabine and Ueli could potentially have been affected.
 
 ```{r distance to Schreck 1}
 
 #Distanz zwischen dem Schreck und den wildschweinen
 #Distanz als zusätzliche Spalte hinzusetzen
-wildschwein_sf$distance <- as.numeric(st_distance(wildschwein_sf,schreck1)[,1])
+wildschwein_sf$distance_Schreck1 <- as.numeric(st_distance(wildschwein_sf,schreck1)[,1])
 
 #Kandidaten rausfiltern
 affected_distance <- wildschwein_sf %>%
@@ -241,7 +241,7 @@ schreck2 <- agenda_fanel[2,]
 
 #Die Wildschweine zwischen dem Start und Ende des ersten schrecks finden
 
-wildschwein_schreck <- filter(wildschwein_sf,DatetimeUTC>schreck2$datum_on,DatetimeUTC<schreck2$datum_off)
+wildschwein_schreck2 <- filter(wildschwein_sf,DatetimeUTC>schreck2$datum_on,DatetimeUTC<schreck2$datum_off)
 
 
 #Distanz zwischen dem Schreck und den wildschweinen
@@ -249,18 +249,17 @@ wildschwein_schreck <- filter(wildschwein_sf,DatetimeUTC>schreck2$datum_on,Datet
 #rechnet geometrische Punkte selbst aus statt über euclidean distance
 
 #Distanz als zusätzliche Spalte hinzusetzen
-wildschwein_schreck$distance <- as.numeric(st_distance(wildschwein_schreck,schreck2)[,1])
+wildschwein_schreck2$distance <- as.numeric(st_distance(wildschwein_schreck2,schreck2)[,1])
 
-#Alle Tiere, welche während der Laufzeit bis zu 200m nah am Schreck 1 waren, hätten ihn hören können 
+#Alle Tiere, welche während der Laufzeit bis zu 200m nah am Schreck 1 waren, hätten ihn hören können --> die Spalte bedeutet etwas anderes, daher eher nicht nutzbar
 
-wildschwein_schreck_close <- wildschwein_schreck %>%
-  filter(distance < agenda_fanel$ausrichtung_min[2])
+#wildschwein_schreck_close <- wildschwein_schreck %>%
+#  filter(distance < agenda_fanel$ausrichtung_min[2])
 
 #ggplot
 
-ggplot(wildschwein_schreck_close, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2014_05")
+ggplot(wildschwein_schreck2, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2014_05")
 ```
-Not enough exposure of the boars to Schreck 2.
 
 #Schreck 3
 
@@ -270,7 +269,7 @@ schreck3 <- agenda_fanel[3,]
 
 #Die Wildschweine zwischen dem Start und Ende des ersten schrecks finden
 
-wildschwein_schreck <- filter(wildschwein_sf,DatetimeUTC>schreck3$datum_on,DatetimeUTC<schreck3$datum_off)
+wildschwein_schreck3 <- filter(wildschwein_sf,DatetimeUTC>schreck3$datum_on,DatetimeUTC<schreck3$datum_off)
 
 
 #Distanz zwischen dem Schreck und den wildschweinen
@@ -278,47 +277,37 @@ wildschwein_schreck <- filter(wildschwein_sf,DatetimeUTC>schreck3$datum_on,Datet
 #rechnet geometrische Punkte selbst aus statt über euclidean distance
 
 #Distanz als zusätzliche Spalte hinzusetzen
-wildschwein_schreck$distance <- as.numeric(st_distance(wildschwein_schreck,schreck2)[,1])
+wildschwein_schreck3$distance <- as.numeric(st_distance(wildschwein_schreck3,schreck3)[,1])
 
-#Alle Tiere, welche während der Laufzeit bis zu 200m nah am Schreck 1 waren, hätten ihn hören können 
+#Alle Tiere, welche während der Laufzeit bis zu 200m nah am Schreck 1 waren, hätten ihn hören können --> falsche Spalte, s.o.
 
-wildschwein_schreck_close <- wildschwein_schreck %>%
-  filter(distance < agenda_fanel$ausrichtung_min[3])
+#wildschwein_schreck_close <- wildschwein_schreck %>%
+ # filter(distance < agenda_fanel$ausrichtung_min[3])
 
 #ggplot
 
-ggplot(wildschwein_schreck_close, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2014_06")
+ggplot(wildschwein_schreck3, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2014_06")
 ```
-Not enough exposure of the boars to Schreck 3.
+Schreck 3 is not relevant.
 
 #Schreck 4
 
 ```{r distance to Schreck 4}
 # Schreck rausfiltern
-schreck2 <- agenda_fanel[4,]
+schreck4 <- agenda_fanel[4,]
 
 #Die Wildschweine zwischen dem Start und Ende des ersten schrecks finden
 
-wildschwein_schreck <- filter(wildschwein_sf,DatetimeUTC>schreck4$datum_on,DatetimeUTC<schreck4$datum_off)
-
-
-#Distanz zwischen dem Schreck und den wildschweinen
-#st_distance(wildschwein_schreck1,schreck1)[,1]
-#rechnet geometrische Punkte selbst aus statt über euclidean distance
+wildschwein_schreck4 <- filter(wildschwein_sf,DatetimeUTC>schreck4$datum_on,DatetimeUTC<schreck4$datum_off)
 
 #Distanz als zusätzliche Spalte hinzusetzen
-wildschwein_schreck$distance <- as.numeric(st_distance(wildschwein_schreck,schreck4)[,1])
-
-#Alle Tiere, welche während der Laufzeit bis zu 200m nah am Schreck 1 waren, hätten ihn hören können 
-
-wildschwein_schreck_close <- wildschwein_schreck %>%
-  filter(distance < agenda_fanel$ausrichtung_min[4])
+wildschwein_schreck4$distance <- as.numeric(st_distance(wildschwein_schreck4,schreck4)[,1])
 
 #ggplot
 
-ggplot(wildschwein_schreck_close, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2014_06")
+ggplot(wildschwein_schreck4, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2014_06")
 ```
-Not enough exposure of the boars to Schreck 4.
+Ueli was the only one affected by Schreck 4.
 
 #Schreck 5
 
@@ -328,7 +317,7 @@ schreck5 <- agenda_fanel[5,]
 
 #Die Wildschweine zwischen dem Start und Ende des ersten schrecks finden
 
-wildschwein_schreck <- filter(wildschwein_sf,DatetimeUTC>schreck5$datum_on,DatetimeUTC<schreck5$datum_off)
+wildschwein_schreck5 <- filter(wildschwein_sf,DatetimeUTC>schreck5$datum_on,DatetimeUTC<schreck5$datum_off)
 
 
 #Distanz zwischen dem Schreck und den wildschweinen
@@ -336,33 +325,36 @@ wildschwein_schreck <- filter(wildschwein_sf,DatetimeUTC>schreck5$datum_on,Datet
 #rechnet geometrische Punkte selbst aus statt über euclidean distance
 
 #Distanz als zusätzliche Spalte hinzusetzen
-wildschwein_schreck$distance <- as.numeric(st_distance(wildschwein_schreck,schreck5)[,1])
-
-#Alle Tiere, welche während der Laufzeit bis zu 200m nah am Schreck 1 waren, hätten ihn hören können 
-
-wildschwein_schreck_close <- wildschwein_schreck %>%
-  filter(distance < agenda_fanel$ausrichtung_min[5])
+wildschwein_schreck5$distance <- as.numeric(st_distance(wildschwein_schreck5,schreck5)[,1])
 
 #ggplot
 
-ggplot(wildschwein_schreck_close, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2015_01")
+ggplot(wildschwein_schreck5, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2015_01")
 ```
-Four boars had exposure to Schreck 5.
+Many boars could have been affected by Schreck 5, whereas only a few seem to have been close enough. The animals that were tracked further away will be filtered out.
 
 ```{r distance to Schreck}
 
 #Distanz zwischen dem Schreck und den wildschweinen
 #Distanz als zusätzliche Spalte hinzusetzen
-wildschwein_sf$distance <- as.numeric(st_distance(wildschwein_sf,schreck5)[,1])
+wildschwein_sf$distance_Schreck5 <- as.numeric(st_distance(wildschwein_sf,schreck5)[,1])
 
 #Kandidaten rausfiltern
-affected_distance <- wildschwein_sf %>%
+affected_distance5 <- wildschwein_sf %>%
   filter(TierName == c("Caroline","Claude","Olga","Sabine"), DatetimeUTC > "2015-05-20 21:01:14",DatetimeUTC < "2015-06-12 21:01:14")
 
 #ggplot
-ggplot(affected_distance, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2015_01")
+ggplot(affected_distance5, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2015_01")
 ```
 Schreck 5 was running from 2015-05-20 to 2015-06-12. It looks as if in the beginning the boars kept a distance of half a kilometer, but came back all the same after about a month.
+
+```{r Caroline and Schreck 5}
+distance5_longerThanSchrecking <- wildschwein_sf %>%
+  filter(TierName == "Caroline", DatetimeUTC > "2015-04-01", DatetimeUTC < "2015-04-05")
+
+ggplot(distance5_longerThanSchrecking,aes(DatetimeUTC,distance_Schreck5)) + geom_point()
+```
+Caroline's moving pattern shows her staying in one place during the days (mostly between 6-9 am to around 6pm) --> sleeping. Movements only at night. Further down, we'll explore which kind of field this Schreck 5 is in.
 
 #Schreck 6
 
@@ -372,7 +364,7 @@ schreck6 <- agenda_fanel[6,]
 
 #Die Wildschweine zwischen dem Start und Ende des ersten schrecks finden
 
-wildschwein_schreck <- filter(wildschwein_sf,DatetimeUTC>schreck6$datum_on,DatetimeUTC<schreck6$datum_off)
+wildschwein_schreck6 <- filter(wildschwein_sf,DatetimeUTC>schreck6$datum_on,DatetimeUTC<schreck6$datum_off)
 
 
 #Distanz zwischen dem Schreck und den wildschweinen
@@ -380,19 +372,14 @@ wildschwein_schreck <- filter(wildschwein_sf,DatetimeUTC>schreck6$datum_on,Datet
 #rechnet geometrische Punkte selbst aus statt über euclidean distance
 
 #Distanz als zusätzliche Spalte hinzusetzen
-wildschwein_schreck$distance <- as.numeric(st_distance(wildschwein_schreck,schreck6)[,1])
-
-#Alle Tiere, welche während der Laufzeit bis zu 200m nah am Schreck 1 waren, hätten ihn hören können 
-
-wildschwein_schreck_close <- wildschwein_schreck %>%
-  filter(distance < agenda_fanel$ausrichtung_min[6])
+wildschwein_schreck6$distance <- as.numeric(st_distance(wildschwein_schreck6,schreck6)[,1])
 
 #ggplot
 
-ggplot(wildschwein_schreck_close, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2015_01")
+ggplot(wildschwein_schreck6, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2015_01")
 ```
 
-Three boars had exposure to Schreck 6.
+Three boars look close enough to have heard the sound.
 
 ```{r distance to Schreck}
 
@@ -401,13 +388,13 @@ Three boars had exposure to Schreck 6.
 wildschwein_sf$distance <- as.numeric(st_distance(wildschwein_sf,schreck6)[,1])
 
 #Kandidaten rausfiltern
-affected_distance <- wildschwein_sf %>%
+affected_distance6 <- wildschwein_sf %>%
   filter(TierName == c("Caroline","Olga","Sabine"), DatetimeUTC > "2015-05-01 21:01:14",DatetimeUTC < "2015-08-12 21:01:14")
 
 #ggplot
-ggplot(affected_distance, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2015_01")
+ggplot(affected_distance6, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2015_01")
 ```
-Schreck 6 was running from 2015-06-12 to 2015-07-01 and seems to have no effect.
+Schreck 6 looks promising.
 
 #Schreck 7
 
@@ -417,27 +404,17 @@ schreck7 <- agenda_fanel[7,]
 
 #Die Wildschweine zwischen dem Start und Ende des ersten schrecks finden
 
-wildschwein_schreck <- filter(wildschwein_sf,DatetimeUTC>schreck7$datum_on,DatetimeUTC<schreck7$datum_off)
-
-
-#Distanz zwischen dem Schreck und den wildschweinen
-#st_distance(wildschwein_schreck1,schreck1)[,1]
-#rechnet geometrische Punkte selbst aus statt über euclidean distance
+wildschwein_schreck7 <- filter(wildschwein_sf,DatetimeUTC>schreck7$datum_on,DatetimeUTC<schreck7$datum_off)
 
 #Distanz als zusätzliche Spalte hinzusetzen
-wildschwein_schreck$distance <- as.numeric(st_distance(wildschwein_schreck,schreck7)[,1])
-
-#Alle Tiere, welche während der Laufzeit bis zu 200m nah am Schreck 1 waren, hätten ihn hören können 
-
-wildschwein_schreck_close <- wildschwein_schreck %>%
-  filter(distance < agenda_fanel$ausrichtung_min[7])
+wildschwein_schreck7$distance <- as.numeric(st_distance(wildschwein_schreck7,schreck7)[,1])
 
 #ggplot
 
-ggplot(wildschwein_schreck_close, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2015_03")
+ggplot(wildschwein_schreck7, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2015_03")
 ```
 
-Only one boar was affected.
+Most likely, the Schreck 7 only had an effect on Ruth.
 
 
 #Schreck 8
@@ -448,26 +425,16 @@ schreck8 <- agenda_fanel[8,]
 
 #Die Wildschweine zwischen dem Start und Ende des ersten schrecks finden
 
-wildschwein_schreck <- filter(wildschwein_sf,DatetimeUTC>schreck8$datum_on,DatetimeUTC<schreck8$datum_off)
-
-
-#Distanz zwischen dem Schreck und den wildschweinen
-#st_distance(wildschwein_schreck1,schreck1)[,1]
-#rechnet geometrische Punkte selbst aus statt über euclidean distance
+wildschwein_schreck8 <- filter(wildschwein_sf,DatetimeUTC>schreck8$datum_on,DatetimeUTC<schreck8$datum_off)
 
 #Distanz als zusätzliche Spalte hinzusetzen
-wildschwein_schreck$distance <- as.numeric(st_distance(wildschwein_schreck,schreck8)[,1])
-
-#Alle Tiere, welche während der Laufzeit bis zu 200m nah am Schreck 1 waren, hätten ihn hören können 
-
-wildschwein_schreck_close <- wildschwein_schreck %>%
-  filter(distance < agenda_fanel$ausrichtung_min[8])
+wildschwein_schreck8$distance <- as.numeric(st_distance(wildschwein_schreck8,schreck8)[,1])
 
 #ggplot
 
-ggplot(wildschwein_schreck_close, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2015_03")
+ggplot(wildschwein_schreck8, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2015_03")
 ```
-Only one boar was affected.
+Several boars were affected by Schreck 8.
 
 
 #Schreck 9
@@ -478,26 +445,16 @@ schreck9 <- agenda_fanel[9,]
 
 #Die Wildschweine zwischen dem Start und Ende des ersten schrecks finden
 
-wildschwein_schreck <- filter(wildschwein_sf,DatetimeUTC>schreck9$datum_on,DatetimeUTC<schreck9$datum_off)
-
-
-#Distanz zwischen dem Schreck und den wildschweinen
-#st_distance(wildschwein_schreck1,schreck1)[,1]
-#rechnet geometrische Punkte selbst aus statt über euclidean distance
+wildschwein_schreck9 <- filter(wildschwein_sf,DatetimeUTC>schreck9$datum_on,DatetimeUTC<schreck9$datum_off)
 
 #Distanz als zusätzliche Spalte hinzusetzen
-wildschwein_schreck$distance <- as.numeric(st_distance(wildschwein_schreck,schreck9)[,1])
-
-#Alle Tiere, welche während der Laufzeit bis zu 200m nah am Schreck 1 waren, hätten ihn hören können 
-
-wildschwein_schreck_close <- wildschwein_schreck %>%
-  filter(distance < agenda_fanel$ausrichtung_min[9])
+wildschwein_schreck9$distance <- as.numeric(st_distance(wildschwein_schreck9,schreck9)[,1])
 
 #ggplot
 
-ggplot(wildschwein_schreck_close, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2015_04")
+ggplot(wildschwein_schreck9, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2015_04")
 ```
-Only one boar was affected.
+Schreck 9 affected many boars.
 
 
 #Schreck 10
@@ -508,26 +465,17 @@ schreck10 <- agenda_fanel[10,]
 
 #Die Wildschweine zwischen dem Start und Ende des ersten schrecks finden
 
-wildschwein_schreck <- filter(wildschwein_sf,DatetimeUTC>schreck10$datum_on,DatetimeUTC<schreck10$datum_off)
+wildschwein_schreck10 <- filter(wildschwein_sf,DatetimeUTC>schreck10$datum_on,DatetimeUTC<schreck10$datum_off)
 
-
-#Distanz zwischen dem Schreck und den wildschweinen
-#st_distance(wildschwein_schreck1,schreck1)[,1]
-#rechnet geometrische Punkte selbst aus statt über euclidean distance
 
 #Distanz als zusätzliche Spalte hinzusetzen
-wildschwein_schreck$distance <- as.numeric(st_distance(wildschwein_schreck,schreck10)[,1])
-
-#Alle Tiere, welche während der Laufzeit bis zu 200m nah am Schreck 1 waren, hätten ihn hören können 
-
-wildschwein_schreck_close <- wildschwein_schreck %>%
-  filter(distance < agenda_fanel$ausrichtung_min[10])
+wildschwein_schreck10$distance <- as.numeric(st_distance(wildschwein_schreck10,schreck10)[,1])
 
 #ggplot
 
-ggplot(wildschwein_schreck_close, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2015_04")
+ggplot(wildschwein_schreck10, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2015_04")
 ```
-Only one boar was affected.
+Schreck 10 was close enough for many.
 
 
 #Schreck 11
@@ -538,42 +486,32 @@ schreck11 <- agenda_fanel[11,]
 
 #Die Wildschweine zwischen dem Start und Ende des ersten schrecks finden
 
-wildschwein_schreck <- filter(wildschwein_sf,DatetimeUTC>schreck11$datum_on,DatetimeUTC<schreck11$datum_off)
-
-
-#Distanz zwischen dem Schreck und den wildschweinen
-#st_distance(wildschwein_schreck1,schreck1)[,1]
-#rechnet geometrische Punkte selbst aus statt über euclidean distance
+wildschwein_schreck11 <- filter(wildschwein_sf,DatetimeUTC>schreck11$datum_on,DatetimeUTC<schreck11$datum_off)
 
 #Distanz als zusätzliche Spalte hinzusetzen
-wildschwein_schreck$distance <- as.numeric(st_distance(wildschwein_schreck,schreck11)[,1])
-
-#Alle Tiere, welche während der Laufzeit bis zu 200m nah am Schreck 1 waren, hätten ihn hören können 
-
-wildschwein_schreck_close <- wildschwein_schreck %>%
-  filter(distance < agenda_fanel$ausrichtung_min[11])
+wildschwein_schreck11$distance <- as.numeric(st_distance(wildschwein_schreck11,schreck11)[,1])
 
 #ggplot
 
-ggplot(wildschwein_schreck_close, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2016_01")
+ggplot(wildschwein_schreck11, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2016_01")
 ```
-Frida and Miriam were affected by the Schreck.
+Many boars were affected by Schreck 11.
 
 ```{r distance to Schreck}
 
 #Distanz zwischen dem Schreck und den wildschweinen
 #Distanz als zusätzliche Spalte hinzusetzen
-wildschwein_sf$distance <- as.numeric(st_distance(wildschwein_sf,schreck11)[,1])
+wildschwein_sf$distance_Schreck11 <- as.numeric(st_distance(wildschwein_sf,schreck11)[,1])
 
 #Kandidaten rausfiltern
-affected_distance <- wildschwein_sf %>%
-  filter(TierName == c("Frida","Miriam"), DatetimeUTC > "2016-03-01 21:01:14",DatetimeUTC < "2016-05-12 21:01:14")
+affected_distance11 <- wildschwein_sf %>%
+  filter(TierName == c("Frida","Miriam", "Caroline", "Ueli","Amos"), DatetimeUTC > "2016-03-01 21:01:14",DatetimeUTC < "2016-05-12 21:01:14")
 
 #ggplot
-ggplot(affected_distance, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2016_01")
+ggplot(affected_distance11, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2016_01")
 ```
 
-Schreck 11 was running from 2016-04-04 to 2016-04-23. It looks like Frida moved away after the Schreck started, whereas Miriam was unimpressed by it.
+Schreck 11 was running from 2016-04-04 to 2016-04-23. Amos seemed to move away, also Caroline, Ueli and Frida. --> this looks promising for further inspection.
 
 #Step 4
 Ueli looks like an interesting candidate for further inspection.
@@ -613,13 +551,13 @@ Same thing with Isabelle and Sabine who should have been near enough to hear the
 
 ```{r Sabine and Isabell only with Schreck1}
 #establish baseline distance of Sabine and Isabelle to Schreck1
-Isabelle_distance <- wildschwein_sf %>%
+SabineIsabelle_distance <- wildschwein_sf %>%
   filter(TierName == c("Sabine","Isabelle"))
 
-SabineIsablle_distance$distance <- as.numeric(st_distance(SabineIsabelle_distance,schreck1)[,1])
+SabineIsabelle_distance$distance1 <- as.numeric(st_distance(SabineIsabelle_distance,schreck1)[,1])
 
-#!!!!!!!!!Warum zeigt es das Datum nicht richtig an? Theoretisch sollte dies die gesamte Trackingzeit plotten. und wie es aussieht waren sie die ganze Zeit nie weiter als 200 m von Schreck 1 entfernt. Wenn das stimmt, waren sie von Schreck 1 komplett unbeeindruckt. Aber von deiner GRafik her weiss ich ja dass das nicht stimmt. Findest du den Fehler?
-ggplot(SabineIsablle_distance, aes(DatetimeUTC,distance)) + geom_line()
+#!!!!!!!!!Warum zeigt es das Datum nicht richtig an? Theoretisch sollte dies die gesamte Trackingzeit plotten. und wie es aussieht waren sie die ganze Zeit nie weiter als 200 m von Schreck 1 entfernt. Wenn das stimmt, waren sie von Schreck 1 komplett unbeeindruckt. Aber von deiner GRafik her weiss ich ja dass das nicht stimmt. Findest du den Fehler? --> Es waren überall Tippfehler...
+ggplot(SabineIsabelle_distance, aes(DatetimeUTC,distance1)) + geom_line()
 
 ```
 
@@ -939,8 +877,96 @@ ggplot() +
 ```
 
 
-```{r Coaching von Nils}
+```{r Schreck 5 is in a bean field}
 forest <- read_sf("Feldaufnahmen_Fanel.gpkg")
+head(forest)
+st_intersects(schreck5, forest) # sagt, wo sich der Punkt des Schrecks mit den Feld-Daten kreuzt
+#Resultat: 272 -->FieldID 195
+
+forest_bohnen195 <- forest %>%
+  filter(FieldID==195)
+
+ggplot(forest_bohnen195)+geom_sf(aes(fill=Frucht)) + geom_sf(data=schreck5)
+
+#das ist unser Feld, in welches z.B. Caroline immer wieder zurückkehrt
+
+distance5_Caroline_Schrecktime <- wildschwein_sf %>%
+  filter(TierName == "Caroline", DatetimeUTC > "2015-05-20", DatetimeUTC < "2015-06-12")
+
+ggplot(forest_bohnen195)+geom_sf(aes(fill=Frucht)) + geom_sf(data=distance5_Caroline_Schrecktime)
+
+intersection_195andSchreck5 <- st_intersects(forest_bohnen195,distance5_Caroline_Schrecktime)
+class(intersection_195andSchreck5)
+
+inter_sel_5 <- distance5_Caroline_Schrecktime[intersection_195andSchreck5[[1]],]
+
+ggplot(forest_bohnen195) + geom_sf(aes(fill=Frucht))+ geom_sf(data=inter_sel_5) + geom_sf(data=schreck5, aes(size=5)) + labs(title="Caroline's positions in the bean field while Schreck 5 was active")
+  #during Schreck time, Carolina still visited the bean field
+```
+
+As can be seen, Schreck 5 is in a bean field. Caroline made some visits during Schreck time.
+To see when Caroline is returning into it, I'd like to set the field polygon as the defining area where the distance is measured. --> column that says: "in the field" or "not in the field"
+
+```{r in the field vs not in the field}
+#ich will jetzt das Feld definieren. Im Feld drin = TRUE --> alle in inter_sel_5
+#für die "nicht enthaltenen" kann ich einen anti-join nutzen oder das Subsetting mit disjoint
+
+disjoint_195andSchreck5 <- st_disjoint(forest_bohnen195,distance5_Caroline_Schrecktime)
+class(intersection_195andSchreck5)
+
+disjoint_caroline_5 <- distance5_Caroline_Schrecktime[disjoint_195andSchreck5[[1]],]
+
+#disjoint anschauen
+ggplot(forest_bohnen195) + geom_sf(aes(fill=Frucht))+ geom_sf(data=disjoint_caroline_5) + geom_sf(data=schreck5, aes(size=5)) + labs(title="Caroline's positions outside bean field while Schreck 5 was active")
+
+#nun die ausserhalb mit 0 und die innerhalb mit 1 ergänzen
+disjoint_caroline_5$inField <- 0
+inter_sel_5$inField <- 1
+#append the two data sets again with their new columns
+Caroline_Schreck5_withField <- bind_rows(disjoint_caroline_5,inter_sel_5)
+
+#this is now the pattern during Schreck time --> red points don't make a lot of sense yet
+ggplot() + geom_point(data=Caroline_Schreck5_withField,aes(DatetimeUTC,distance_Schreck5)) +
+  geom_point(data=inter_sel_5,aes(DatetimeUTC,inField, colour="red"))
+  
+
+```
+
+
+```{r Caroline longer time span}
+distance5_Caroline_longerThanSchrecktime <- wildschwein_sf %>%
+  filter(TierName == "Caroline")
+
+ggplot(forest_bohnen195)+geom_sf(aes(fill=Frucht)) + geom_sf(data=distance5_Caroline_longerThanSchrecktime)
+
+intersection_195andSchreck5_long <- st_intersects(forest_bohnen195,distance5_Caroline_longerThanSchrecktime)
+class(intersection_195andSchreck5)
+
+inter_sel_5_long <- distance5_Caroline_longerThanSchrecktime[intersection_195andSchreck5[[1]],]
+
+ggplot(forest_bohnen195) + geom_sf(aes(fill=Frucht))+ geom_sf(data=inter_sel_5_long) + geom_sf(data=schreck5, aes(size=5)) + labs(title="Caroline's positions in the bean field during the whole time")
+  #during Schreck time, Carolina still visited the bean field
+
+#ich will jetzt das Feld definieren. Im Feld drin = TRUE --> alle in inter_sel_5
+#für die "nicht enthaltenen" kann ich einen anti-join nutzen oder das Subsetting mit disjoint
+
+disjoint_195andSchreck5_long <- st_disjoint(forest_bohnen195,distance5_Caroline_longerThanSchrecktime)
+class(intersection_195andSchreck5_long)
+
+disjoint_caroline_5_long <- distance5_Caroline_longerThanSchrecktime[disjoint_195andSchreck5_long[[1]],]
+
+#disjoint anschauen
+ggplot(forest_bohnen195) + geom_sf(aes(fill=Frucht))+ geom_sf(data=disjoint_caroline_5_long) + geom_sf(data=schreck5, aes(size=5)) + labs(title="Caroline's positions outside bean field during the whole time")
+
+#nun die ausserhalb mit 0 und die innerhalb mit 1 ergänzen
+disjoint_caroline_5_long$inField <- 0
+inter_sel_5_long$inField <- 1
+#append the two data sets again with their new columns
+Caroline_Schreck5_withField_long <- bind_rows(disjoint_caroline_5_long,inter_sel_5_long)
+
+#this is now the pattern during Schreck time --> red points don't make a lot of sense yet
+ggplot() + geom_point(data=Caroline_Schreck5_withField_long,aes(DatetimeUTC,distance_Schreck5)) +
+  geom_point(data=inter_sel_5_long,aes(DatetimeUTC,inField, colour="red"))
 ```
 
 
