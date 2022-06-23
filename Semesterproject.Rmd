@@ -229,7 +229,7 @@ affected_distance <- wildschwein_sf %>%
   filter(TierName == c("Sabine","Isabelle"),DatetimeUTC > "2014-04-01 21:01:14", DatetimeUTC < "2014-12-28 21:01:14")
 
 #ggplot
-ggplot(affected_distance, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2014_04")
+ggplot(affected_distance, aes(DatetimeUTC,distance_Schreck1, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2014_04")
 ```
 Sabine and Isabelle don't seem to be impressed by the Schreck. However they only just came across the Schreck for 2 and 4 days accordingly before the Schreck stopped.
 
@@ -344,7 +344,7 @@ affected_distance5 <- wildschwein_sf %>%
   filter(TierName == c("Caroline","Claude","Olga","Sabine"), DatetimeUTC > "2015-05-20 21:01:14",DatetimeUTC < "2015-06-12 21:01:14")
 
 #ggplot
-ggplot(affected_distance5, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2015_01")
+ggplot(affected_distance5, aes(DatetimeUTC,distance_Schreck5, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2015_01")
 ```
 Schreck 5 was running from 2015-05-20 to 2015-06-12. It looks as if in the beginning the boars kept a distance of half a kilometer, but came back all the same after about a month.
 
@@ -513,7 +513,7 @@ ggplot(affected_distance11, aes(DatetimeUTC,distance, color=TierName)) + geom_po
 
 Schreck 11 was running from 2016-04-04 to 2016-04-23. Amos seemed to move away, also Caroline, Ueli and Frida. --> this looks promising for further inspection.
 
-#Step 4
+##Step 4
 Ueli looks like an interesting candidate for further inspection.
 His corresponding location data to "Schreck time 1" were filtered and visualized in different ways.
 
@@ -1119,6 +1119,61 @@ distance1_Ueli_Schrecktime <- wildschwein_sf %>%
 ggplot(forest_273)+geom_sf(aes(fill=Frucht)) + geom_sf(data=distance1_Ueli_Schrecktime)
 #Ueli war nie direkt auf dem Feld während Schrecktime :(
 ```
+
+
+
+
+#next step
+How much time does a boare spend in the field before the Schreck (in %), during and after? 
+
+Selection of the boars and schrecks which will be analyzed further:
+Schreck 1 and 2 and 4 will de disregarded because there is no data of boars that were tracked in this region before, during and after the schreck. So there would be nothing to compare the schrecks effect with.
+
+Schreck 3 will be disregarded because no boar was tracked in its vicinity. 
+
+Schreck 7, 8 and 9 will be disregarded because only one boar fulfills requirements of being tracked in the area before, during and after Schreck-time respectively. This would again pose the problem of lacking comparability.
+
+Hence only Schreck 5, 6, 10, and 11 will be further analyzed.
+
+For Schreck 5 and the boars Olga, Sabine and Caroline will be further examined, because they were in the area as well as tracked before and after. 
+The same applies for Schreck 10 with Ruth, Sabine, Olga and Caroline.
+
+For Schreck 11 it will be Miriam, Frida, Caroline and Ueli.
+
+```{r in the field vs not in the field}
+#Im Feld drin = TRUE --> alle in inter_sel_5
+#für die "nicht enthaltenen" kann ich einen anti-join nutzen oder das Subsetting mit disjoint
+
+disjoint_195andSchreck5 <- st_disjoint(forest_bohnen195,distance5_Caroline_Schrecktime)
+class(intersection_195andSchreck5)
+
+disjoint_caroline_5 <- distance5_Caroline_Schrecktime[disjoint_195andSchreck5[[1]],]
+
+#disjoint anschauen
+ggplot(forest_bohnen195) + geom_sf(aes(fill=Frucht))+ geom_sf(data=disjoint_caroline_5) + geom_sf(data=schreck5, aes(size=5)) + labs(title="Caroline's positions outside bean field while Schreck 5 was active")
+
+#nun die ausserhalb mit 0 und die innerhalb mit 1 ergänzen
+disjoint_caroline_5$inField <- 0
+inter_sel_5$inField <- 1
+#append the two data sets again with their new columns
+Caroline_Schreck5_withField <- bind_rows(disjoint_caroline_5,inter_sel_5)
+#bis hier stimmt es schon mal
+
+#this is now the pattern during Schreck time --> red points don't say a lot yet, just that she was in the field --> conceptualize better?
+ggplot() + geom_point(data=Caroline_Schreck5_withField,aes(DatetimeUTC,distance_Schreck5)) +
+  geom_point(data=inter_sel_5,aes(DatetimeUTC,inField, colour="red"))
+  
+
+
+#47 from 2207 Data points are in the field
+print(47/2207*100)
+# during Schreck time she spends 2 % of her time in the field.
+
+# now the same for before and after
+```
+
+
+
 
 ## Discussion
 
