@@ -1100,6 +1100,26 @@ ggplot(forest_290)+geom_sf(aes(fill=Frucht)) + geom_sf(data=distance14_Amos_Schr
 #Auch Amos war wohl nicht in der Nähe, falls ich es richtig überlegt habe...
 ```
 
+```{r Ueli with Schreck 1}
+schreck1 <- agenda_fanel[1,]
+
+st_intersects(schreck1, forest) # sagt, wo sich der Punkt des Schrecks mit den Feld-Daten kreuzt
+#Resultat: 273
+
+forest_273 <- forest %>%
+  filter(FieldID==273)
+
+#sieht auch ein wenig weit weg aus... aber könnten auch wenige Meter Abstand sein
+
+ggplot(forest_273)+geom_sf(aes(fill=Frucht)) + geom_sf(data=schreck1)
+
+distance1_Ueli_Schrecktime <- wildschwein_sf %>%
+  filter(TierName == "Ueli", DatetimeUTC > "2014-05-01", DatetimeUTC < "2014-10-28")
+
+ggplot(forest_273)+geom_sf(aes(fill=Frucht)) + geom_sf(data=distance1_Ueli_Schrecktime)
+#Ueli war nie direkt auf dem Feld während Schrecktime :(
+```
+
 ## Discussion
 
 
