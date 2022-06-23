@@ -1140,7 +1140,33 @@ The same applies for Schreck 10 with Ruth, Sabine, Olga and Caroline.
 
 For Schreck 11 it will be Miriam, Frida, Caroline and Ueli.
 
-```{r in the field vs not in the field}
+```{r in the field vs not in the field during SChreck time}
+#Im Feld drin = TRUE --> alle in inter_sel_5
+
+
+disjoint_195andSchreck5 <- st_disjoint(forest_bohnen195,distance5_Caroline_Schrecktime)
+class(intersection_195andSchreck5)
+
+disjoint_caroline_5 <- distance5_Caroline_Schrecktime[disjoint_195andSchreck5[[1]],]
+
+
+#nun die ausserhalb mit 0 und die innerhalb mit 1 ergänzen
+disjoint_caroline_5$inField <- 0
+inter_sel_5$inField <- 1
+#append the two data sets again with their new columns
+Caroline_Schreck5_withField <- bind_rows(disjoint_caroline_5,inter_sel_5)
+
+  
+
+
+#47 from 2207 Data points are in the field
+print(47/2207*100)
+# during Schreck time she spends 2 % of her time in the field.
+
+# now the same for before and after
+```
+
+```{r in the field vs not in the field before SChreck time}
 #Im Feld drin = TRUE --> alle in inter_sel_5
 #für die "nicht enthaltenen" kann ich einen anti-join nutzen oder das Subsetting mit disjoint
 
@@ -1172,6 +1198,33 @@ print(47/2207*100)
 # now the same for before and after
 ```
 
+
+
+```{r in the field vs not in the field after SChreck time}
+#Im Feld drin = TRUE --> alle in inter_sel_5
+#für die "nicht enthaltenen" kann ich einen anti-join nutzen oder das Subsetting mit disjoint
+
+disjoint_195andSchreck5 <- st_disjoint(forest_bohnen195,distance5_Caroline_Schrecktime)
+class(intersection_195andSchreck5)
+
+disjoint_caroline_5 <- distance5_Caroline_Schrecktime[disjoint_195andSchreck5[[1]],]
+
+
+
+#nun die ausserhalb mit 0 und die innerhalb mit 1 ergänzen
+disjoint_caroline_5$inField <- 0
+inter_sel_5$inField <- 1
+#append the two data sets again with their new columns
+Caroline_Schreck5_withField <- bind_rows(disjoint_caroline_5,inter_sel_5)
+
+
+
+#47 from 2207 Data points are in the field
+print(47/2207*100)
+# during Schreck time she spends 2 % of her time in the field.
+
+# now the same for before and after
+```
 
 
 
