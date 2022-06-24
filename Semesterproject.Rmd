@@ -1034,14 +1034,55 @@ ggplot() + geom_point(data=Caroline_Schreck5_6_withField_long,aes(DatetimeUTC,di
 Reduce timescale to March 2015 until November 2015 for Caroline
 ```{r Caroline smaller timescale}
 Caroline_Schreck5_6_withField_long_aroundInFieldtime <- Caroline_Schreck5_6_withField_long %>%
-  filter(DatetimeUTC>"2015-03-30", DatetimeUTC<"2015-11-01")
+  filter(DatetimeUTC>"2015-04-15", DatetimeUTC<"2015-08-15")
+inter_sel_5_6_long_shorter <- inter_sel_5_6_long %>%
+  filter(DatetimeUTC<"2015-08-15")
 
 ggplot() + geom_point(data=Caroline_Schreck5_6_withField_long_aroundInFieldtime,aes(DatetimeUTC,distance5_6)) +
-  geom_point(data=inter_sel_5_6_long,aes(DatetimeUTC,inField, colour="red")) +
+  geom_point(data=inter_sel_5_6_long_shorter,aes(DatetimeUTC,inField, colour="red")) +
   labs(title="Caroline's distance to Schreck 5 / 6 around inField time. Red points mean: in the bean field")
 #hier noch  zu ergänzen: Linien, wann die Schrecks aktiv sind (z.B. https://stackoverflow.com/questions/66825661/vertical-lines-for-data-points-in-geom-point-in-ggplot2-for-r)
 ```
+Next thing to do is add a background color that shows "Before Schrecktime" - "during Schrecktime" - "after Schrecktime"
+https://statisticsglobe.com/draw-ggplot2-plot-different-background-colors-region-r
 
+```{r Caroline with background color}
+Caroline_breaks <- data.frame(start=as.Date(c("2015-04-15","2015-05-20","2015-06-12","2015-07-01")),
+                              end=as.Date(c("2015-05-20","2015-06-12","2015-07-01","2015-08-15")),
+                              colors=factor(1:4),
+                              name=c("before","S5","S6","after"))
+Caroline_breaks
+
+ggplot() +
+  geom_rect(data = Caroline_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+                ymax = Inf,
+                fill = colors),
+            alpha = 0.5) +
+  geom_point(data=Caroline_Schreck5_6_withField_long_aroundInFieldtime,aes(as.Date(DatetimeUTC),distance5_6)) +
+  geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="red")) +
+  labs(title="Caroline's distance to Schreck 5 / 6 around inField time. Red points mean: in the bean field")
+
+#Variante mit weniger Datenpunkten:
+Caroline_Schreck5_6_withField_long_aroundInFieldtime_smooth <- Caroline_Schreck5_6_withField_long_aroundInFieldtime %>%
+  dplyr::filter(row_number() %% 150 == 0)
+
+ggplot() +
+  geom_rect(data = Caroline_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+                ymax = Inf,
+                fill = colors),
+            alpha = 0.5) + 
+  geom_line(data=Caroline_Schreck5_6_withField_long_aroundInFieldtime_smooth,aes(as.Date(DatetimeUTC),distance5_6)) +
+  geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="red")) +
+  labs(title="Caroline's distance to Schreck 5 / 6 around inField time. Red points mean: in the bean field")
+#missing: legend and color annotations, some graphical and text adjustments, interpretation
+
+```
 
 Repeating Schreck 5 & 6 with Olga
 ```{r Olga during Schrecktime 5 and 6}
@@ -1339,6 +1380,8 @@ print(47/2207*100)
 # during Schreck time she spends 2 % of her time in the field.
 
 # now the same for before and after
+
+#Idea: also display graphically the distribution of "In" and "Not In" Before, during and after
 ```
 
 ```{r in the field vs not in the field before SChreck time}
