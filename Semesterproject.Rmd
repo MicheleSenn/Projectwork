@@ -1069,6 +1069,8 @@ ggplot() +
 #Variante mit weniger Datenpunkten:
 Caroline_Schreck5_6_withField_long_aroundInFieldtime_smooth <- Caroline_Schreck5_6_withField_long_aroundInFieldtime %>%
   dplyr::filter(row_number() %% 150 == 0)
+Caroline_Schreck5_6_withField_long_aroundInFieldtime_smooth2 <- Caroline_Schreck5_6_withField_long_aroundInFieldtime %>%
+  dplyr::filter(row_number() %% 50 == 0)
 
 ggplot() +
   geom_rect(data = Caroline_breaks,
@@ -1082,6 +1084,73 @@ ggplot() +
   geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
   labs(title="Caroline's distance to Schreck 5 and 6", colour="Location")
 
+#plotten mit sampling size reduction
+ggarrange(
+  ggplot() +
+  geom_rect(data = Caroline_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+                ymax = Inf,
+                fill = Phases),
+            alpha = 0.5) + 
+  geom_line(data=Caroline_Schreck5_6_withField_long_aroundInFieldtime_smooth2,aes(as.Date(DatetimeUTC),distance5_6)) +
+  geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
+  labs(subtitle= "Reducing sample size to every 50th observation", colour="Location") +
+    rremove("y.title") + rremove("x.title"),
+  ggplot() +
+  geom_rect(data = Caroline_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+                ymax = Inf,
+                fill = Phases),
+            alpha = 0.5) + 
+  geom_line(data=Caroline_Schreck5_6_withField_long_aroundInFieldtime_smooth,aes(as.Date(DatetimeUTC),distance5_6)) +
+  geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
+  labs(subtitle= "Reducing sample size to every 150th observation", colour="Location") +
+    rremove("y.title") + rremove("x.title"),
+  nrow=2, common.legend=TRUE, legend="right"
+)
+
+
+install.packages("zoo")
+library(zoo)
+
+#Variante mit rolling window:
+Caroline_Schreck5_6_withField_long_aroundInFieldtime$rollmean <- rollmean(Caroline_Schreck5_6_withField_long_aroundInFieldtime$distance5_6,2, NA, align="left")
+Caroline_Schreck5_6_withField_long_aroundInFieldtime$rollmean2 <- rollmean(Caroline_Schreck5_6_withField_long_aroundInFieldtime$distance5_6,10, NA, align="left")
+
+#plotten mit rolling window
+ggarrange(
+  ggplot() +
+  geom_rect(data = Caroline_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+                ymax = Inf,
+                fill = Phases),
+            alpha = 0.5) + 
+  geom_line(data=Caroline_Schreck5_6_withField_long_aroundInFieldtime,aes(as.Date(DatetimeUTC),rollmean)) +
+  geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
+  labs(subtitle="Rolling Mean = 2",colour="Location") +
+    rremove("y.title") + rremove("x.title"),
+  ggplot() +
+  geom_rect(data = Caroline_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+                ymax = Inf,
+                fill = Phases),
+            alpha = 0.5) + 
+  geom_line(data=Caroline_Schreck5_6_withField_long_aroundInFieldtime,aes(as.Date(DatetimeUTC),rollmean2)) +
+  geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
+  labs(subtitle="Rolling Mean = 10", colour="Location") +
+    rremove("y.title") + rremove("x.title"),
+  nrow=2, common.legend=TRUE, legend="right"
+)
+
+#annotate_figure(plot_rolling_window_Caroline, text_grob("Caroline's distance to Schreck 5 and 6", face="bold", size=20))
 ```
 
 Repeating Schreck 5 & 6 with Olga
@@ -1181,7 +1250,7 @@ ggplot() +
                 fill = colors),
             alpha = 0.5) +
   geom_point(data=Olga_Schreck5_6_withField_long_aroundInFieldtime,aes(as.Date(DatetimeUTC),distance5_6)) +
-  geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="red")) +
+  geom_point(data=inter_sel_5_6_long_olga,aes(as.Date(DatetimeUTC),inField, colour="red")) +
   labs(title="Olga's distance to Schreck 5 / 6 around inField time. Red points mean: in the bean field", colour="")
 
 #Variante mit weniger Datenpunkten:
@@ -1197,7 +1266,7 @@ ggplot() +
                 fill = Phases),
             alpha = 0.5) + 
   geom_line(data=Olga_Schreck5_6_withField_long_aroundInFieldtime_smooth,aes(as.Date(DatetimeUTC),distance5_6)) +
-  geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
+  geom_point(data=inter_sel_5_6_long_olga,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
   labs(title="Olga's distance to Schreck 5 and 6", colour="Location")
 
 ```
@@ -1306,6 +1375,7 @@ Sabine_breaks$Phases <- factor(Sabine_breaks$name, as.character(Sabine_breaks$na
 Sabine_Schreck5_6_withField_long_aroundInFieldtime_smooth <- Sabine_Schreck5_6_withField_long_aroundInFieldtime %>%
   dplyr::filter(row_number() %% 150 == 0)
 
+
 ggplot() +
   geom_rect(data = Sabine_breaks,
             aes(xmin = start,
@@ -1315,7 +1385,7 @@ ggplot() +
                 fill = Phases),
             alpha = 0.5) + 
   geom_line(data=Sabine_Schreck5_6_withField_long_aroundInFieldtime_smooth,aes(as.Date(DatetimeUTC),distance5_6)) +
-  geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
+  geom_point(data=inter_sel_5_6_long_Sabine,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
   labs(title="Sabine's distance to Schreck 5 and 6", colour="Location")
 
 ```
@@ -1342,6 +1412,45 @@ ggarrange(
     labs(title="Sabine Schreck 6"),
   ncol=3,nrow=2,legend="none",common.legend=TRUE
 )
+```
+```{r compare distances from all 3 animals}
+ggarrange(
+  ggplot() +
+  geom_rect(data = Caroline_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+                ymax = Inf,
+                fill = Phases),
+            alpha = 0.5) + 
+  geom_line(data=Caroline_Schreck5_6_withField_long_aroundInFieldtime_smooth,aes(as.Date(DatetimeUTC),distance5_6)) +
+  geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
+  labs(title="Caroline's distance to Schreck 5 and 6", colour="Location"),
+  ggplot() +
+  geom_rect(data = Olga_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+                ymax = Inf,
+                fill = Phases),
+            alpha = 0.5) + 
+  geom_line(data=Olga_Schreck5_6_withField_long_aroundInFieldtime_smooth,aes(as.Date(DatetimeUTC),distance5_6)) +
+  geom_point(data=inter_sel_5_6_long_olga,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
+  labs(title="Olga's distance to Schreck 5 and 6", colour="Location"),
+  ggplot() +
+  geom_rect(data = Sabine_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+                ymax = Inf,
+                fill = Phases),
+            alpha = 0.5) + 
+  geom_line(data=Sabine_Schreck5_6_withField_long_aroundInFieldtime_smooth,aes(as.Date(DatetimeUTC),distance5_6)) +
+  geom_point(data=inter_sel_5_6_long_Sabine,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
+  labs(title="Sabine's distance to Schreck 5 and 6", colour="Location"),
+  ncol=1, nrow=3, legend="none",common.legend= TRUE
+  )
+  
 ```
 
 ```{r Miriam Schreck 11}
