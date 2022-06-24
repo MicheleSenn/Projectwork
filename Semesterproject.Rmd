@@ -872,10 +872,6 @@ ggplot() +
 #sometimes she stays away a bit more but even the aggressive sound doesn't help much
 ```
 
-```{r comparison of Schrecks that have a different time scale}
-#no idea yet
-```
-
 
 ```{r Schreck 5 and 6 is in a bean field}
 forest <- read_sf("Feldaufnahmen_Fanel.gpkg")
@@ -1013,6 +1009,34 @@ ggplot() + geom_point(data=Caroline_Schreck5_withField_long,aes(DatetimeUTC,dist
   geom_point(data=inter_sel_5_long,aes(DatetimeUTC,inField, colour="red")) +
   labs(title="Caroline's distance to Schreck 5 during whole tracking time. Red points mean: in the bean field")
 ```
+
+Repeating Schreck 5 & 6 with Olga
+```{r Olga during Schrecktime 5 and 6}
+distance5_Olga_Schrecktime <- wildschwein_sf %>%
+  filter(TierName == "Olga", DatetimeUTC > "2015-05-20", DatetimeUTC < "2015-06-12")
+
+distance6_Olga_Schrecktime <-wildschwein_sf %>%
+  filter(TierName == "Olga", DatetimeUTC > "2015-05-22", DatetimeUTC < "2015-06-12")
+
+ggplot(forest_bohnen195)+geom_sf(aes(fill=Frucht)) + geom_sf(data=distance5_Olga_Schrecktime)
+
+ggplot(forest_bohnen195)+geom_sf(aes(fill=Frucht)) + geom_sf(data=distance6_Olga_Schrecktime)
+#Olga was in and around the fields 5 & 6 a lot!
+
+intersection_195andSchreck5_olga <- st_intersects(forest_bohnen195,distance5_Olga_Schrecktime)
+intersection_195andSchreck6_olga <- st_intersects(forest_bohnen195,distance6_Olga_Schrecktime)
+
+inter_sel_5_olga <- distance5_Olga_Schrecktime[intersection_195andSchreck5_olga[[1]],]
+inter_sel_6_olga <- distance6_Olga_Schrecktime[intersection_195andSchreck6_olga[[1]],]
+
+ggplot(forest_bohnen195) + geom_sf(aes(fill=Frucht))+ geom_sf(data=inter_sel_5_olga) + geom_sf(data=schreck5, aes(size=5)) + labs(title="Olga's positions in the bean field while Schreck 5 was active")
+  #during Schreck time, Olga still visited the bean field
+
+ggplot(forest_bohnen195) + geom_sf(aes(fill=Frucht))+ geom_sf(data=inter_sel_6_olga) + geom_sf(data=schreck6, aes(size=5)) + labs(title="Olga's positions in the bean field while Schreck 6 was active")
+```
+Aside from Caroline, also Olga visited the same bean field during Schreck time 5 & 6!
+
+
 ```{r double checking concurrence}
 
 #wildschweine_2017 <- wildschwein_sf %>%
@@ -1100,7 +1124,7 @@ ggplot(forest_290)+geom_sf(aes(fill=Frucht)) + geom_sf(data=distance14_Amos_Schr
 #Auch Amos war wohl nicht in der Nähe, falls ich es richtig überlegt habe...
 ```
 
-```{r Ueli with Schreck 1}
+```{r Ueli with Schreck 1, eval=FALSE, include=FALSE}
 schreck1 <- agenda_fanel[1,]
 
 st_intersects(schreck1, forest) # sagt, wo sich der Punkt des Schrecks mit den Feld-Daten kreuzt
