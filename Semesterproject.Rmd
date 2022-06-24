@@ -1012,7 +1012,7 @@ ggplot(forest_bohnen195) + geom_sf(aes(fill=Frucht))+ geom_sf(data=inter_sel_5_6
 #für die "nicht enthaltenen" kann ich einen anti-join nutzen oder das Subsetting mit disjoint
 
 disjoint_195andSchreck5_6_long <- st_disjoint(forest_bohnen195,Caroline_longerThanSchrecktime)
-class(intersection_195andSchreck5_long)
+#class(intersection_195andSchreck5_6_long)
 
 disjoint_caroline_5_6_long <- Caroline_longerThanSchrecktime[disjoint_195andSchreck5_6_long[[1]],]
 
@@ -1031,6 +1031,17 @@ ggplot() + geom_point(data=Caroline_Schreck5_6_withField_long,aes(DatetimeUTC,di
   labs(title="Caroline's distance to Schreck 5 / 6 during whole tracking time. Red points mean: in the bean field")
 #hier noch  zu ergänzen: Linien, wann die Schrecks aktiv sind (z.B. https://stackoverflow.com/questions/66825661/vertical-lines-for-data-points-in-geom-point-in-ggplot2-for-r)
 ```
+Reduce timescale to March 2015 until November 2015 for Caroline
+```{r Caroline smaller timescale}
+Caroline_Schreck5_6_withField_long_aroundInFieldtime <- Caroline_Schreck5_6_withField_long %>%
+  filter(DatetimeUTC>"2015-03-30", DatetimeUTC<"2015-11-01")
+
+ggplot() + geom_point(data=Caroline_Schreck5_6_withField_long_aroundInFieldtime,aes(DatetimeUTC,distance5_6)) +
+  geom_point(data=inter_sel_5_6_long,aes(DatetimeUTC,inField, colour="red")) +
+  labs(title="Caroline's distance to Schreck 5 / 6 around inField time. Red points mean: in the bean field")
+#hier noch  zu ergänzen: Linien, wann die Schrecks aktiv sind (z.B. https://stackoverflow.com/questions/66825661/vertical-lines-for-data-points-in-geom-point-in-ggplot2-for-r)
+```
+
 
 Repeating Schreck 5 & 6 with Olga
 ```{r Olga during Schrecktime 5 and 6}
@@ -1100,6 +1111,17 @@ ggplot() + geom_point(data=Olga_Schreck5_6_withField_long,aes(DatetimeUTC,distan
 #hier noch  zu ergänzen: Linien, wann die Schrecks aktiv sind (z.B. https://stackoverflow.com/questions/66825661/vertical-lines-for-data-points-in-geom-point-in-ggplot2-for-r)
 ```
 
+Reduce timescale to until End of August for Olga
+```{r Olga smaller timescale}
+Olga_Schreck5_6_withField_long_aroundInFieldtime <- Olga_Schreck5_6_withField_long %>%
+  filter(DatetimeUTC<"2015-08-01")
+
+ggplot() + geom_point(data=Olga_Schreck5_6_withField_long_aroundInFieldtime,aes(DatetimeUTC,distance5_6)) +
+  geom_point(data=inter_sel_5_6_long_olga,aes(DatetimeUTC,inField, colour="red")) +
+  labs(title="Olga's distance to Schreck 5 / 6 around inField time. Red points mean: in the bean field")
+#hier noch  zu ergänzen: Linien, wann die Schrecks aktiv sind (z.B. https://stackoverflow.com/questions/66825661/vertical-lines-for-data-points-in-geom-point-in-ggplot2-for-r)
+```
+
 Repeating Schreck 5 & 6 with Sabine
 ```{r Sabine during Schrecktime 5 and 6}
 distance5_Sabine_Schrecktime <- wildschwein_sf %>%
@@ -1165,6 +1187,17 @@ Sabine_Schreck5_6_withField_long <- bind_rows(disjoint_Sabine_5_6_long,inter_sel
 ggplot() + geom_point(data=Sabine_Schreck5_6_withField_long,aes(DatetimeUTC,distance5_6)) +
   geom_point(data=inter_sel_5_6_long_Sabine,aes(DatetimeUTC,inField, colour="red")) +
   labs(title="Sabine's distance to Schreck 5 / 6 during whole tracking time. Red points mean: in the bean field")
+#hier noch  zu ergänzen: Linien, wann die Schrecks aktiv sind (z.B. https://stackoverflow.com/questions/66825661/vertical-lines-for-data-points-in-geom-point-in-ggplot2-for-r)
+```
+
+Reduce timescale to after May for Sabine
+```{r Sabine smaller timescale}
+Sabine_Schreck5_6_withField_long_aroundInFieldtime <- Sabine_Schreck5_6_withField_long %>%
+  filter(DatetimeUTC>"2015-06-01")
+
+ggplot() + geom_point(data=Sabine_Schreck5_6_withField_long_aroundInFieldtime,aes(DatetimeUTC,distance5_6)) +
+  geom_point(data=inter_sel_5_6_long_Sabine,aes(DatetimeUTC,inField, colour="red")) +
+  labs(title="Sabine's distance to Schreck 5 / 6 around inField time. Red points mean: in the bean field")
 #hier noch  zu ergänzen: Linien, wann die Schrecks aktiv sind (z.B. https://stackoverflow.com/questions/66825661/vertical-lines-for-data-points-in-geom-point-in-ggplot2-for-r)
 ```
 
