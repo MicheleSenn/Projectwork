@@ -1050,8 +1050,9 @@ https://statisticsglobe.com/draw-ggplot2-plot-different-background-colors-region
 Caroline_breaks <- data.frame(start=as.Date(c("2015-04-15","2015-05-20","2015-06-12","2015-07-01")),
                               end=as.Date(c("2015-05-20","2015-06-12","2015-07-01","2015-08-15")),
                               colors=factor(1:4),
-                              name=c("before","S5","S6","after"))
+                              name=c("Before Schreck activity","During active Schreck 5","During active Schreck 6","After Schreck activity"))
 Caroline_breaks
+Caroline_breaks$Phases <- factor(Caroline_breaks$name, as.character(Caroline_breaks$name))
 
 ggplot() +
   geom_rect(data = Caroline_breaks,
@@ -1063,7 +1064,7 @@ ggplot() +
             alpha = 0.5) +
   geom_point(data=Caroline_Schreck5_6_withField_long_aroundInFieldtime,aes(as.Date(DatetimeUTC),distance5_6)) +
   geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="red")) +
-  labs(title="Caroline's distance to Schreck 5 / 6 around inField time. Red points mean: in the bean field")
+  labs(title="Caroline's distance to Schreck 5 / 6 around inField time. Red points mean: in the bean field", colour="")
 
 #Variante mit weniger Datenpunkten:
 Caroline_Schreck5_6_withField_long_aroundInFieldtime_smooth <- Caroline_Schreck5_6_withField_long_aroundInFieldtime %>%
@@ -1075,12 +1076,11 @@ ggplot() +
                 xmax = end,
                 ymin = - Inf,
                 ymax = Inf,
-                fill = colors),
+                fill = Phases),
             alpha = 0.5) + 
   geom_line(data=Caroline_Schreck5_6_withField_long_aroundInFieldtime_smooth,aes(as.Date(DatetimeUTC),distance5_6)) +
-  geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="red")) +
-  labs(title="Caroline's distance to Schreck 5 / 6 around inField time. Red points mean: in the bean field")
-#missing: legend and color annotations, some graphical and text adjustments, interpretation
+  geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
+  labs(title="Caroline's distance to Schreck 5 and 6", colour="Location")
 
 ```
 
@@ -1110,6 +1110,7 @@ ggplot(forest_bohnen195) + geom_sf(aes(fill=Frucht))+ geom_sf(data=inter_sel_6_o
 ```
 Aside from Caroline, also Olga visited the same bean field during Schreck time 5 & 6!
 
+
 ```{r Olga longer time span}
 Olga_longerThanSchrecktime <- wildschwein_sf %>%
   filter(TierName == "Olga")
@@ -1126,7 +1127,7 @@ intersection_195andSchreck5_6_long_olga <- st_intersects(forest_bohnen195,Olga_l
 inter_sel_5_6_long_olga <- Olga_longerThanSchrecktime[intersection_195andSchreck5_6_long_olga[[1]],]
 
 ggplot(forest_bohnen195) + geom_sf(aes(fill=Frucht))+ geom_sf(data=inter_sel_5_6_long_olga) + geom_sf(data=schreck5, aes(size=5)) + labs(title="Olga's positions in the bean field during the whole time")
-  #during Schreck time, Carolina still visited the bean field
+  #during Schreck time, Olga still visited the bean field
 
 #ich will jetzt das Feld definieren. Im Feld drin = TRUE --> alle in inter_sel_5_long
 #für die "nicht enthaltenen" kann ich einen anti-join nutzen oder das Subsetting mit disjoint
@@ -1162,6 +1163,45 @@ ggplot() + geom_point(data=Olga_Schreck5_6_withField_long_aroundInFieldtime,aes(
   labs(title="Olga's distance to Schreck 5 / 6 around inField time. Red points mean: in the bean field")
 #hier noch  zu ergänzen: Linien, wann die Schrecks aktiv sind (z.B. https://stackoverflow.com/questions/66825661/vertical-lines-for-data-points-in-geom-point-in-ggplot2-for-r)
 ```
+
+```{r Olga with background color}
+Olga_breaks <- data.frame(start=as.Date(c("2015-04-15","2015-05-20","2015-06-12","2015-07-01")),
+                              end=as.Date(c("2015-05-20","2015-06-12","2015-07-01","2015-08-15")),
+                              colors=factor(1:4),
+                              name=c("Before Schreck activity","During active Schreck 5","During active Schreck 6","After Schreck activity"))
+Olga_breaks
+Olga_breaks$Phases <- factor(Olga_breaks$name, as.character(Olga_breaks$name))
+
+ggplot() +
+  geom_rect(data = Olga_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+               ymax = Inf,
+                fill = colors),
+            alpha = 0.5) +
+  geom_point(data=Olga_Schreck5_6_withField_long_aroundInFieldtime,aes(as.Date(DatetimeUTC),distance5_6)) +
+  geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="red")) +
+  labs(title="Olga's distance to Schreck 5 / 6 around inField time. Red points mean: in the bean field", colour="")
+
+#Variante mit weniger Datenpunkten:
+Olga_Schreck5_6_withField_long_aroundInFieldtime_smooth <- Olga_Schreck5_6_withField_long_aroundInFieldtime %>%
+  dplyr::filter(row_number() %% 150 == 0)
+
+ggplot() +
+  geom_rect(data = Olga_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+                ymax = Inf,
+                fill = Phases),
+            alpha = 0.5) + 
+  geom_line(data=Olga_Schreck5_6_withField_long_aroundInFieldtime_smooth,aes(as.Date(DatetimeUTC),distance5_6)) +
+  geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
+  labs(title="Olga's distance to Schreck 5 and 6", colour="Location")
+
+```
+
 
 Repeating Schreck 5 & 6 with Sabine
 ```{r Sabine during Schrecktime 5 and 6}
@@ -1240,6 +1280,68 @@ ggplot() + geom_point(data=Sabine_Schreck5_6_withField_long_aroundInFieldtime,ae
   geom_point(data=inter_sel_5_6_long_Sabine,aes(DatetimeUTC,inField, colour="red")) +
   labs(title="Sabine's distance to Schreck 5 / 6 around inField time. Red points mean: in the bean field")
 #hier noch  zu ergänzen: Linien, wann die Schrecks aktiv sind (z.B. https://stackoverflow.com/questions/66825661/vertical-lines-for-data-points-in-geom-point-in-ggplot2-for-r)
+```
+
+```{r Sabine with background color}
+Sabine_breaks <- data.frame(start=as.Date(c("2015-04-15","2015-05-20","2015-06-12","2015-07-01")),
+                              end=as.Date(c("2015-05-20","2015-06-12","2015-07-01","2015-08-15")),
+                              colors=factor(1:4),
+                              name=c("Before Schreck activity","During active Schreck 5","During active Schreck 6","After Schreck activity"))
+Sabine_breaks
+Sabine_breaks$Phases <- factor(Sabine_breaks$name, as.character(Sabine_breaks$name))
+
+#ggplot() +
+#  geom_rect(data = Caroline_breaks,
+#            aes(xmin = start,
+#                xmax = end,
+#                ymin = - Inf,
+ #               ymax = Inf,
+#                fill = colors),
+#            alpha = 0.5) +
+#  geom_point(data=Caroline_Schreck5_6_withField_long_aroundInFieldtime,aes(as.Date(DatetimeUTC),distance5_6)) +
+#  geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="red")) +
+#  labs(title="Caroline's distance to Schreck 5 / 6 around inField time. Red points mean: in the bean field", colour="")
+
+#Variante mit weniger Datenpunkten:
+Sabine_Schreck5_6_withField_long_aroundInFieldtime_smooth <- Sabine_Schreck5_6_withField_long_aroundInFieldtime %>%
+  dplyr::filter(row_number() %% 150 == 0)
+
+ggplot() +
+  geom_rect(data = Sabine_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+                ymax = Inf,
+                fill = Phases),
+            alpha = 0.5) + 
+  geom_line(data=Sabine_Schreck5_6_withField_long_aroundInFieldtime_smooth,aes(as.Date(DatetimeUTC),distance5_6)) +
+  geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
+  labs(title="Sabine's distance to Schreck 5 and 6", colour="Location")
+
+```
+
+
+
+```{r compare Olga and Caroline and Sabine during Schreck time}
+
+#install.packages("ggpubr")
+library(ggpubr)
+
+ggarrange(
+  ggplot(forest_bohnen195) + geom_sf()+ geom_sf(data=inter_sel_5) + geom_sf(data=schreck5, aes(colour="Schreck 5", size=2)) +
+    labs(title="Caroline Schreck 5"),
+  ggplot(forest_bohnen195) + geom_sf()+ geom_sf(data=inter_sel_5_olga) + geom_sf(data=schreck5, aes(colour="Schreck 5", size=2)) +
+    labs(title="Olga Schreck 5"),
+  ggplot(forest_bohnen195) + geom_sf()+ geom_sf(data=inter_sel_5_Sabine) + geom_sf(data=schreck5, aes(colour="Schreck 5", size=2)) +
+    labs(title="Sabine Schreck 5"),
+  ggplot(forest_bohnen195) + geom_sf()+ geom_sf(data=inter_sel_6) + geom_sf(data=schreck6, aes(colour="Schreck 6", size=2)) +
+    labs(title="Caroline Schreck 6"),
+  ggplot(forest_bohnen195) + geom_sf()+ geom_sf(data=inter_sel_6_olga) + geom_sf(data=schreck6, aes(colour="Schreck 6", size=2)) +
+    labs(title="Olga Schreck 6"),
+  ggplot(forest_bohnen195) + geom_sf()+ geom_sf(data=inter_sel_6_Sabine) + geom_sf(data=schreck6, aes(colour="Schreck 6", size=2)) +
+    labs(title="Sabine Schreck 6"),
+  ncol=3,nrow=2,legend="none",common.legend=TRUE
+)
 ```
 
 ```{r Miriam Schreck 11}
