@@ -1267,7 +1267,7 @@ ggplot() +
             alpha = 0.5) + 
   geom_line(data=Olga_Schreck5_6_withField_long_aroundInFieldtime_smooth,aes(as.Date(DatetimeUTC),distance5_6)) +
   geom_point(data=inter_sel_5_6_long_olga,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
-  labs(title="Olga's distance to Schreck 5 and 6", colour="Location")
+  labs(title="Olga's distance to Schreck 5 and 6", colour="Location", x="",y="Distance [m]")
 
 ```
 
@@ -1386,7 +1386,7 @@ ggplot() +
             alpha = 0.5) + 
   geom_line(data=Sabine_Schreck5_6_withField_long_aroundInFieldtime_smooth,aes(as.Date(DatetimeUTC),distance5_6)) +
   geom_point(data=inter_sel_5_6_long_Sabine,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
-  labs(title="Sabine's distance to Schreck 5 and 6", colour="Location")
+  labs(title="Sabine's distance to Schreck 5 and 6", colour="Location", x="",y="Distance [m]")
 
 ```
 
@@ -1425,7 +1425,7 @@ ggarrange(
             alpha = 0.5) + 
   geom_line(data=Caroline_Schreck5_6_withField_long_aroundInFieldtime_smooth,aes(as.Date(DatetimeUTC),distance5_6)) +
   geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
-  labs(title="Caroline's distance to Schreck 5 and 6", colour="Location"),
+  labs(title="Caroline's distance to Schreck 5 and 6", colour="Location", x="",y="Distance [m]"),
   ggplot() +
   geom_rect(data = Olga_breaks,
             aes(xmin = start,
@@ -1436,7 +1436,7 @@ ggarrange(
             alpha = 0.5) + 
   geom_line(data=Olga_Schreck5_6_withField_long_aroundInFieldtime_smooth,aes(as.Date(DatetimeUTC),distance5_6)) +
   geom_point(data=inter_sel_5_6_long_olga,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
-  labs(title="Olga's distance to Schreck 5 and 6", colour="Location"),
+  labs(title="Olga's distance to Schreck 5 and 6", colour="Location", x="",y="Distance [m]"),
   ggplot() +
   geom_rect(data = Sabine_breaks,
             aes(xmin = start,
@@ -1447,7 +1447,7 @@ ggarrange(
             alpha = 0.5) + 
   geom_line(data=Sabine_Schreck5_6_withField_long_aroundInFieldtime_smooth,aes(as.Date(DatetimeUTC),distance5_6)) +
   geom_point(data=inter_sel_5_6_long_Sabine,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
-  labs(title="Sabine's distance to Schreck 5 and 6", colour="Location"),
+  labs(title="Sabine's distance to Schreck 5 and 6", colour="Location", x="",y="Distance [m]"),
   ncol=1, nrow=3, legend="none",common.legend= TRUE
   )
   
