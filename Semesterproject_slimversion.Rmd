@@ -151,7 +151,7 @@ ggplot(agenda_fanel, aes(xmin = datum_on, xmax = datum_off, y=id )) +
   geom_errorbarh()
 ```
 
-###simplyfing the dataset
+##simplyfing the dataset and selecting the boars and Schrecks which will be examined further
 In order to see which animals were tracked during the active period of the "Schreck", the boar data was filtered by the dates in which the Schreck were active.
 For the tracked boars, a distance between their coordinates and the Schreck coordinate was calculated using st_distance().
 
@@ -192,7 +192,93 @@ ggplot(wildschwein_schreck2, aes(DatetimeUTC,distance, color=TierName)) + geom_p
 
 The same five boars could have been affected. This comes at no surprise, since the two Schreck are essentially the same Schreck with the only difference that on the later the sound mode was switched from "normal" to " aggressive".
 
-## Results
+However, there's not sufficient data of those boars movement before and after the Schreck-period.
+
+Schreck number 3 can be disregarded, since no animal was close to it while it was active. Only one animal was close to Schreck number 4 which will also be disregarded since there are no animals to compare.
+
+The plot for Schreck WSS_2015_01 looks as follows:
+
+```{r distance to Schreck 5}
+#filter
+schreck5 <- agenda_fanel[5,]
+
+wildschwein_schreck5 <- filter(wildschwein_sf,DatetimeUTC>schreck5$datum_on,DatetimeUTC<schreck5$datum_off)
+
+#add distance
+wildschwein_schreck5$distance <- as.numeric(st_distance(wildschwein_schreck5,schreck5)[,1])
+
+#ggplot
+
+ggplot(wildschwein_schreck5, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2015_01")
+```
+Many boars could have been affected by Schreck 5, whereas only a few seem to have been close enough. The animals that were tracked further away will be filtered out.
+The plot for Schreck WSS_2015_01 but in aggressive mode looks as follows:
+
+```{r distance to Schreck}
+#filter
+schreck6 <- agenda_fanel[6,]
+
+wildschwein_sf$distance <- as.numeric(st_distance(wildschwein_sf,schreck6)[,1])
+
+affected_distance6 <- wildschwein_sf %>%
+  filter(TierName == c("Caroline","Olga","Sabine"), DatetimeUTC > "2015-05-01 21:01:14",DatetimeUTC < "2015-08-12 21:01:14")
+
+#ggplot
+ggplot(affected_distance6, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2015_01")
+```
+
+Olga, Sabine and Caroline will be further examined, because they were in the area as well as tracked before and after.  
+
+Schreck 7, 8 and 9 will be disregarded because only one boar fulfills requirements of being tracked in the area before, during and after Schreck-time respectively. This would again pose the problem of lacking comparability.
+
+```{r distance to Schreck 10}
+#filter
+schreck10 <- agenda_fanel[10,]
+
+wildschwein_schreck10 <- filter(wildschwein_sf,DatetimeUTC>schreck10$datum_on,DatetimeUTC<schreck10$datum_off)
+
+#add distance
+wildschwein_schreck10$distance <- as.numeric(st_distance(wildschwein_schreck10,schreck10)[,1])
+
+#ggplot
+
+ggplot(wildschwein_schreck10, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2015_04")
+```
+Schreck WSS_2015_04 was close enough for many.Ruth, Sabine, Olga and Caroline were also tracked before and after.
+
+```{r distance to Schreck 11}
+# filter
+schreck11 <- agenda_fanel[11,]
+
+wildschwein_schreck11 <- filter(wildschwein_sf,DatetimeUTC>schreck11$datum_on,DatetimeUTC<schreck11$datum_off)
+
+#add distance
+wildschwein_schreck11$distance <- as.numeric(st_distance(wildschwein_schreck11,schreck11)[,1])
+
+#ggplot
+
+ggplot(wildschwein_schreck11, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2016_01")
+```
+Many boars were affected by Schreck WSS_2016_01.Miriam, Frida, Caroline and Ueli were also tracked before and after.
+
+This leads to the selection of boars and Schrecks which will be analyzed further as follows:
+Schreck 1 and 2 and 4 will de disregarded because there is no data of boars that were tracked in this region before, during and after the Schreck, so there would be nothing to compare the Schrecks effect with.
+
+Schreck 3 will be disregarded because no boar was tracked in its vicinity. 
+
+Schreck 7, 8 and 9 will be disregarded because only one boar fulfills requirements of being tracked in the area before, during and after Schreck-time respectively. This would again pose the problem of lacking comparability.
+
+Hence only Schreck 5, 6, 10, and 11 could be further analyzed.
+
+For Schreck 5 and 6, respectively, the boars Olga, Sabine and Caroline could be further examined, because they were in the area as well as tracked before and after. 
+The same applies for Schreck 10 with Ruth, Sabine, Olga and Caroline.
+
+For Schreck 11 it could be Miriam, Frida, Caroline and Ueli.
+
+
+# Results
+##Distance to Schreck approach
+Using the approach of calculating the distance of the boar to the Schreck provides the following results.
 
 Sabine and Isabelle seem to have come the closest to Schreck WSS_2014_04, so there distance to the Schreck during its running time was plotted. 
 ```{r distance to Schreck 1}
@@ -207,3 +293,60 @@ affected_distance <- wildschwein_sf %>%
 ggplot(affected_distance, aes(DatetimeUTC,distance_Schreck1, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2014_04")
 ```
 Sabine and Isabelle don't seem to be impressed by the Schreck. However they only just came across the Schreck for 2 and 4 days accordingly before the Schreck stopped.
+
+```{r distance to Schreck}
+
+#add distance
+wildschwein_sf$distance_Schreck5 <- as.numeric(st_distance(wildschwein_sf,schreck5)[,1])
+
+#filter
+affected_distance5 <- wildschwein_sf %>%
+  filter(TierName == c("Caroline","Claude","Olga","Sabine"), DatetimeUTC > "2015-05-20 21:01:14",DatetimeUTC < "2015-06-12 21:01:14")
+
+#ggplot
+ggplot(affected_distance5, aes(DatetimeUTC,distance_Schreck5, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2015_01")
+```
+Schreck 5 was running from 2015-05-20 to 2015-06-12. It looks as if in the beginning the boars kept a distance of half a kilometer, but came back after about a month.
+
+```{r Caroline and Schreck 5}
+distance5_longerThanSchrecking <- wildschwein_sf %>%
+  filter(TierName == "Caroline", DatetimeUTC > "2015-04-01", DatetimeUTC < "2015-04-05")
+
+ggplot(distance5_longerThanSchrecking,aes(DatetimeUTC,distance_Schreck5)) + geom_point()
+```
+Caroline's moving pattern shows her staying in one place during the days (mostly between 6-9 am to around 6pm). That's most likely when she's sleeping. Movements are only at night, which was to be expected of a nocturnal animal. Later, we'll explore which kind of field this Schreck 5 is in.
+
+There seems to be some short time effect on the boars especially of Schreck 5. It looks like the boars moved away a bit in the beginning. However, there is no way of showing that this effect was due to the Schreck and not simply a coincidence using this approach.
+
+##In the field vs. out of the field before, during and after approach
+How much time does a boar spend in the field before the Schreck (in %), during and after? 
+```{r in the field vs not in the field during SChreck time}
+#Im Feld drin = TRUE --> alle in inter_sel_5
+
+
+disjoint_195andSchreck5 <- st_disjoint(forest_bohnen195,distance5_Caroline_Schrecktime)
+class(intersection_195andSchreck5)
+
+disjoint_caroline_5 <- distance5_Caroline_Schrecktime[disjoint_195andSchreck5[[1]],]
+
+
+#nun die ausserhalb mit 0 und die innerhalb mit 1 ergänzen
+disjoint_caroline_5$inField <- 0
+inter_sel_5$inField <- 1
+#append the two data sets again with their new columns
+Caroline_Schreck5_withField <- bind_rows(disjoint_caroline_5,inter_sel_5)
+
+  
+
+
+#47 from 2207 Data points are in the field
+print(47/2207*100)
+# during Schreck time she spends 2 % of her time in the field.
+
+# now the same for before and after
+
+#Idea: also display graphically the distribution of "In" and "Not In" Before, during and after
+```
+
+#Discussion
+Using the distance of boar to Schreck approach has the disadvantage that there is no way of showing that an effect was due to the Schreck and not simply a coincidence. This approach is good for getting a first idea of the boars movement and to select the Schrecks and boars with which to continue in further analysis. It shows which boars were in the vicinity of a Schreck and could therefore possibly have been affected by it.
