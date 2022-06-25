@@ -1,0 +1,209 @@
+---
+title: Scare-off measures against wild boars 
+subtitle: computational movement analysis
+author: Lia Baumann and Michele Senn
+output: html_document
+---
+
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+
+#set the setting for all code chunks:
+
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+```
+
+```{r load wild boar data, include=FALSE}
+#load packages
+library(devtools)
+devtools::install_github("ComputationalMovementAnalysis/ComputationalMovementAnalysisData")
+library(ComputationalMovementAnalysisData)
+library(ggplot2)
+library(dplyr)
+library(sf)
+```
+
+# Abstract
+
+This project aims to develop a method for modelling the behavior of wild boars who have been in contact with scare-off measures. The hypothesis is that their behaviour can be modeled by comparing the average time they spent in a certain field before the scrare-off measure called "Schreck" was put into action, during and after. A second approach of calculating the distance of the boar to the Schreck will also be shown in this project.
+
+#Introduction
+## Research Question
+
+Once a scare-off measure has proven to have an effect and cause the wild boars to relocate, it needs to be examined how long the effect lasts. Therefore, the following research question was formulated:
+
+How can the returning of the boars be modelled?
+
+##Data
+
+Long-term data for movement trajectories will be necessary (at least 6 weeks).
+Data should be of different times of day and of several individuals in a similar location.
+Furthermore, mapdata will be needed.
+Some background information on the boars social behavior and seasonal movements would also be interesting and help for a better understanding of the data.
+
+##Analytical concepts
+
+EDA: plotting data in order to get an idea of what the data looks like and finding patterns like which individual is Schrecked by what
+Calculating distances to Scare-Off-Location over time using the ST_Distance() function, which returns the shortest distance that separates two geometries
+Trajectories with Moving Window Method to remove static points
+Plot spatial and time overlaps between the tracked animals
+Find returning patterns by building a "In the Field / not in the Field" vs. distance to Schreck graph
+
+##R concepts
+
+The modeling will be done using the following concepts and packages:
+
+Spatial objects will be created with the r-package "sf"
+raster data and background maps will be plotted and visuallized with these r-packages: "plotly", "ggplot2"
+For the reshaping and transforming of date the r-package "tidyverse" will be used
+
+##Risk analysis
+
+We consider the scope a bit of a risk because of the amount of behaviors we could potentially analyse --> we need to be clear on what we really want to find out and stick to it.
+Interpretation of behaviors might be vague or non-causal because we assume that patterns can be detected when nothing is happening at all in reality (--> semantic annotations)
+Surprisingly, no differences between seasons / locations / individuals detected --> we can still focus on time series analysis
+Technical difficulties, e.g. when handling too much data, choosing irrelevant thresholds or interpretation issues.
+Possibly, the different measures don't show the same effects. We might need to distinguish between measures in order to draw inferences.
+
+#Methods
+##Data processing
+The data was loaded and conferted into the coordination system crs = 2056.To find out, which boars were affected by which Schreck, the datasets were both transformed into the same coordinate system using st_transform. They were subsequently plotted on top of each other to visualize the spatial overlap.
+```{r temporal overlap, eval=FALSE, include=FALSE}
+#load data and put into readable format
+sampling_periods <- wildschwein_BE %>%
+  group_by(TierID, TierName, CollarID) %>%
+  summarise(
+    min = min(DatetimeUTC),
+    max = max(DatetimeUTC)
+  )
+
+
+wildschwein_overlap_temp <- wildschwein_overlap_temp %>%
+  left_join(sampling_periods, by = c("TierID", "TierName", "CollarID"))
+
+
+wildschwein_overlap_temp %>%
+mutate(TierCollar = paste(TierName, CollarID)) %>%
+  ggplot(aes(xmin = min, xmax = max, y = TierCollar)) +
+  geom_errorbarh() +
+  facet_grid(Groups~., scales = "free_y", space = "free_y")
+
+```
+
+```{r spatial overlap, include=FALSE}
+#convert into same coordinate system
+
+wildschwein_sf <- wildschwein_BE %>%
+  st_as_sf(coords = c("E", "N"), crs = 2056) %>%
+  mutate(tiercollar = paste(TierID, TierName, CollarID)) 
+
+wildschwein_convex_hull <- wildschwein_sf %>%
+  group_by(TierID, TierName, CollarID) %>%
+  summarise() %>%
+  st_convex_hull()
+
+
+wildschwein_convex_hull %>%
+  mutate(tiercollar = paste(TierID, TierName, CollarID)) %>%
+  ggplot(aes(fill = factor(TierID))) + geom_sf(alpha = 0.1) +
+  coord_sf(datum = 2056) +
+  facet_wrap(~tiercollar) +
+  theme(legend.position = "none")
+
+
+st_overlaps(wildschwein_convex_hull, sparse = FALSE)[1:5, 1:5]
+```
+
+```{r EDA}
+#looking at all data points
+
+#schreck_locations needs to be transformed into the same coordinate system
+schreck_locations_sf <- schreck_locations %>%
+  st_as_sf(coords = c("lon", "lat"), crs = 4326) %>%
+  st_transform(2056)
+
+#plot wildschweins and schrecks together to see their spatial overlap
+ggplot() +
+  geom_sf(data=wildschwein_sf,aes(fill=TierID)) +
+  geom_sf(data=schreck_locations_sf, aes(color=region)) +
+  coord_sf(datum=2056)
+```
+As a result, it was found that the animals were only tracked around the Schreck in the region of Fanel. As a consequence, all other Schreck data points were removed and the spatial overlap replotted.
+
+```{r filter all but region Fanel}
+#only Fanel
+schreck_locations_sf_fanel <- schreck_locations_sf %>%
+  filter(region=="fanel")
+
+ggplot() +
+  geom_sf(data=wildschwein_sf,aes(fill=TierID)) +
+  geom_sf(data=schreck_locations_sf_fanel, aes(color=region)) +
+  coord_sf(datum=2056)
+```
+
+In order to combine the data about the Schreck locations and their corresponding agenda, or sounding time, they were joined by their matching column "id" with an inner join.
+Following this join, the agenda of all the "Schreck time" was visualized using an errorbar plot.
+
+```{r join schreck agendas fanel}
+agenda_fanel <- inner_join(schreck_locations_sf_fanel, schreck_agenda, by="id")
+
+#show when the schrecks in fanel were used
+ggplot(agenda_fanel, aes(xmin = datum_on, xmax = datum_off, y=id )) +
+  geom_errorbarh()
+```
+
+###simplyfing the dataset
+In order to see which animals were tracked during the active period of the "Schreck", the boar data was filtered by the dates in which the Schreck were active.
+For the tracked boars, a distance between their coordinates and the Schreck coordinate was calculated using st_distance().
+
+To single out the boars which could have been affected by the Schreck, all boars wo never came into the radius of 2 km of the Schreck were removed. The remaining distances were plotted against the DatetimeUTC column.
+
+The plot for Schreck WSS_2014_04 looks as follows:
+```{r distance to Schreck 1}
+#1 Schreck filter
+schreck1 <- agenda_fanel[1,]
+
+#filter for Schreck period
+
+wildschwein_schreck1 <- filter(wildschwein_sf,DatetimeUTC>schreck1$datum_on,DatetimeUTC<schreck1$datum_off)
+
+#add st_distance as a column
+wildschwein_schreck1$distance <- as.numeric(st_distance(wildschwein_schreck1,schreck1)[,1])
+
+#ggplot
+
+ggplot(wildschwein_schreck1, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2014_04")
+```
+Since we don't know, how close you would need to be to hear the Schreck, all of the five boars Caroline, Isabelle, Nicole, Sabine and Ueli could potentially have been affected.
+
+The same procedure was done for Schreck WSS_2014_05.
+
+```{r distance to Schreck 2}
+#filter for schreck and running period
+schreck2 <- agenda_fanel[2,]
+
+wildschwein_schreck2 <- filter(wildschwein_sf,DatetimeUTC>schreck2$datum_on,DatetimeUTC<schreck2$datum_off)
+
+#add distance
+wildschwein_schreck2$distance <- as.numeric(st_distance(wildschwein_schreck2,schreck2)[,1])
+#ggplot
+
+ggplot(wildschwein_schreck2, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2014_05")
+```
+
+The same five boars could have been affected. This comes at no surprise, since the two Schreck are essentially the same Schreck with the only difference that on the later the sound mode was switched from "normal" to " aggressive".
+
+## Results
+
+Sabine and Isabelle seem to have come the closest to Schreck WSS_2014_04, so there distance to the Schreck during its running time was plotted. 
+```{r distance to Schreck 1}
+
+wildschwein_sf$distance_Schreck1 <- as.numeric(st_distance(wildschwein_sf,schreck1)[,1])
+
+filter
+affected_distance <- wildschwein_sf %>%
+  filter(TierName == c("Sabine","Isabelle"),DatetimeUTC > "2014-04-01 21:01:14", DatetimeUTC < "2014-12-28 21:01:14")
+
+#ggplot
+ggplot(affected_distance, aes(DatetimeUTC,distance_Schreck1, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2014_04")
+```
+Sabine and Isabelle don't seem to be impressed by the Schreck. However they only just came across the Schreck for 2 and 4 days accordingly before the Schreck stopped.
