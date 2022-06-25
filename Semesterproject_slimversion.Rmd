@@ -23,46 +23,46 @@ library(sf)
 ```
 
 # Abstract
+This project aims to develop a method for modelling the behavior of wild boars who have been in contact with scare-off measures. The hypothesis is that their behavior can be modeled by comparing the average time they spent in a certain field before the scare-off measure called "Schreck" was put into action, during and after. A second approach of calculating the distance of the boar to the Schreck will also be shown in this project.
 
-This project aims to develop a method for modelling the behavior of wild boars who have been in contact with scare-off measures. The hypothesis is that their behaviour can be modeled by comparing the average time they spent in a certain field before the scrare-off measure called "Schreck" was put into action, during and after. A second approach of calculating the distance of the boar to the Schreck will also be shown in this project.
+--> fill in the results
 
 #Introduction
+This project aims to develop a method for modelling the behavior of wild boars who have been in contact with scare-off measures. 
+
 ## Research Question
+Once a scare-off measure has been set into action,  it needs to be examined weather or not it has an effect. Therefore, the following research question was formulated:
 
-Once a scare-off measure has proven to have an effect and cause the wild boars to relocate, it needs to be examined how long the effect lasts. Therefore, the following research question was formulated:
+How can the behavior of the boars who had been in contact with a Schreck be modeled?
 
-How can the returning of the boars be modelled?
+The hypothesis is that their behavior can be modeled by comparing the average time they spent in a certain field before the scare-off measure called "Schreck" was put into action, during and after. A second approach of calculating the distance of the boar to the Schreck will also be shown in this project.
 
 ##Data
-
-Long-term data for movement trajectories will be necessary (at least 6 weeks).
-Data should be of different times of day and of several individuals in a similar location.
-Furthermore, mapdata will be needed.
-Some background information on the boars social behavior and seasonal movements would also be interesting and help for a better understanding of the data.
+In order to achieve this project's goal long-term data for movement trajectories is necessary (at least 6 weeks). The data has to be of different times of day and of several individuals in a similar location. Furthermore, mapdata is needed.
 
 ##Analytical concepts
-
-EDA: plotting data in order to get an idea of what the data looks like and finding patterns like which individual is Schrecked by what
-Calculating distances to Scare-Off-Location over time using the ST_Distance() function, which returns the shortest distance that separates two geometries
-Trajectories with Moving Window Method to remove static points
-Plot spatial and time overlaps between the tracked animals
-Find returning patterns by building a "In the Field / not in the Field" vs. distance to Schreck graph
+The analytical concepts used in this project are as follows.
+EDA was used for plotting the data in order to get an idea of what the data looks like and finding patterns like which individual is affected by which Schreck.
+Distances to Scare-Off-Location over time were calculated using the ST_Distance() function, which returns the shortest distance that separates two geometries.
+Trajectories with Moving Window Method were used to remove static points.
+Spatial and time overlaps between the tracked animals were plotted.
+A binary approach was used to find returning patterns by building a "In the Field / not in the Field" vs. distance to Schreck graph.
 
 ##R concepts
+The modeling was done using the following concepts and packages:
 
-The modeling will be done using the following concepts and packages:
+Spatial objects were created with the r-package "sf"
 
-Spatial objects will be created with the r-package "sf"
-raster data and background maps will be plotted and visuallized with these r-packages: "plotly", "ggplot2"
-For the reshaping and transforming of date the r-package "tidyverse" will be used
+Raster data and background maps were plotted and visualized with these r-packages: "plotly", "ggplot2"
+
+For the reshaping and transforming of data the r-package "tidyverse" were used.
 
 ##Risk analysis
 
-We consider the scope a bit of a risk because of the amount of behaviors we could potentially analyse --> we need to be clear on what we really want to find out and stick to it.
-Interpretation of behaviors might be vague or non-causal because we assume that patterns can be detected when nothing is happening at all in reality (--> semantic annotations)
-Surprisingly, no differences between seasons / locations / individuals detected --> we can still focus on time series analysis
-Technical difficulties, e.g. when handling too much data, choosing irrelevant thresholds or interpretation issues.
-Possibly, the different measures don't show the same effects. We might need to distinguish between measures in order to draw inferences.
+The scope is considered a risk because of the amount of behaviors that could potentially be analysed. It is important to only analyse whats needed in order to answer the research question of this project.
+The Interpretation of behaviors might be vague or false because an emerging pattern is only correlated but not causal.
+Technical difficulties could also pose a risk, e.g. when handling too much data, choosing irrelevant thresholds or interpretation issues.
+Possibly, the different measures don't show the same effects. It might be necessary to distinguish between measures in order to draw inferences.
 
 #Methods
 ##Data processing
