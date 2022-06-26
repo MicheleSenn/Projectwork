@@ -33,14 +33,14 @@ This project aims to develop a method for modelling the behavior of wild boars w
 This project aims to develop a method for modelling the behavior of wild boars who have been in contact with scare-off measures. 
 
 ## Research Question
-Once a scare-off measure has been set into action,  it needs to be examined weather or not it has an effect. Therefore, the following research question was formulated:
+Once a scare-off measure has been set into action, it needs to be examined weather or not it has an effect. Therefore, the following research question was formulated:
 
 How can the behavior of the boars who had been in contact with a Schreck be modeled?
 
 The hypothesis is that their behavior can be modeled by comparing the average time they spent in a certain field before the scare-off measure called "Schreck" was put into action, during and after. A second approach of calculating the distance of the boar to the Schreck will also be shown in this project.
 
 ## Data
-In order to achieve this project's goal long-term data for movement trajectories is necessary (at least 6 weeks). The data has to be of different times of day and of several individuals in a similar location. Furthermore, mapdata is needed.
+In order to achieve this project's goal it is necessary (at least 6 weeks). The data has to be of different times of day and of several individuals in a similar location.
 
 ## Analytical concepts
 The analytical concepts used in this project are as follows.
@@ -53,11 +53,11 @@ A binary approach was used to find returning patterns by building a "In the Fiel
 ## R concepts
 The modeling was done using the following concepts and packages:
 
-Spatial objects were created with the r-package "sf"
+Spatial objects were created with the r-package "sf".
 
-Raster data and background maps were plotted and visualized with these r-packages: "plotly", "ggplot2"
+Raster data and background maps were plotted and visualized with these r-packages: "ggplot2"
 
-For the reshaping and transforming of data the r-package "tidyverse" were used.
+For the reshaping and transforming of data the r-package "tidyverse" was used.
 
 ## Risk analysis
 
@@ -67,6 +67,7 @@ Technical difficulties could also pose a risk, e.g. when handling too much data,
 Possibly, the different measures don't show the same effects. It might be necessary to distinguish between measures in order to draw inferences.
 
 # Methods
+
 ## Data processing
 The data was loaded and conferted into the coordination system crs = 2056.To find out, which boars were affected by which Schreck, the datasets were both transformed into the same coordinate system using st_transform. They were subsequently plotted on top of each other to visualize the spatial overlap.
 ```{r temporal overlap, eval=FALSE, include=FALSE}
@@ -148,7 +149,7 @@ In order to combine the data about the Schreck locations and their corresponding
 Following this join, the agenda of all the "Schreck time" was visualized using an errorbar plot.
 Table xy shows a table of the possibly relevant Schrecks as they were active at some point during the boar tracking time.
 
-```{r join schreck agendas fanel}
+```{r join schreck agendas fanel, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 agenda_fanel <- inner_join(schreck_locations_sf_fanel, schreck_agenda, by="id")
 head(agenda_fanel)
 
@@ -163,11 +164,10 @@ knitr::kable(agenda_fanel %>%
              )
 ```
 
-## Simplyfing the dataset and selecting the boars and Schrecks which will be examined further
+## Selecting focus
 In order to see which animals were tracked during the active period of the "Schreck", the boar data was filtered by the dates in which the Schreck were active.
 For the tracked boars, a distance between their coordinates and the Schreck coordinate was calculated using st_distance().
 
-The plot for Schreck WSS_2014_04 looks as follows:
 ```{r distance to Schreck 1}
 #1 Schreck filter
 schreck1 <- agenda_fanel[1,]
@@ -183,7 +183,9 @@ wildschwein_schreck1$distance <- as.numeric(st_distance(wildschwein_schreck1,sch
 
 ggplot(wildschwein_schreck1, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2014_04") + theme_classic()
 ```
-Since we don't know, how close you would need to be to hear the Schreck, all of the five boars Caroline, Isabelle, Nicole, Sabine and Ueli could potentially have been affected.
+
+
+Since it isn't known how close you would need to be to hear the Schreck, all of the five boars Caroline, Isabelle, Nicole, Sabine and Ueli could potentially have been affected.
 
 The same procedure was repeated for the other possibly relevant Schrecks (results not displayed).
 
@@ -246,7 +248,6 @@ The analysis led to the conclusion that only one Schreck WSS_2015_04, first with
 All following conceptual steps will be carried out with this focus.
 
 
-# Results
 ## Distance to Schreck approach
 Using the approach of calculating the distance of the boar to the Schreck provides insights about the movement radius around the Schreck during inactive and active times.
 
@@ -275,7 +276,7 @@ As a next step, finding which kind of field this Schreck WSS-2015-01 is in, was 
 The intersection of Schreck and corresponding field was located using "st_intersects" from the sf-package.
 
 
-```{r Schreck 5 and 6 is in a bean field}
+```{r Schreck 5 and 6 is in a bean field, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 forest <- read_sf("Feldaufnahmen_Fanel.gpkg")
 head(forest)
 schreck5 <- agenda_fanel[5,]
@@ -318,7 +319,7 @@ ggarrange(
 
 Looking at only the bean field:
 
-```{r Caroline zoom in active Schreck 5_6}
+```{r Caroline zoom in active Schreck 5_6, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 intersection_195andSchreck5 <- st_intersects(forest_bohnen195,distance5_Caroline_Schrecktime)
 intersection_195andSchreck6 <- st_intersects(forest_bohnen195,distance6_Caroline_Schrecktime)
 class(intersection_195andSchreck5)
@@ -335,11 +336,13 @@ ggarrange(
 )
   #during Schreck time, Carolina still visited the bean field (during Standard and aggressive mode)
 ```
+
+
 As can be seen, WSS-2015-01 is in a bean field (mode standard and then aggressive). Caroline made some visits during Schreck time.
 
 In a similar way, the positions outside the bean field could be found by subsetting the dataset with st_disjoint() from the sf-package.
 
-```{r Caroline in the field vs not in the field Schreck 5 and 6}
+```{r Caroline in the field vs not in the field Schreck 5 and 6, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 #ich will jetzt das Feld definieren. Im Feld drin = TRUE --> alle in inter_sel_5
 #für die "nicht enthaltenen" kann ich einen anti-join nutzen oder das Subsetting mit disjoint
 
@@ -390,7 +393,7 @@ ggarrange(
 
 To conceptualize the distances and movements not only during active Schreck times, but also before and after, the whole tracking time of Caroline was visualized:
 
-```{r Caroline longer time span}
+```{r Caroline longer time span, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 Caroline_longerThanSchrecktime <- wildschwein_sf %>%
   filter(TierName == "Caroline")
 
@@ -446,7 +449,7 @@ ggplot() + geom_point(data=Caroline_Schreck5_6_withField_long_aroundInFieldtime,
 #hier noch  zu ergänzen: Linien, wann die Schrecks aktiv sind (z.B. https://stackoverflow.com/questions/66825661/vertical-lines-for-data-points-in-geom-point-in-ggplot2-for-r)
 ```
 
-To conceptualize the active and inactive time of the Schreck, a background fill was used. Subsequently, it was tested it complexity could be reduced by reduction of sampling size
+To conceptualize the active and inactive time of the Schreck, a background fill was used. Subsequently, it was tested if complexity could be reduced by reduction of sampling size
 
 ```{r Caroline with background color}
  Caroline_breaks <-
@@ -546,7 +549,7 @@ ggarrange(
 #annotate_figure(plot_rolling_window_Caroline, text_grob("Caroline's distance to Schreck 5 and 6", face="bold", size=20))
 ```
 
-Olga's and Sabine's data were prepared following the same steps as was done with Caroline.
+Olga's and Sabine's data were prepared following the same steps as was done with Caroline (preparation steps not shown).
 
 ```{r Olga during Schrecktime 5 and 6}
 distance5_Olga_Schrecktime <- wildschwein_sf %>%
@@ -663,8 +666,6 @@ Olga_Schreck5_6_withField_long_aroundInFieldtime_smooth <- Olga_Schreck5_6_withF
 
 ```
 
-
-Repeating Schreck 5 & 6 with Sabine
 ```{r Sabine during Schrecktime 5 and 6}
 distance5_Sabine_Schrecktime <- wildschwein_sf %>%
   filter(TierName == "Sabine", DatetimeUTC > "2015-05-20", DatetimeUTC < "2015-06-12")
@@ -788,9 +789,12 @@ ggarrange(
 )
 ```
 
+
+# Results
+
 The final conceptualization of movement patterns of the three female boars is depicted in the following graph. The red points correspond to the position being inside of the bean field with the Schreck WSS-2015-01.
 
-```{r compare distances from all 3 animals}
+```{r compare distances from all 3 animals, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 ggarrange(
   ggplot() +
   geom_rect(data = Caroline_breaks,
@@ -827,12 +831,11 @@ ggarrange(
   labs(title="Sabine's distance to Schreck 5 and 6", colour="Location", x="",y="Distance [m]"),
   ncol=1, nrow=3, legend="none",common.legend= TRUE
   )
-  
 ```
 
 
 
-##In the field vs. out of the field before, during and after approach
+## In the field vs. out of the field before, during and after approach
 How much time does a boar spend in the field before the Schreck (in %), during and after? 
 ```{r in the field vs not in the field during SChreck time}
 #Im Feld drin = TRUE --> alle in inter_sel_5
