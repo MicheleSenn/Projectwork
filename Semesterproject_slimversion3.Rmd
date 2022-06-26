@@ -1,0 +1,878 @@
+---
+title: Scare-off measures against wild boars 
+subtitle: computational movement analysis
+author: Lia Baumann and Michele Senn
+output: html_document
+---
+
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+
+#set the setting for all code chunks:
+
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+```
+
+```{r load wild boar data, include=FALSE}
+#load packages
+library(devtools)
+#devtools::install_github("ComputationalMovementAnalysis/ComputationalMovementAnalysisData")
+library(ComputationalMovementAnalysisData)
+library(ggplot2)
+library(tidyr)
+library(sf)
+library(zoo)
+library(ggpubr)
+```
+
+# Abstract
+This project aims to develop a method for modelling the behavior of wild boars who have been in contact with scare-off measures. The hypothesis is that their behavior can be modeled by comparing the average time they spent in a certain field before the scare-off measure called "Schreck" was put into action, during and after. A second approach of calculating the distance of the boar to the Schreck will also be shown in this project.
+
+--> fill in the results
+
+# Introduction
+This project aims to develop a method for modelling the behavior of wild boars who have been in contact with scare-off measures. 
+
+## Research Question
+Once a scare-off measure has been set into action,  it needs to be examined weather or not it has an effect. Therefore, the following research question was formulated:
+
+How can the behavior of the boars who had been in contact with a Schreck be modeled?
+
+The hypothesis is that their behavior can be modeled by comparing the average time they spent in a certain field before the scare-off measure called "Schreck" was put into action, during and after. A second approach of calculating the distance of the boar to the Schreck will also be shown in this project.
+
+## Data
+In order to achieve this project's goal long-term data for movement trajectories is necessary (at least 6 weeks). The data has to be of different times of day and of several individuals in a similar location. Furthermore, mapdata is needed.
+
+## Analytical concepts
+The analytical concepts used in this project are as follows.
+EDA was used for plotting the data in order to get an idea of what the data looks like and finding patterns like which individual is affected by which Schreck.
+Distances to Scare-Off-Location over time were calculated using the ST_Distance() function, which returns the shortest distance that separates two geometries.
+Trajectories with Moving Window Method were used to remove static points.
+Spatial and time overlaps between the tracked animals were plotted.
+A binary approach was used to find returning patterns by building a "In the Field / not in the Field" vs. distance to Schreck graph.
+
+## R concepts
+The modeling was done using the following concepts and packages:
+
+Spatial objects were created with the r-package "sf"
+
+Raster data and background maps were plotted and visualized with these r-packages: "plotly", "ggplot2"
+
+For the reshaping and transforming of data the r-package "tidyverse" were used.
+
+## Risk analysis
+
+The scope is considered a risk because of the amount of behaviors that could potentially be analysed. It is important to only analyse whats needed in order to answer the research question of this project.
+The Interpretation of behaviors might be vague or false because an emerging pattern is only correlated but not causal.
+Technical difficulties could also pose a risk, e.g. when handling too much data, choosing irrelevant thresholds or interpretation issues.
+Possibly, the different measures don't show the same effects. It might be necessary to distinguish between measures in order to draw inferences.
+
+# Methods
+## Data processing
+The data was loaded and conferted into the coordination system crs = 2056.To find out, which boars were affected by which Schreck, the datasets were both transformed into the same coordinate system using st_transform. They were subsequently plotted on top of each other to visualize the spatial overlap.
+```{r temporal overlap, eval=FALSE, include=FALSE}
+#load data and put into readable format
+sampling_periods <- wildschwein_BE %>%
+  group_by(TierID, TierName, CollarID) %>%
+  summarise(
+    min = min(DatetimeUTC),
+    max = max(DatetimeUTC)
+  )
+
+
+wildschwein_overlap_temp <- wildschwein_overlap_temp %>%
+  left_join(sampling_periods, by = c("TierID", "TierName", "CollarID"))
+
+
+wildschwein_overlap_temp %>%
+mutate(TierCollar = paste(TierName, CollarID)) %>%
+  ggplot(aes(xmin = min, xmax = max, y = TierCollar)) +
+  geom_errorbarh() +
+  facet_grid(Groups~., scales = "free_y", space = "free_y")
+
+```
+
+```{r spatial overlap, include=FALSE}
+#convert into same coordinate system
+
+wildschwein_sf <- wildschwein_BE %>%
+  st_as_sf(coords = c("E", "N"), crs = 2056) %>%
+  mutate(tiercollar = paste(TierID, TierName, CollarID)) 
+
+wildschwein_convex_hull <- wildschwein_sf %>%
+  group_by(TierID, TierName, CollarID) %>%
+  summarise() %>%
+  st_convex_hull()
+
+
+wildschwein_convex_hull %>%
+  mutate(tiercollar = paste(TierID, TierName, CollarID)) %>%
+  ggplot(aes(fill = factor(TierID))) + geom_sf(alpha = 0.1) +
+  coord_sf(datum = 2056) +
+  facet_wrap(~tiercollar) +
+  theme(legend.position = "none")
+
+
+st_overlaps(wildschwein_convex_hull, sparse = FALSE)[1:5, 1:5]
+```
+
+```{r EDA}
+#looking at all data points
+
+#schreck_locations needs to be transformed into the same coordinate system
+schreck_locations_sf <- schreck_locations %>%
+  st_as_sf(coords = c("lon", "lat"), crs = 4326) %>%
+  st_transform(2056)
+
+#plot wildschweins and schrecks together to see their spatial overlap
+ggplot() +
+  geom_sf(data=wildschwein_sf,aes(fill=TierID)) +
+  geom_sf(data=schreck_locations_sf, aes(color=region)) +
+  coord_sf(datum=2056)
+```
+
+
+As a result, it was found that the animals were only tracked around the Schreck in the region of Fanel. As a consequence, all other Schreck data points were removed and the spatial overlap replotted to validate the finding.
+
+```{r filter all but region Fanel}
+#only Fanel
+schreck_locations_sf_fanel <- schreck_locations_sf %>%
+  filter(region=="fanel")
+
+ggplot() +
+  geom_sf(data=wildschwein_sf,aes(fill=TierID)) +
+  geom_sf(data=schreck_locations_sf_fanel, aes(color=region)) +
+  coord_sf(datum=2056) + theme_classic()
+```
+
+In order to combine the data about the Schreck locations and their corresponding agenda, or sounding time, they were joined by their matching column "id" with an inner join.
+Following this join, the agenda of all the "Schreck time" was visualized using an errorbar plot.
+Table xy shows a table of the possibly relevant Schrecks as they were active at some point during the boar tracking time.
+
+```{r join schreck agendas fanel}
+agenda_fanel <- inner_join(schreck_locations_sf_fanel, schreck_agenda, by="id")
+head(agenda_fanel)
+
+#show when the schrecks in fanel were used
+ggplot(agenda_fanel, aes(xmin = datum_on, xmax = datum_off, y=id )) +
+  geom_errorbarh()
+
+knitr::kable(agenda_fanel %>%
+               filter(lubridate::year(datum_off)<2017) %>%
+               select(id, datum_on, datum_off, modus),
+             caption = "Table of all Schrecks in region Fanel during boar tracking time"
+             )
+```
+
+## Simplyfing the dataset and selecting the boars and Schrecks which will be examined further
+In order to see which animals were tracked during the active period of the "Schreck", the boar data was filtered by the dates in which the Schreck were active.
+For the tracked boars, a distance between their coordinates and the Schreck coordinate was calculated using st_distance().
+
+The plot for Schreck WSS_2014_04 looks as follows:
+```{r distance to Schreck 1}
+#1 Schreck filter
+schreck1 <- agenda_fanel[1,]
+
+#filter for Schreck period
+
+wildschwein_schreck1 <- filter(wildschwein_sf,DatetimeUTC>schreck1$datum_on,DatetimeUTC<schreck1$datum_off)
+
+#add st_distance as a column
+wildschwein_schreck1$distance <- as.numeric(st_distance(wildschwein_schreck1,schreck1)[,1])
+
+#ggplot
+
+ggplot(wildschwein_schreck1, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2014_04") + theme_classic()
+```
+Since we don't know, how close you would need to be to hear the Schreck, all of the five boars Caroline, Isabelle, Nicole, Sabine and Ueli could potentially have been affected.
+
+The same procedure was repeated for the other possibly relevant Schrecks (results not displayed).
+
+```{r distance to Schreck 2, include=FALSE}
+#filter for schreck and running period
+schreck2 <- agenda_fanel[2,]
+
+wildschwein_schreck2 <- filter(wildschwein_sf,DatetimeUTC>schreck2$datum_on,DatetimeUTC<schreck2$datum_off)
+
+#add distance
+wildschwein_schreck2$distance <- as.numeric(st_distance(wildschwein_schreck2,schreck2)[,1])
+#ggplot
+
+ggplot(wildschwein_schreck2, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2014_05") + theme_classic()
+```
+
+```{r distance to Schreck 5, include=FALSE}
+#filter
+schreck5 <- agenda_fanel[5,]
+
+wildschwein_schreck5 <- filter(wildschwein_sf,DatetimeUTC>schreck5$datum_on,DatetimeUTC<schreck5$datum_off)
+
+#add distance
+wildschwein_schreck5$distance <- as.numeric(st_distance(wildschwein_schreck5,schreck5)[,1])
+
+#ggplot
+
+ggplot(wildschwein_schreck5, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2015_01") + theme_classic()
+```
+
+```{r distance to Schreck 6, include=FALSE}
+#filter
+schreck6 <- agenda_fanel[6,]
+
+wildschwein_sf$distance <- as.numeric(st_distance(wildschwein_sf,schreck6)[,1])
+
+affected_distance6 <- wildschwein_sf %>%
+  filter(TierName == c("Caroline","Olga","Sabine"), DatetimeUTC > "2015-05-01 21:01:14",DatetimeUTC < "2015-08-12 21:01:14")
+
+#ggplot
+ggplot(affected_distance6, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2015_01") + theme_classic()
+```
+
+
+```{r distance to Schreck 10, eval=FALSE, include=FALSE}
+#filter
+schreck10 <- agenda_fanel[10,]
+
+wildschwein_schreck10 <- filter(wildschwein_sf,DatetimeUTC>schreck10$datum_on,DatetimeUTC<schreck10$datum_off)
+
+#add distance
+wildschwein_schreck10$distance <- as.numeric(st_distance(wildschwein_schreck10,schreck10)[,1])
+
+#ggplot
+
+ggplot(wildschwein_schreck10, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2015_04")
+```
+
+The analysis led to the conclusion that only one Schreck WSS_2015_04, first with standard mode and subsequently switching to aggressive mode, can provide enough data to be used for the modelling steps. Sabine, Olga and Caroline were tracked during the running time, and also before and after.
+All following conceptual steps will be carried out with this focus.
+
+
+# Results
+## Distance to Schreck approach
+Using the approach of calculating the distance of the boar to the Schreck provides insights about the movement radius around the Schreck during inactive and active times.
+
+```{r Caroline and Schreck 5}
+distance5_longerThanSchrecking <- wildschwein_sf %>%
+  filter(TierName == "Caroline")
+distance5_longerThanSchrecking$distance_Schreck5 <- as.numeric(st_distance(distance5_longerThanSchrecking,schreck5)[,1])
+
+ggplot(distance5_longerThanSchrecking,aes(DatetimeUTC,distance_Schreck5)) + geom_point() + labs(y ="Distance to WSS-2015-01 [m]", x="",title="Caroline's distance during whole tracking time") + theme_classic()
+```
+
+Zooming in for better understanding of the pattern:
+
+```{r Caroline zoom in}
+
+distance5_4days_Caroline <- wildschwein_sf %>%
+  filter(TierName == "Caroline", DatetimeUTC > "2015-04-01", DatetimeUTC < "2015-04-05")
+distance5_4days_Caroline$distance_Schreck5 <- as.numeric(st_distance(distance5_4days_Caroline,schreck5)[,1])
+
+ggplot(distance5_4days_Caroline,aes(DatetimeUTC,distance_Schreck5)) + geom_point() + labs(y ="Distance to WSS-2015-01 [m]", x="",title="Caroline's distance during 4 days") + theme_classic()
+```
+
+Caroline's moving pattern shows her staying in one place during the days (mostly between 6-9 am to around 6pm). That's most likely when she's sleeping. Movements are only at night, which was to be expected of a nocturnal animal.
+
+As a next step, finding which kind of field this Schreck WSS-2015-01 is in, was done with the dataset "Feldaufnahmen_Fanel" which provides geographical data about the agricultural fields in Fanel.
+The intersection of Schreck and corresponding field was located using "st_intersects" from the sf-package.
+
+
+```{r Schreck 5 and 6 is in a bean field}
+forest <- read_sf("Feldaufnahmen_Fanel.gpkg")
+head(forest)
+schreck5 <- agenda_fanel[5,]
+schreck6 <- agenda_fanel[6,]
+#schreck9 <- agenda_fanel[9,]
+schreck10 <- agenda_fanel[10,]
+
+st_intersects(schreck5, forest) # sagt, wo sich der Punkt des Schrecks mit den Feld-Daten kreuzt
+#Resultat: 272 -->FieldID 195
+#st_intersects(schreck6,forest) #same field
+
+st_intersects(schreck10,forest)
+
+forest_bohnen195 <- forest %>%
+  filter(FieldID==195)
+
+ggplot(forest_bohnen195)+geom_sf(aes(fill=Frucht)) + geom_sf(data=schreck5) + labs(title="Intersection of WSS-2015-01 and field", subtitle= "Schreck is in a bean field") + theme_classic()
+```
+
+The following graphs show Caroline's location around the bean field during active WSS-2015-01, first during standard mode and then during aggressive mode.
+
+```{r Caroline during Schreck 5 and 6}
+#5+6 ist in einem Feld, wo Caroline rumgeht
+
+distance5_Caroline_Schrecktime <- wildschwein_sf %>%
+  filter(TierName == "Caroline", DatetimeUTC > "2015-05-20", DatetimeUTC < "2015-06-12")
+distance6_Caroline_Schrecktime <- wildschwein_sf %>%
+  filter(TierName == "Caroline", DatetimeUTC > "2015-06-12", DatetimeUTC < "2015-07-01")
+
+ggarrange(
+  ggplot(forest_bohnen195)+geom_sf(aes(fill=Frucht)) +
+    geom_sf(data=distance5_Caroline_Schrecktime) + labs(title="Standard mode") + theme_classic(),
+  ggplot(forest_bohnen195)+geom_sf(aes(fill=Frucht))+
+    geom_sf(data=distance6_Caroline_Schrecktime) + labs(title="Aggressive mode") + theme_classic(),
+  legend="none", widths=c(1,2)
+)
+
+```
+
+
+Looking at only the bean field:
+
+```{r Caroline zoom in active Schreck 5_6}
+intersection_195andSchreck5 <- st_intersects(forest_bohnen195,distance5_Caroline_Schrecktime)
+intersection_195andSchreck6 <- st_intersects(forest_bohnen195,distance6_Caroline_Schrecktime)
+class(intersection_195andSchreck5)
+
+inter_sel_5 <- distance5_Caroline_Schrecktime[intersection_195andSchreck5[[1]],]
+inter_sel_6 <- distance6_Caroline_Schrecktime[intersection_195andSchreck6[[1]],]
+
+ggarrange(
+  ggplot(forest_bohnen195) + geom_sf(aes(fill=Frucht))+ geom_sf(data=inter_sel_5) +
+    geom_sf(data=schreck5, aes(size=5)) + labs(title="Standard mode") + theme_classic(),
+  ggplot(forest_bohnen195) + geom_sf(aes(fill=Frucht))+ geom_sf(data=inter_sel_6) +
+    geom_sf(data=schreck6, aes(size=5)) + labs(title="Aggressive mode") + theme_classic(),
+  legend="none"
+)
+  #during Schreck time, Carolina still visited the bean field (during Standard and aggressive mode)
+```
+As can be seen, WSS-2015-01 is in a bean field (mode standard and then aggressive). Caroline made some visits during Schreck time.
+
+
+```{r Caroline in the field vs not in the field Schreck 5 and 6}
+#ich will jetzt das Feld definieren. Im Feld drin = TRUE --> alle in inter_sel_5
+#für die "nicht enthaltenen" kann ich einen anti-join nutzen oder das Subsetting mit disjoint
+
+disjoint_195andSchreck5 <- st_disjoint(forest_bohnen195,distance5_Caroline_Schrecktime)
+disjoint_195andSchreck6 <- st_disjoint(forest_bohnen195,distance6_Caroline_Schrecktime)
+class(intersection_195andSchreck5)
+
+disjoint_caroline_5 <- distance5_Caroline_Schrecktime[disjoint_195andSchreck5[[1]],]
+disjoint_caroline_6 <- distance6_Caroline_Schrecktime[disjoint_195andSchreck6[[1]],]
+
+#disjoint anschauen
+ggplot(forest_bohnen195) + geom_sf(aes(fill=Frucht))+ geom_sf(data=disjoint_caroline_5) + geom_sf(data=schreck5, aes(size=5)) + labs(title="Caroline's positions outside bean field while Schreck 5 was active")
+ggplot(forest_bohnen195) + geom_sf(aes(fill=Frucht))+ geom_sf(data=disjoint_caroline_6) + geom_sf(data=schreck6, aes(size=5)) + labs(title="Caroline's positions outside bean field while Schreck 6 was active")
+```
+
+```{r Caroline in and out}
+#nun die ausserhalb mit 0 und die innerhalb mit 1 ergänzen
+disjoint_caroline_5$inField <- 0
+disjoint_caroline_6$inField <- 0
+inter_sel_5$inField <- 1
+inter_sel_6$inField <- 1
+#append the two data sets again with their new columns
+Caroline_Schreck5_withField <- bind_rows(disjoint_caroline_5,inter_sel_5)
+Caroline_Schreck6_withField <- bind_rows(disjoint_caroline_6,inter_sel_6)
+#bis hier stimmt es schon mal
+
+Caroline_Schreck5_withField$distance5 <- as.numeric(st_distance(Caroline_Schreck5_withField$geometry,schreck5)[,1])
+Caroline_Schreck6_withField$distance6 <- as.numeric(st_distance(Caroline_Schreck6_withField$geometry,schreck6)[,1])
+
+#this is now the pattern during Schreck time --> red points don't say a lot yet, just that she was in the field --> conceptualize better?
+ggplot() + geom_point(data=Caroline_Schreck5_withField,aes(DatetimeUTC,distance5)) +
+  geom_point(data=inter_sel_5,aes(DatetimeUTC,inField, colour="red"))
+ggplot() + geom_point(data=Caroline_Schreck6_withField,aes(DatetimeUTC,distance6)) +
+  geom_point(data=inter_sel_6,aes(DatetimeUTC,inField, colour="red"))
+```
+
+```{r Caroline longer time span}
+Caroline_longerThanSchrecktime <- wildschwein_sf %>%
+  filter(TierName == "Caroline")
+
+Caroline_longerThanSchrecktime$distance5_6 <-
+  as.numeric(st_distance(Caroline_longerThanSchrecktime$geometry,schreck5)[,1])
+#don't need to do it for Schreck 6 because it is the same with different mode
+
+ggplot(forest_bohnen195)+geom_sf(aes(fill=Frucht)) + geom_sf(data=Caroline_longerThanSchrecktime)
+
+intersection_195andSchreck5_6_long <- st_intersects(forest_bohnen195,Caroline_longerThanSchrecktime)
+class(intersection_195andSchreck5)
+
+inter_sel_5_6_long <- Caroline_longerThanSchrecktime[intersection_195andSchreck5_6_long[[1]],]
+
+ggplot(forest_bohnen195) + geom_sf(aes(fill=Frucht))+ geom_sf(data=inter_sel_5_6_long) + geom_sf(data=schreck5, aes(size=5)) + labs(title="Caroline's positions in the bean field during the whole time")
+  #during Schreck time, Carolina still visited the bean field
+
+#ich will jetzt das Feld definieren. Im Feld drin = TRUE --> alle in inter_sel_5_long
+#für die "nicht enthaltenen" kann ich einen anti-join nutzen oder das Subsetting mit disjoint
+
+disjoint_195andSchreck5_6_long <- st_disjoint(forest_bohnen195,Caroline_longerThanSchrecktime)
+#class(intersection_195andSchreck5_6_long)
+
+disjoint_caroline_5_6_long <- Caroline_longerThanSchrecktime[disjoint_195andSchreck5_6_long[[1]],]
+
+#disjoint anschauen --> ok!
+ggplot(forest_bohnen195) + geom_sf(aes(fill=Frucht))+ geom_sf(data=disjoint_caroline_5_6_long) + geom_sf(data=schreck5, aes(size=5)) + labs(title="Caroline's positions outside bean field during the whole time")
+
+#nun die ausserhalb mit 0 und die innerhalb mit 1 ergänzen
+disjoint_caroline_5_6_long$inField <- 0
+inter_sel_5_6_long$inField <- 1
+#append the two data sets again with their new columns
+Caroline_Schreck5_6_withField_long <- bind_rows(disjoint_caroline_5_6_long,inter_sel_5_6_long)
+
+#this is now the pattern during the whole time --> red points are in Field
+ggplot() + geom_point(data=Caroline_Schreck5_6_withField_long,aes(DatetimeUTC,distance5_6)) +
+  geom_point(data=inter_sel_5_6_long,aes(DatetimeUTC,inField, colour="red")) +
+  labs(title="Caroline's distance to Schreck 5 / 6 during whole tracking time. Red points mean: in the bean field")
+#hier noch  zu ergänzen: Linien, wann die Schrecks aktiv sind (z.B. https://stackoverflow.com/questions/66825661/vertical-lines-for-data-points-in-geom-point-in-ggplot2-for-r)
+```
+
+Reduce timescale to March 2015 until November 2015 for Caroline
+```{r Caroline smaller timescale}
+Caroline_Schreck5_6_withField_long_aroundInFieldtime <- Caroline_Schreck5_6_withField_long %>%
+  filter(DatetimeUTC>"2015-04-15", DatetimeUTC<"2015-08-15")
+inter_sel_5_6_long_shorter <- inter_sel_5_6_long %>%
+  filter(DatetimeUTC<"2015-08-15")
+
+ggplot() + geom_point(data=Caroline_Schreck5_6_withField_long_aroundInFieldtime,aes(DatetimeUTC,distance5_6)) +
+  geom_point(data=inter_sel_5_6_long_shorter,aes(DatetimeUTC,inField, colour="red")) +
+  labs(title="Caroline's distance to Schreck 5 / 6 around inField time. Red points mean: in the bean field")
+#hier noch  zu ergänzen: Linien, wann die Schrecks aktiv sind (z.B. https://stackoverflow.com/questions/66825661/vertical-lines-for-data-points-in-geom-point-in-ggplot2-for-r)
+```
+
+Next thing to do is add a background color that shows "Before Schrecktime" - "during Schrecktime" - "after Schrecktime"
+https://statisticsglobe.com/draw-ggplot2-plot-different-background-colors-region-r
+
+```{r Caroline with background color}
+ Caroline_breaks <- data.frame(start=as.Date(c("2015-04-15","2015-05-20","2015-06-12","2015-07-01")),
+                              end=as.Date(c("2015-05-20","2015-06-12","2015-07-01","2015-08-15")),
+                              colors=factor(1:4),
+                              name=c("Before Schreck activity","During active Schreck 5","During active Schreck 6","After Schreck activity"))
+Caroline_breaks
+Caroline_breaks$Phases <- factor(Caroline_breaks$name, as.character(Caroline_breaks$name))
+
+ggplot() +
+  geom_rect(data = Caroline_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+                ymax = Inf,
+                fill = colors),
+            alpha = 0.5) +
+  geom_point(data=Caroline_Schreck5_6_withField_long_aroundInFieldtime,aes(as.Date(DatetimeUTC),distance5_6)) +
+  geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="red")) +
+  labs(title="Caroline's distance to Schreck 5 / 6 around inField time. Red points mean: in the bean field", colour="")
+
+#Variante mit weniger Datenpunkten:
+Caroline_Schreck5_6_withField_long_aroundInFieldtime_smooth <- Caroline_Schreck5_6_withField_long_aroundInFieldtime %>%
+  dplyr::filter(row_number() %% 150 == 0)
+Caroline_Schreck5_6_withField_long_aroundInFieldtime_smooth2 <- Caroline_Schreck5_6_withField_long_aroundInFieldtime %>%
+  dplyr::filter(row_number() %% 50 == 0)
+
+ggplot() +
+  geom_rect(data = Caroline_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+                ymax = Inf,
+                fill = Phases),
+            alpha = 0.5) + 
+  geom_line(data=Caroline_Schreck5_6_withField_long_aroundInFieldtime_smooth,aes(as.Date(DatetimeUTC),distance5_6)) +
+  geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
+  labs(title="Caroline's distance to Schreck 5 and 6", colour="Location")
+
+#plotten mit sampling size reduction
+ggarrange(
+  ggplot() +
+  geom_rect(data = Caroline_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+                ymax = Inf,
+                fill = Phases),
+            alpha = 0.5) + 
+  geom_line(data=Caroline_Schreck5_6_withField_long_aroundInFieldtime_smooth2,aes(as.Date(DatetimeUTC),distance5_6)) +
+  geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
+  labs(subtitle= "Reducing sampling size to every 50th observation", colour="Location") +
+    rremove("y.title") + rremove("x.title"),
+  ggplot() +
+  geom_rect(data = Caroline_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+                ymax = Inf,
+                fill = Phases),
+            alpha = 0.5) + 
+  geom_line(data=Caroline_Schreck5_6_withField_long_aroundInFieldtime_smooth,aes(as.Date(DatetimeUTC),distance5_6)) +
+  geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
+  labs(subtitle= "Reducing sampling size to every 150th observation", colour="Location") +
+    rremove("y.title") + rremove("x.title"),
+  nrow=2, common.legend=TRUE, legend="right"
+)
+
+#Variante mit rolling window:
+Caroline_Schreck5_6_withField_long_aroundInFieldtime$rollmean <- rollmean(Caroline_Schreck5_6_withField_long_aroundInFieldtime$distance5_6,2, NA, align="left")
+Caroline_Schreck5_6_withField_long_aroundInFieldtime$rollmean2 <- rollmean(Caroline_Schreck5_6_withField_long_aroundInFieldtime$distance5_6,10, NA, align="left")
+
+#plotten mit rolling window
+ggarrange(
+  ggplot() +
+  geom_rect(data = Caroline_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+                ymax = Inf,
+                fill = Phases),
+            alpha = 0.5) + 
+  geom_line(data=Caroline_Schreck5_6_withField_long_aroundInFieldtime,aes(as.Date(DatetimeUTC),rollmean)) +
+  geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
+  labs(subtitle="Rolling Mean = 2",colour="Location") +
+    rremove("y.title") + rremove("x.title"),
+  ggplot() +
+  geom_rect(data = Caroline_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+                ymax = Inf,
+                fill = Phases),
+            alpha = 0.5) + 
+  geom_line(data=Caroline_Schreck5_6_withField_long_aroundInFieldtime,aes(as.Date(DatetimeUTC),rollmean2)) +
+  geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
+  labs(subtitle="Rolling Mean = 10", colour="Location") +
+    rremove("y.title") + rremove("x.title"),
+  nrow=2, common.legend=TRUE, legend="right"
+)
+
+#annotate_figure(plot_rolling_window_Caroline, text_grob("Caroline's distance to Schreck 5 and 6", face="bold", size=20))
+```
+
+Repeating Schreck 5 & 6 with Olga
+```{r Olga during Schrecktime 5 and 6}
+distance5_Olga_Schrecktime <- wildschwein_sf %>%
+  filter(TierName == "Olga", DatetimeUTC > "2015-05-20", DatetimeUTC < "2015-06-12")
+
+distance6_Olga_Schrecktime <-wildschwein_sf %>%
+  filter(TierName == "Olga", DatetimeUTC > "2015-06-12", DatetimeUTC < "2015-07-01")
+
+ggplot(forest_bohnen195)+geom_sf(aes(fill=Frucht)) + geom_sf(data=distance5_Olga_Schrecktime)
+
+ggplot(forest_bohnen195)+geom_sf(aes(fill=Frucht)) + geom_sf(data=distance6_Olga_Schrecktime)
+#Olga was in and around the fields 5 & 6 a lot!
+
+intersection_195andSchreck5_olga <- st_intersects(forest_bohnen195,distance5_Olga_Schrecktime)
+intersection_195andSchreck6_olga <- st_intersects(forest_bohnen195,distance6_Olga_Schrecktime)
+
+inter_sel_5_olga <- distance5_Olga_Schrecktime[intersection_195andSchreck5_olga[[1]],]
+inter_sel_6_olga <- distance6_Olga_Schrecktime[intersection_195andSchreck6_olga[[1]],]
+
+ggplot(forest_bohnen195) + geom_sf(aes(fill=Frucht))+ geom_sf(data=inter_sel_5_olga) + geom_sf(data=schreck5, aes(size=5)) + labs(title="Olga's positions in the bean field while Schreck 5 was active")
+  #during Schreck time, Olga still visited the bean field
+
+ggplot(forest_bohnen195) + geom_sf(aes(fill=Frucht))+ geom_sf(data=inter_sel_6_olga) + geom_sf(data=schreck6, aes(size=5)) + labs(title="Olga's positions in the bean field while Schreck 6 was active")
+```
+
+Aside from Caroline, also Olga visited the same bean field during Schreck time 5 & 6!
+
+```{r Olga longer time span}
+Olga_longerThanSchrecktime <- wildschwein_sf %>%
+  filter(TierName == "Olga")
+
+Olga_longerThanSchrecktime$distance5_6 <-
+  as.numeric(st_distance(Olga_longerThanSchrecktime$geometry,schreck5)[,1])
+#don't need to do it for Schreck 6 because it is the same with different mode
+
+ggplot(forest_bohnen195)+geom_sf(aes(fill=Frucht)) + geom_sf(data=Olga_longerThanSchrecktime)
+
+intersection_195andSchreck5_6_long_olga <- st_intersects(forest_bohnen195,Olga_longerThanSchrecktime)
+#class(intersection_195andSchreck5)
+
+inter_sel_5_6_long_olga <- Olga_longerThanSchrecktime[intersection_195andSchreck5_6_long_olga[[1]],]
+
+ggplot(forest_bohnen195) + geom_sf(aes(fill=Frucht))+ geom_sf(data=inter_sel_5_6_long_olga) + geom_sf(data=schreck5, aes(size=5)) + labs(title="Olga's positions in the bean field during the whole time")
+  #during Schreck time, Olga still visited the bean field
+
+#ich will jetzt das Feld definieren. Im Feld drin = TRUE --> alle in inter_sel_5_long
+#für die "nicht enthaltenen" kann ich einen anti-join nutzen oder das Subsetting mit disjoint
+
+disjoint_195andSchreck5_6_long_olga <- st_disjoint(forest_bohnen195,Olga_longerThanSchrecktime)
+#class(intersection_195andSchreck5_long)
+
+disjoint_Olga_5_6_long <- Olga_longerThanSchrecktime[disjoint_195andSchreck5_6_long_olga[[1]],]
+
+#disjoint anschauen --> ok!
+ggplot(forest_bohnen195) + geom_sf(aes(fill=Frucht))+ geom_sf(data=disjoint_Olga_5_6_long) + geom_sf(data=schreck5, aes(size=5)) + labs(title="Olga's positions outside bean field during the whole time")
+
+#nun die ausserhalb mit 0 und die innerhalb mit 1 ergänzen
+disjoint_Olga_5_6_long$inField <- 0
+inter_sel_5_6_long_olga$inField <- 1
+#append the two data sets again with their new columns
+Olga_Schreck5_6_withField_long <- bind_rows(disjoint_Olga_5_6_long,inter_sel_5_6_long_olga)
+
+#this is now the pattern during the whole time --> red points are in Field
+ggplot() + geom_point(data=Olga_Schreck5_6_withField_long,aes(DatetimeUTC,distance5_6)) +
+  geom_point(data=inter_sel_5_6_long_olga,aes(DatetimeUTC,inField, colour="red")) +
+  labs(title="Olga's distance to Schreck 5 / 6 during whole tracking time. Red points mean: in the bean field")
+#hier noch  zu ergänzen: Linien, wann die Schrecks aktiv sind (z.B. https://stackoverflow.com/questions/66825661/vertical-lines-for-data-points-in-geom-point-in-ggplot2-for-r)
+```
+
+Reduce timescale to until End of August for Olga
+```{r Olga smaller timescale}
+Olga_Schreck5_6_withField_long_aroundInFieldtime <- Olga_Schreck5_6_withField_long %>%
+  filter(DatetimeUTC<"2015-08-01")
+
+ggplot() + geom_point(data=Olga_Schreck5_6_withField_long_aroundInFieldtime,aes(DatetimeUTC,distance5_6)) +
+  geom_point(data=inter_sel_5_6_long_olga,aes(DatetimeUTC,inField, colour="red")) +
+  labs(title="Olga's distance to Schreck 5 / 6 around inField time. Red points mean: in the bean field")
+#hier noch  zu ergänzen: Linien, wann die Schrecks aktiv sind (z.B. https://stackoverflow.com/questions/66825661/vertical-lines-for-data-points-in-geom-point-in-ggplot2-for-r)
+```
+
+```{r Olga with background color}
+Olga_breaks <- data.frame(start=as.Date(c("2015-04-15","2015-05-20","2015-06-12","2015-07-01")),
+                              end=as.Date(c("2015-05-20","2015-06-12","2015-07-01","2015-08-15")),
+                              colors=factor(1:4),
+                              name=c("Before Schreck activity","During active Schreck 5","During active Schreck 6","After Schreck activity"))
+Olga_breaks
+Olga_breaks$Phases <- factor(Olga_breaks$name, as.character(Olga_breaks$name))
+
+ggplot() +
+  geom_rect(data = Olga_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+               ymax = Inf,
+                fill = colors),
+            alpha = 0.5) +
+  geom_point(data=Olga_Schreck5_6_withField_long_aroundInFieldtime,aes(as.Date(DatetimeUTC),distance5_6)) +
+  geom_point(data=inter_sel_5_6_long_olga,aes(as.Date(DatetimeUTC),inField, colour="red")) +
+  labs(title="Olga's distance to Schreck 5 / 6 around inField time. Red points mean: in the bean field", colour="")
+
+#Variante mit weniger Datenpunkten:
+Olga_Schreck5_6_withField_long_aroundInFieldtime_smooth <- Olga_Schreck5_6_withField_long_aroundInFieldtime %>%
+  dplyr::filter(row_number() %% 150 == 0)
+
+ggplot() +
+  geom_rect(data = Olga_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+                ymax = Inf,
+                fill = Phases),
+            alpha = 0.5) + 
+  geom_line(data=Olga_Schreck5_6_withField_long_aroundInFieldtime_smooth,aes(as.Date(DatetimeUTC),distance5_6)) +
+  geom_point(data=inter_sel_5_6_long_olga,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
+  labs(title="Olga's distance to Schreck 5 and 6", colour="Location", x="",y="Distance [m]")
+
+```
+
+
+Repeating Schreck 5 & 6 with Sabine
+```{r Sabine during Schrecktime 5 and 6}
+distance5_Sabine_Schrecktime <- wildschwein_sf %>%
+  filter(TierName == "Sabine", DatetimeUTC > "2015-05-20", DatetimeUTC < "2015-06-12")
+
+distance6_Sabine_Schrecktime <-wildschwein_sf %>%
+  filter(TierName == "Sabine", DatetimeUTC > "2015-06-12", DatetimeUTC < "2015-07-01")
+
+ggplot(forest_bohnen195)+geom_sf(aes(fill=Frucht)) + geom_sf(data=distance5_Sabine_Schrecktime)
+
+ggplot(forest_bohnen195)+geom_sf(aes(fill=Frucht)) + geom_sf(data=distance6_Sabine_Schrecktime)
+#Sabine was in and around the fields 5 & 6 a lot!
+
+intersection_195andSchreck5_Sabine <- st_intersects(forest_bohnen195,distance5_Sabine_Schrecktime)
+intersection_195andSchreck6_Sabine <- st_intersects(forest_bohnen195,distance6_Sabine_Schrecktime)
+
+inter_sel_5_Sabine <- distance5_Sabine_Schrecktime[intersection_195andSchreck5_Sabine[[1]],]
+inter_sel_6_Sabine <- distance6_Sabine_Schrecktime[intersection_195andSchreck6_Sabine[[1]],]
+
+ggplot(forest_bohnen195) + geom_sf(aes(fill=Frucht))+ geom_sf(data=inter_sel_5_Sabine) + geom_sf(data=schreck5, aes(size=5)) + labs(title="Sabine's positions in the bean field while Schreck 5 was active")
+  #during Schreck time, Sabine still visited the bean field
+
+ggplot(forest_bohnen195) + geom_sf(aes(fill=Frucht))+ geom_sf(data=inter_sel_6_Sabine) + geom_sf(data=schreck6, aes(size=5)) + labs(title="Sabine's positions in the bean field while Schreck 6 was active")
+```
+Aside from Caroline and Olga, also Sabine visited the same bean field during Schreck time 5 & 6!
+
+```{r Sabine longer time span}
+Sabine_longerThanSchrecktime <- wildschwein_sf %>%
+  filter(TierName == "Sabine")
+
+Sabine_longerThanSchrecktime$distance5_6 <-
+  as.numeric(st_distance(Sabine_longerThanSchrecktime$geometry,schreck5)[,1])
+#don't need to do it for Schreck 6 because it is the same with different mode
+
+ggplot(forest_bohnen195)+geom_sf(aes(fill=Frucht)) + geom_sf(data=Sabine_longerThanSchrecktime)
+
+intersection_195andSchreck5_6_long_Sabine <- st_intersects(forest_bohnen195,Sabine_longerThanSchrecktime)
+#class(intersection_195andSchreck5)
+
+inter_sel_5_6_long_Sabine <- Sabine_longerThanSchrecktime[intersection_195andSchreck5_6_long_Sabine[[1]],]
+
+ggplot(forest_bohnen195) + geom_sf(aes(fill=Frucht))+ geom_sf(data=inter_sel_5_6_long_Sabine) + geom_sf(data=schreck5, aes(size=5)) + labs(title="Sabine's positions in the bean field during the whole time")
+  #during Schreck time, Sabine still visited the bean field
+
+#ich will jetzt das Feld definieren. Im Feld drin = TRUE --> alle in inter_sel_5_long
+#für die "nicht enthaltenen" kann ich einen anti-join nutzen oder das Subsetting mit disjoint
+
+disjoint_195andSchreck5_6_long_Sabine <- st_disjoint(forest_bohnen195,Sabine_longerThanSchrecktime)
+#class(intersection_195andSchreck5_long)
+
+disjoint_Sabine_5_6_long <- Sabine_longerThanSchrecktime[disjoint_195andSchreck5_6_long_Sabine[[1]],]
+
+#disjoint anschauen --> ok!
+ggplot(forest_bohnen195) + geom_sf(aes(fill=Frucht))+ geom_sf(data=disjoint_Sabine_5_6_long) + geom_sf(data=schreck5, aes(size=5)) + labs(title="Sabine's positions outside bean field during the whole time")
+
+#nun die ausserhalb mit 0 und die innerhalb mit 1 ergänzen
+disjoint_Sabine_5_6_long$inField <- 0
+inter_sel_5_6_long_Sabine$inField <- 1
+#append the two data sets again with their new columns
+Sabine_Schreck5_6_withField_long <- bind_rows(disjoint_Sabine_5_6_long,inter_sel_5_6_long_Sabine)
+
+#this is now the pattern during the whole time --> red points are in Field
+ggplot() + geom_point(data=Sabine_Schreck5_6_withField_long,aes(DatetimeUTC,distance5_6)) +
+  geom_point(data=inter_sel_5_6_long_Sabine,aes(DatetimeUTC,inField, colour="red")) +
+  labs(title="Sabine's distance to Schreck 5 / 6 during whole tracking time. Red points mean: in the bean field")
+#hier noch  zu ergänzen: Linien, wann die Schrecks aktiv sind (z.B. https://stackoverflow.com/questions/66825661/vertical-lines-for-data-points-in-geom-point-in-ggplot2-for-r)
+```
+
+Reduce timescale to after May for Sabine
+```{r Sabine smaller timescale}
+Sabine_Schreck5_6_withField_long_aroundInFieldtime <- Sabine_Schreck5_6_withField_long %>%
+  filter(DatetimeUTC>"2015-06-01")
+
+ggplot() + geom_point(data=Sabine_Schreck5_6_withField_long_aroundInFieldtime,aes(DatetimeUTC,distance5_6)) +
+  geom_point(data=inter_sel_5_6_long_Sabine,aes(DatetimeUTC,inField, colour="red")) +
+  labs(title="Sabine's distance to Schreck 5 / 6 around inField time. Red points mean: in the bean field")
+#hier noch  zu ergänzen: Linien, wann die Schrecks aktiv sind (z.B. https://stackoverflow.com/questions/66825661/vertical-lines-for-data-points-in-geom-point-in-ggplot2-for-r)
+```
+
+```{r Sabine with background color}
+Sabine_breaks <- data.frame(start=as.Date(c("2015-04-15","2015-05-20","2015-06-12","2015-07-01")),
+                              end=as.Date(c("2015-05-20","2015-06-12","2015-07-01","2015-08-15")),
+                              colors=factor(1:4),
+                              name=c("Before Schreck activity","During active Schreck 5","During active Schreck 6","After Schreck activity"))
+Sabine_breaks
+Sabine_breaks$Phases <- factor(Sabine_breaks$name, as.character(Sabine_breaks$name))
+
+#Variante mit weniger Datenpunkten:
+Sabine_Schreck5_6_withField_long_aroundInFieldtime_smooth <- Sabine_Schreck5_6_withField_long_aroundInFieldtime %>%
+  dplyr::filter(row_number() %% 150 == 0)
+
+
+ggplot() +
+  geom_rect(data = Sabine_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+                ymax = Inf,
+                fill = Phases),
+            alpha = 0.5) + 
+  geom_line(data=Sabine_Schreck5_6_withField_long_aroundInFieldtime_smooth,aes(as.Date(DatetimeUTC),distance5_6)) +
+  geom_point(data=inter_sel_5_6_long_Sabine,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
+  labs(title="Sabine's distance to Schreck 5 and 6", colour="Location", x="",y="Distance [m]")
+
+```
+
+```{r compare Olga and Caroline and Sabine during Schreck time}
+ggarrange(
+  ggplot(forest_bohnen195) + geom_sf()+ geom_sf(data=inter_sel_5) + geom_sf(data=schreck5, aes(colour="Schreck 5", size=2)) +
+    labs(title="Caroline Schreck 5"),
+  ggplot(forest_bohnen195) + geom_sf()+ geom_sf(data=inter_sel_5_olga) + geom_sf(data=schreck5, aes(colour="Schreck 5", size=2)) +
+    labs(title="Olga Schreck 5"),
+  ggplot(forest_bohnen195) + geom_sf()+ geom_sf(data=inter_sel_5_Sabine) + geom_sf(data=schreck5, aes(colour="Schreck 5", size=2)) +
+    labs(title="Sabine Schreck 5"),
+  ggplot(forest_bohnen195) + geom_sf()+ geom_sf(data=inter_sel_6) + geom_sf(data=schreck6, aes(colour="Schreck 6", size=2)) +
+    labs(title="Caroline Schreck 6"),
+  ggplot(forest_bohnen195) + geom_sf()+ geom_sf(data=inter_sel_6_olga) + geom_sf(data=schreck6, aes(colour="Schreck 6", size=2)) +
+    labs(title="Olga Schreck 6"),
+  ggplot(forest_bohnen195) + geom_sf()+ geom_sf(data=inter_sel_6_Sabine) + geom_sf(data=schreck6, aes(colour="Schreck 6", size=2)) +
+    labs(title="Sabine Schreck 6"),
+  ncol=3,nrow=2,legend="none",common.legend=TRUE
+)
+```
+
+```{r compare distances from all 3 animals}
+ggarrange(
+  ggplot() +
+  geom_rect(data = Caroline_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+                ymax = Inf,
+                fill = Phases),
+            alpha = 0.5) + 
+  geom_line(data=Caroline_Schreck5_6_withField_long_aroundInFieldtime_smooth,aes(as.Date(DatetimeUTC),distance5_6)) +
+  geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
+  labs(title="Caroline's distance to Schreck 5 and 6", colour="Location", x="",y="Distance [m]"),
+  ggplot() +
+  geom_rect(data = Olga_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+                ymax = Inf,
+                fill = Phases),
+            alpha = 0.5) + 
+  geom_line(data=Olga_Schreck5_6_withField_long_aroundInFieldtime_smooth,aes(as.Date(DatetimeUTC),distance5_6)) +
+  geom_point(data=inter_sel_5_6_long_olga,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
+  labs(title="Olga's distance to Schreck 5 and 6", colour="Location", x="",y="Distance [m]"),
+  ggplot() +
+  geom_rect(data = Sabine_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+                ymax = Inf,
+                fill = Phases),
+            alpha = 0.5) + 
+  geom_line(data=Sabine_Schreck5_6_withField_long_aroundInFieldtime_smooth,aes(as.Date(DatetimeUTC),distance5_6)) +
+  geom_point(data=inter_sel_5_6_long_Sabine,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
+  labs(title="Sabine's distance to Schreck 5 and 6", colour="Location", x="",y="Distance [m]"),
+  ncol=1, nrow=3, legend="none",common.legend= TRUE
+  )
+  
+```
+
+
+
+##In the field vs. out of the field before, during and after approach
+How much time does a boar spend in the field before the Schreck (in %), during and after? 
+```{r in the field vs not in the field during SChreck time}
+#Im Feld drin = TRUE --> alle in inter_sel_5
+
+
+disjoint_195andSchreck5 <- st_disjoint(forest_bohnen195,distance5_Caroline_Schrecktime)
+class(intersection_195andSchreck5)
+
+disjoint_caroline_5 <- distance5_Caroline_Schrecktime[disjoint_195andSchreck5[[1]],]
+
+
+#nun die ausserhalb mit 0 und die innerhalb mit 1 ergänzen
+disjoint_caroline_5$inField <- 0
+inter_sel_5$inField <- 1
+#append the two data sets again with their new columns
+Caroline_Schreck5_withField <- bind_rows(disjoint_caroline_5,inter_sel_5)
+
+  
+
+
+#47 from 2207 Data points are in the field
+print(47/2207*100)
+# during Schreck time she spends 2 % of her time in the field.
+
+# now the same for before and after
+
+#Idea: also display graphically the distribution of "In" and "Not In" Before, during and after
+```
+
+
+
+
+#Discussion
+Using the distance of boar to Schreck approach has the disadvantage that there is no way of showing that an effect was due to the Schreck and not simply a coincidence. This approach is good for getting a first idea of the boars movement and to select the Schrecks and boars with which to continue in further analysis. It shows which boars were in the vicinity of a Schreck and could therefore possibly have been affected by it.
+
+#Validation
+- comparison with other projects
+- face validity with Nils?
+Rykiel, E. J. (1996). Testing ecological models: the meaning of validation. Ecological modelling, 90(3), 229-244.
+
+#Outlook / further steps
+- Context of data (weather, maps, topological...)
+
+
+Your report shall:
+– cover how you went about investigating your research questions. Describe your data science ideas
+and how you implemented your ideas.
+– present the results of your study and discuss them in the light of your research questions. What
+have you achieved and what would be further steps for future research?
+– report problems and limitations you encountered along the way and the solutions you chose to
+overcome these, be it limitations with respect to the data sources, the tools or any other source of
+limitation.
+– discuss your data science choices in the light of the theory covered in the lectures, group works,
+and your reading assignments.
