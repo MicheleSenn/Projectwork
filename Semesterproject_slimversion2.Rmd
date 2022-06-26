@@ -338,7 +338,6 @@ ggarrange(
 As can be seen, WSS-2015-01 is in a bean field (mode standard and then aggressive). Caroline made some visits during Schreck time.
 
 
-
 ```{r Caroline in the field vs not in the field Schreck 5 and 6}
 #ich will jetzt das Feld definieren. Im Feld drin = TRUE --> alle in inter_sel_5
 #für die "nicht enthaltenen" kann ich einen anti-join nutzen oder das Subsetting mit disjoint
