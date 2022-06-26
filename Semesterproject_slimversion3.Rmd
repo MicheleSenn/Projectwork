@@ -151,7 +151,6 @@ Table xy shows a table of the possibly relevant Schrecks as they were active at 
 
 ```{r join schreck agendas fanel, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 agenda_fanel <- inner_join(schreck_locations_sf_fanel, schreck_agenda, by="id")
-head(agenda_fanel)
 
 #show when the schrecks in fanel were used
 ggplot(agenda_fanel, aes(xmin = datum_on, xmax = datum_off, y=id )) +
@@ -278,7 +277,6 @@ The intersection of Schreck and corresponding field was located using "st_inters
 
 ```{r Schreck 5 and 6 is in a bean field, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 forest <- read_sf("Feldaufnahmen_Fanel.gpkg")
-head(forest)
 schreck5 <- agenda_fanel[5,]
 schreck6 <- agenda_fanel[6,]
 #schreck9 <- agenda_fanel[9,]
@@ -322,7 +320,7 @@ Looking at only the bean field:
 ```{r Caroline zoom in active Schreck 5_6, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 intersection_195andSchreck5 <- st_intersects(forest_bohnen195,distance5_Caroline_Schrecktime)
 intersection_195andSchreck6 <- st_intersects(forest_bohnen195,distance6_Caroline_Schrecktime)
-class(intersection_195andSchreck5)
+#class(intersection_195andSchreck5)
 
 inter_sel_5 <- distance5_Caroline_Schrecktime[intersection_195andSchreck5[[1]],]
 inter_sel_6 <- distance6_Caroline_Schrecktime[intersection_195andSchreck6[[1]],]
@@ -348,7 +346,7 @@ In a similar way, the positions outside the bean field could be found by subsett
 
 disjoint_195andSchreck5 <- st_disjoint(forest_bohnen195,distance5_Caroline_Schrecktime)
 disjoint_195andSchreck6 <- st_disjoint(forest_bohnen195,distance6_Caroline_Schrecktime)
-class(intersection_195andSchreck5)
+#class(intersection_195andSchreck5)
 
 disjoint_caroline_5 <- distance5_Caroline_Schrecktime[disjoint_195andSchreck5[[1]],]
 disjoint_caroline_6 <- distance6_Caroline_Schrecktime[disjoint_195andSchreck6[[1]],]
@@ -404,7 +402,7 @@ Caroline_longerThanSchrecktime$distance5_6 <-
 #ggplot(forest_bohnen195)+geom_sf(aes(fill=Frucht)) + geom_sf(data=Caroline_longerThanSchrecktime)
 
 intersection_195andSchreck5_6_long <- st_intersects(forest_bohnen195,Caroline_longerThanSchrecktime)
-class(intersection_195andSchreck5)
+#class(intersection_195andSchreck5)
 
 inter_sel_5_6_long <- Caroline_longerThanSchrecktime[intersection_195andSchreck5_6_long[[1]],]
 
@@ -516,21 +514,11 @@ As a methodological comparison, smoothing was computed using the Rolling Window 
 #Variante mit rolling window:
 Caroline_Schreck5_6_withField_long_aroundInFieldtime$rollmean <- rollmean(Caroline_Schreck5_6_withField_long_aroundInFieldtime$distance5_6,2, NA, align="left")
 Caroline_Schreck5_6_withField_long_aroundInFieldtime$rollmean2 <- rollmean(Caroline_Schreck5_6_withField_long_aroundInFieldtime$distance5_6,10, NA, align="left")
+Caroline_Schreck5_6_withField_long_aroundInFieldtime$rollmean3 <- rollmean(Caroline_Schreck5_6_withField_long_aroundInFieldtime$distance5_6,100, NA, align="left")
+Caroline_Schreck5_6_withField_long_aroundInFieldtime$rollmean4 <- rollmean(Caroline_Schreck5_6_withField_long_aroundInFieldtime$distance5_6,150, NA, align="left")
 
 #plotten mit rolling window
 ggarrange(
-  ggplot() +
-  geom_rect(data = Caroline_breaks,
-            aes(xmin = start,
-                xmax = end,
-                ymin = - Inf,
-                ymax = Inf,
-                fill = Phases),
-            alpha = 0.5) + 
-  geom_line(data=Caroline_Schreck5_6_withField_long_aroundInFieldtime,aes(as.Date(DatetimeUTC),rollmean)) +
-  geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
-  labs(subtitle="Rolling Mean = 2",colour="Location") +
-    rremove("y.title") + rremove("x.title"),
   ggplot() +
   geom_rect(data = Caroline_breaks,
             aes(xmin = start,
@@ -543,7 +531,31 @@ ggarrange(
   geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
   labs(subtitle="Rolling Mean = 10", colour="Location") +
     rremove("y.title") + rremove("x.title"),
-  nrow=2, common.legend=TRUE, legend="right"
+  ggplot() +
+  geom_rect(data = Caroline_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+                ymax = Inf,
+                fill = Phases),
+            alpha = 0.5) + 
+  geom_line(data=Caroline_Schreck5_6_withField_long_aroundInFieldtime,aes(as.Date(DatetimeUTC),rollmean3)) +
+  geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
+  labs(subtitle="Rolling Mean = 100", colour="Location") +
+    rremove("y.title") + rremove("x.title"),
+  ggplot() +
+  geom_rect(data = Caroline_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+                ymax = Inf,
+                fill = Phases),
+            alpha = 0.5) + 
+  geom_line(data=Caroline_Schreck5_6_withField_long_aroundInFieldtime,aes(as.Date(DatetimeUTC),rollmean4)) +
+  geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
+  labs(subtitle="Rolling Mean = 150", colour="Location") +
+    rremove("y.title") + rremove("x.title"),
+  nrow=3, common.legend=TRUE, legend="right"
 )
 
 #annotate_figure(plot_rolling_window_Caroline, text_grob("Caroline's distance to Schreck 5 and 6", face="bold", size=20))
@@ -842,7 +854,6 @@ How much time does a boar spend in the field before the Schreck (in %), during a
 
 
 disjoint_195andSchreck5 <- st_disjoint(forest_bohnen195,distance5_Caroline_Schrecktime)
-class(intersection_195andSchreck5)
 
 disjoint_caroline_5 <- distance5_Caroline_Schrecktime[disjoint_195andSchreck5[[1]],]
 
