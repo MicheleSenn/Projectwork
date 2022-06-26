@@ -66,10 +66,15 @@ The Interpretation of behaviors might be vague or false because an emerging patt
 Technical difficulties could also pose a risk, e.g. when handling too much data, choosing irrelevant thresholds or interpretation issues.
 Possibly, the different measures don't show the same effects. It might be necessary to distinguish between measures in order to draw inferences.
 
+Disclaimer:
+Data preparation and conceptualization was divided between the two team members.
+The contributors were marked where possible.
+
 # Methods
 
-## Data processing
+## Data processing *(Lia)*
 The data was loaded and conferted into the coordination system crs = 2056.To find out, which boars were affected by which Schreck, the datasets were both transformed into the same coordinate system using st_transform. They were subsequently plotted on top of each other to visualize the spatial overlap.
+
 ```{r temporal overlap, eval=FALSE, include=FALSE}
 #load data and put into readable format
 sampling_periods <- wildschwein_BE %>%
@@ -132,7 +137,7 @@ ggplot() +
 ```
 
 
-As a result, it was found that the animals were only tracked around the Schreck in the region of Fanel. As a consequence, all other Schreck data points were removed and the spatial overlap replotted to validate the finding.
+As a result, it was found that the animals were only tracked around the Schreck in the region of Fanel. As a consequence, all other Schreck data points were removed and the spatial overlap replotted to validate the finding. *(Lia)*
 
 ```{r filter all but region Fanel}
 #only Fanel
@@ -147,7 +152,7 @@ ggplot() +
 
 In order to combine the data about the Schreck locations and their corresponding agenda, or sounding time, they were joined by their matching column "id" with an inner join.
 Following this join, the agenda of all the "Schreck time" was visualized using an errorbar plot.
-Table xy shows a table of the possibly relevant Schrecks as they were active at some point during the boar tracking time.
+Table xy shows a table of the possibly relevant Schrecks as they were active at some point during the boar tracking time. *(Lia)*
 
 ```{r join schreck agendas fanel, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 agenda_fanel <- inner_join(schreck_locations_sf_fanel, schreck_agenda, by="id")
@@ -163,7 +168,7 @@ knitr::kable(agenda_fanel %>%
              )
 ```
 
-## Selecting focus
+## Selecting focus *(Lia)*
 In order to see which animals were tracked during the active period of the "Schreck", the boar data was filtered by the dates in which the Schreck were active.
 For the tracked boars, a distance between their coordinates and the Schreck coordinate was calculated using st_distance().
 
@@ -186,7 +191,7 @@ ggplot(wildschwein_schreck1, aes(DatetimeUTC,distance, color=TierName)) + geom_p
 
 Since it isn't known how close you would need to be to hear the Schreck, all of the five boars Caroline, Isabelle, Nicole, Sabine and Ueli could potentially have been affected.
 
-The same procedure was repeated for the other possibly relevant Schrecks (results not displayed).
+The same procedure was repeated for the other possibly relevant Schrecks (results not displayed). *(Lia)*
 
 ```{r distance to Schreck 2, include=FALSE}
 #filter for schreck and running period
@@ -243,12 +248,12 @@ wildschwein_schreck10$distance <- as.numeric(st_distance(wildschwein_schreck10,s
 ggplot(wildschwein_schreck10, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2015_04")
 ```
 
-The analysis led to the conclusion that only one Schreck WSS_2015_04, first with standard mode and subsequently switching to aggressive mode, can provide enough data to be used for the modelling steps. Sabine, Olga and Caroline were tracked during the running time, and also before and after.
+The analysis led to the conclusion that only one Schreck WSS_2015_04, first with standard mode and subsequently switching to aggressive mode, can provide enough data to be used for the modelling steps. Sabine, Olga and Caroline were tracked during the running time, and also before and after. *(Lia)*
 All following conceptual steps will be carried out with this focus.
 
 
 ## Distance to Schreck approach
-Using the approach of calculating the distance of the boar to the Schreck provides insights about the movement radius around the Schreck during inactive and active times.
+Using the approach of calculating the distance of the boar to the Schreck provides insights about the movement radius around the Schreck during inactive and active times. *(Lia)*
 
 ```{r Caroline and Schreck 5}
 distance5_longerThanSchrecking <- wildschwein_sf %>%
@@ -269,10 +274,10 @@ distance5_4days_Caroline$distance_Schreck5 <- as.numeric(st_distance(distance5_4
 ggplot(distance5_4days_Caroline,aes(DatetimeUTC,distance_Schreck5)) + geom_point() + labs(y ="Distance to WSS-2015-01 [m]", x="",title="Caroline's distance during 4 days") + theme_classic()
 ```
 
-Caroline's moving pattern shows her staying in one place during the days (mostly between 6-9 am to around 6pm). That's most likely when she's sleeping. Movements are only at night, which was to be expected of a nocturnal animal.
+Caroline's moving pattern shows her staying in one place during the days (mostly between 6-9 am to around 6pm). That's most likely when she's sleeping. Movements are only at night, which was to be expected of a nocturnal animal. *(Lia)*
 
 As a next step, finding which kind of field this Schreck WSS-2015-01 is in, was done with the dataset "Feldaufnahmen_Fanel" which provides geographical data about the agricultural fields in Fanel.
-The intersection of Schreck and corresponding field was located using "st_intersects" from the sf-package.
+The intersection of Schreck and corresponding field was located using "st_intersects" from the sf-package. *(Lia)*
 
 
 ```{r Schreck 5 and 6 is in a bean field, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
@@ -336,9 +341,9 @@ ggarrange(
 ```
 
 
-As can be seen, WSS-2015-01 is in a bean field (mode standard and then aggressive). Caroline made some visits during Schreck time.
+As can be seen, WSS-2015-01 is in a bean field (mode standard and then aggressive). Caroline made some visits during Schreck time. *(Lia)*
 
-In a similar way, the positions outside the bean field could be found by subsetting the dataset with st_disjoint() from the sf-package.
+In a similar way, the positions outside the bean field could be found by subsetting the dataset with st_disjoint() from the sf-package. *(Lia)*
 
 ```{r Caroline in the field vs not in the field Schreck 5 and 6, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 #ich will jetzt das Feld definieren. Im Feld drin = TRUE --> alle in inter_sel_5
@@ -363,7 +368,7 @@ ggarrange(
 )
 ```
 
-Using the information about the inside and outside positions, respectively, and adding binary information (1= "in field", 0= "outside of field"), creates information about when Caroline was moving inside of the bean field and when not.
+Using the information about the inside and outside positions, respectively, and adding binary information (1= "in field", 0= "outside of field"), creates information about when Caroline was moving inside of the bean field and when not. *(Lia)*
 
 ```{r Caroline in and out}
 #nun die ausserhalb mit 0 und die innerhalb mit 1 ergänzen
@@ -389,7 +394,7 @@ ggarrange(
 ) ##scaling of y axis not ok yet
 ```
 
-To conceptualize the distances and movements not only during active Schreck times, but also before and after, the whole tracking time of Caroline was visualized:
+To conceptualize the distances and movements not only during active Schreck times, but also before and after, the whole tracking time of Caroline was visualized. *(Lia)*
 
 ```{r Caroline longer time span, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 Caroline_longerThanSchrecktime <- wildschwein_sf %>%
@@ -433,7 +438,7 @@ ggplot() + geom_point(data=Caroline_Schreck5_6_withField_long,aes(DatetimeUTC,di
 #hier noch  zu ergänzen: Linien, wann die Schrecks aktiv sind (z.B. https://stackoverflow.com/questions/66825661/vertical-lines-for-data-points-in-geom-point-in-ggplot2-for-r)
 ```
 
-Reduction of the timescale to March 2015 until November 2015 for Caroline:
+Reduction of the timescale to March 2015 until November 2015 for Caroline: *(Lia)*
 
 ```{r Caroline smaller timescale}
 Caroline_Schreck5_6_withField_long_aroundInFieldtime <- Caroline_Schreck5_6_withField_long %>%
@@ -447,7 +452,7 @@ ggplot() + geom_point(data=Caroline_Schreck5_6_withField_long_aroundInFieldtime,
 #hier noch  zu ergänzen: Linien, wann die Schrecks aktiv sind (z.B. https://stackoverflow.com/questions/66825661/vertical-lines-for-data-points-in-geom-point-in-ggplot2-for-r)
 ```
 
-To conceptualize the active and inactive time of the Schreck, a background fill was used. Subsequently, it was tested if complexity could be reduced by reduction of sampling size
+To conceptualize the active and inactive time of the Schreck, a background fill was used. Subsequently, it was tested if complexity could be reduced by reduction of sampling size *(Lia)*
 
 ```{r Caroline with background color}
  Caroline_breaks <-
@@ -508,7 +513,7 @@ ggarrange(
 )
 ```
 
-As a methodological comparison, smoothing was computed using the Rolling Window approach.
+As a methodological comparison, smoothing was computed using the Rolling Window approach. *(Lia)*
 
 ```{r rolling window Caroline}
 #Variante mit rolling window:
@@ -561,7 +566,7 @@ ggarrange(
 #annotate_figure(plot_rolling_window_Caroline, text_grob("Caroline's distance to Schreck 5 and 6", face="bold", size=20))
 ```
 
-Olga's and Sabine's data were prepared following the same steps as was done with Caroline (preparation steps not shown).
+Olga's and Sabine's data were prepared following the same steps as was done with Caroline (preparation steps not shown). *(Lia)*
 
 ```{r Olga during Schrecktime 5 and 6}
 distance5_Olga_Schrecktime <- wildschwein_sf %>%
@@ -781,7 +786,7 @@ Sabine_Schreck5_6_withField_long_aroundInFieldtime_smooth <- Sabine_Schreck5_6_w
 #  labs(title="Sabine's distance to Schreck 5 and 6", colour="Location", x="",y="Distance [m]")
 
 ```
-Validating the robustness of the methodolical approach was undertaken by visualization and comparison of their different positions around the bean field during active WSS-2015-01.
+Validating the robustness of the methodolical approach was undertaken by visualization and comparison of their different positions around the bean field during active WSS-2015-01. *(Lia)*
 
 ```{r compare Olga and Caroline and Sabine during Schreck time}
 ggarrange(
@@ -804,7 +809,7 @@ ggarrange(
 
 # Results
 
-The final conceptualization of movement patterns of the three female boars is depicted in the following graph. The red points correspond to the position being inside of the bean field with the Schreck WSS-2015-01.
+The final conceptualization of movement patterns of the three female boars is depicted in the following graph. The red points correspond to the position being inside of the bean field with the Schreck WSS-2015-01. *(Lia)*
 
 ```{r compare distances from all 3 animals, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 ggarrange(
@@ -848,7 +853,7 @@ ggarrange(
 
 
 ## In the field vs. out of the field before, during and after approach
-How much time does a boar spend in the field before the Schreck (in %), during and after? 
+How much time does a boar spend in the field before the Schreck (in %), during and after? *(Michèle)*
 ```{r in the field vs not in the field during SChreck time}
 #Im Feld drin = TRUE --> alle in inter_sel_5
 
