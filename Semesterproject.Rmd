@@ -1096,7 +1096,7 @@ ggarrange(
             alpha = 0.5) + 
   geom_line(data=Caroline_Schreck5_6_withField_long_aroundInFieldtime_smooth2,aes(as.Date(DatetimeUTC),distance5_6)) +
   geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
-  labs(subtitle= "Reducing sample size to every 50th observation", colour="Location") +
+  labs(subtitle= "Reducing sampling size to every 50th observation", colour="Location") +
     rremove("y.title") + rremove("x.title"),
   ggplot() +
   geom_rect(data = Caroline_breaks,
@@ -1108,7 +1108,7 @@ ggarrange(
             alpha = 0.5) + 
   geom_line(data=Caroline_Schreck5_6_withField_long_aroundInFieldtime_smooth,aes(as.Date(DatetimeUTC),distance5_6)) +
   geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
-  labs(subtitle= "Reducing sample size to every 150th observation", colour="Location") +
+  labs(subtitle= "Reducing sampling size to every 150th observation", colour="Location") +
     rremove("y.title") + rremove("x.title"),
   nrow=2, common.legend=TRUE, legend="right"
 )
