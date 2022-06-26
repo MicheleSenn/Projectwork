@@ -73,7 +73,7 @@ The contributors were marked where possible.
 # Methods
 
 ## Data processing *(Lia)*
-The data was loaded and conferted into the coordination system crs = 2056.To find out, which boars were affected by which Schreck, the datasets were both transformed into the same coordinate system using st_transform. They were subsequently plotted on top of each other to visualize the spatial overlap.
+The data was loaded and converted into the coordination system crs = 2056.To find out, which boars were affected by which Schreck, the datasets were both transformed into the same coordinate system using st_transform. They were subsequently plotted on top of each other to visualize the spatial overlap.
 
 ```{r temporal overlap, eval=FALSE, include=FALSE}
 #load data and put into readable format
@@ -191,7 +191,7 @@ ggplot(wildschwein_schreck1, aes(DatetimeUTC,distance, color=TierName)) + geom_p
 
 Since it isn't known how close you would need to be to hear the Schreck, all of the five boars Caroline, Isabelle, Nicole, Sabine and Ueli could potentially have been affected.
 
-The same procedure was repeated for the other possibly relevant Schrecks (results not displayed). *(Lia)*
+The same procedure was repeated for the other  Schrecks in the Fanel region (results not displayed). *(Lia)*
 
 ```{r distance to Schreck 2, include=FALSE}
 #filter for schreck and running period
@@ -853,6 +853,12 @@ ggarrange(
 
 
 ## In the field vs. out of the field before, during and after approach
+In this approach the time of a boar inside a certain area is compared to the time spent outside of this area. The idea behind this approach was to gather information out of a rather large dataset that is relevant for a farmer. Furthermore, this approach should provide some relative numbers with which a conclusion might be reached as to weather or not the scare-off measures have an effect on the boars. 
+A binary approach in form of a inside vs. outside the field was used. The defined area is a certain field. This will be done for the period before the Schreck was put into action, during and after. The percentage of time spent inside the field vs. outside the field can then be compared between the timespan before, during and after.
+
+First the Schreck and boar for this approach had to be selected. It had be Schrecks and boars were several animals were in the vicinity of a Schreck during its running period were there's also enough tracking data of the boars movement from the period before the Schreck was put into action and from the period after the Schreck was active. This was done as described above. Schreck number 5 and 6 respectively were selected and the boars Caroline, Sabine and Olga, also as described in more detail above.
+
+The question which this approach seeks to answer is:
 How much time does a boar spend in the field before the Schreck (in %), during and after? *(Michèle)*
 ```{r in the field vs not in the field during SChreck time}
 #Im Feld drin = TRUE --> alle in inter_sel_5
