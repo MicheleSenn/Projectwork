@@ -214,7 +214,7 @@ ggplot(wildschwein_schreck5, aes(DatetimeUTC,distance, color=TierName)) + geom_p
 Many boars could have been affected by Schreck 5, whereas only a few seem to have been close enough. The animals that were tracked further away will be filtered out.
 The plot for Schreck WSS_2015_01 but in aggressive mode looks as follows:
 
-```{r distance to Schreck}
+```{r distance to Schreck6}
 #filter
 schreck6 <- agenda_fanel[6,]
 
@@ -281,7 +281,7 @@ For Schreck 11 it could be Miriam, Frida, Caroline and Ueli.
 Using the approach of calculating the distance of the boar to the Schreck provides the following results.
 
 Sabine and Isabelle seem to have come the closest to Schreck WSS_2014_04, so there distance to the Schreck during its running time was plotted. 
-```{r distance to Schreck 1}
+```{r distance to Schreck 1 filtered}
 
 wildschwein_sf$distance_Schreck1 <- as.numeric(st_distance(wildschwein_sf,schreck1)[,1])
 
@@ -294,7 +294,7 @@ ggplot(affected_distance, aes(DatetimeUTC,distance_Schreck1, color=TierName)) + 
 ```
 Sabine and Isabelle don't seem to be impressed by the Schreck. However they only just came across the Schreck for 2 and 4 days accordingly before the Schreck stopped.
 
-```{r distance to Schreck}
+```{r distance to Schreck5 filtered}
 
 #add distance
 wildschwein_sf$distance_Schreck5 <- as.numeric(st_distance(wildschwein_sf,schreck5)[,1])
@@ -321,14 +321,25 @@ There seems to be some short time effect on the boars especially of Schreck 5. I
 ##In the field vs. out of the field before, during and after approach
 How much time does a boar spend in the field before the Schreck (in %), during and after? 
 ```{r in the field vs not in the field during SChreck time}
-#Im Feld drin = TRUE --> alle in inter_sel_5
+#create field
+forest <- read_sf("Feldaufnahmen_Fanel.gpkg")
 
+st_intersects(schreck5, forest) 
+
+forest_bohnen195 <- forest %>%
+  filter(FieldID==195)
+
+distance5_Caroline_Schrecktime <- wildschwein_sf %>%
+  filter(TierName == "Caroline", DatetimeUTC > "2015-05-20", DatetimeUTC < "2015-06-12")
+
+intersection_195andSchreck5 <- st_intersects(forest_bohnen195,distance5_Caroline_Schrecktime)
 
 disjoint_195andSchreck5 <- st_disjoint(forest_bohnen195,distance5_Caroline_Schrecktime)
 class(intersection_195andSchreck5)
 
 disjoint_caroline_5 <- distance5_Caroline_Schrecktime[disjoint_195andSchreck5[[1]],]
 
+inter_sel_5 <- distance5_Caroline_Schrecktime[intersection_195andSchreck5[[1]],]
 
 #nun die ausserhalb mit 0 und die innerhalb mit 1 ergänzen
 disjoint_caroline_5$inField <- 0
