@@ -345,7 +345,7 @@ As can be seen, WSS-2015-01 is in a bean field (mode standard and then aggressiv
 disjoint_195andSchreck5 <- st_disjoint(forest_bohnen195,distance5_Caroline_Schrecktime)
 disjoint_195andSchreck6 <- st_disjoint(forest_bohnen195,distance6_Caroline_Schrecktime)
 class(intersection_195andSchreck5)
-
+..
 disjoint_caroline_5 <- distance5_Caroline_Schrecktime[disjoint_195andSchreck5[[1]],]
 disjoint_caroline_6 <- distance6_Caroline_Schrecktime[disjoint_195andSchreck6[[1]],]
 
