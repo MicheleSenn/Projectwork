@@ -570,61 +570,6 @@ ggarrange(
 ```
 
 
-Of additional interest was the relative change of distance during the same time period. It was calculated by grouping average daily distances and calculating their average change in %.
-
-
-```{r relative distance change}
-distance5_longerThanSchrecking_relChange <- Caroline_Schreck5_6_withField_long_aroundInFieldtime %>%
-  mutate(Week=lubridate::week(DatetimeUTC)) %>%
-  group_by(Week) %>%
-  arrange(desc(Week)) %>%
-  summarise(avg_dist = mean(distance5_6)) %>%
-  mutate(dist_perc= (avg_dist/lead(avg_dist) - 1) * 100) %>%
-  mutate(TierName="Caroline")
-
-distance5_longerThanSchrecking_relChange_olga <- Olga_Schreck5_6_withField_long_aroundInFieldtime %>%
-  mutate(Week=lubridate::week(DatetimeUTC)) %>%
-  group_by(Week) %>%
-  arrange(desc(Week)) %>%
-  summarise(avg_dist = mean(distance5_6)) %>%
-  mutate(dist_perc= (avg_dist/lead(avg_dist) - 1) * 100) %>%
-  mutate(TierName = "Olga")
-
-distance5_longerThanSchrecking_relChange_Sabine <- Sabine_Schreck5_6_withField_long_aroundInFieldtime %>%
-  mutate(Week=lubridate::week(DatetimeUTC)) %>%
-  group_by(Week) %>%
-  arrange(desc(Week)) %>%
-  summarise(avg_dist = mean(distance5_6)) %>%
-  mutate(dist_perc= (avg_dist/lead(avg_dist) - 1) * 100) %>%
-  mutate(TierName = "Sabine")
-
-relChange_all_3boars <- rbind(distance5_longerThanSchrecking_relChange,distance5_longerThanSchrecking_relChange_olga,distance5_longerThanSchrecking_relChange_Sabine)
-
-
-Relative_breaks <-
-  data.frame(start=(c(15,20,23,26)),
-             end=(c(20,23,26,32)),
-             colors=factor(1:4),
-             Phases=c("Before Schreck activity","During active Schreck 5","During active Schreck 6","After Schreck activity"))
-
-ggplot() +
-  geom_rect(data = Relative_breaks,
-            aes(xmin = start,
-                xmax = end,
-                ymin = - Inf,
-                ymax = Inf,
-                fill = Phases),
-            alpha = 0.2) +
-  geom_line(data=relChange_all_3boars, aes(Week,dist_perc, color=TierName)) + labs(y="Change in distance [%]", title="Relative change in distance from WSS-2015-01") + theme_classic() 
-  #geom_vline(xintercept=20, linetype="dashed")
-
-#Looking at avg distance
-#ggplot(distance5_longerThanSchrecking_relChange,aes(week, avg_dist)) + geom_line()
-#Looking at change in distance
-#ggplot(distance5_longerThanSchrecking_relChange_olga,aes(week,dist_perc)) +
-#  geom_line() + labs(y="Change in distance [%]")
-```
-
 Olga's and Sabine's data were prepared following the same steps as was done with Caroline (preparation steps not shown). *(Lia)*
 
 ```{r Olga during Schrecktime 5 and 6}
@@ -845,6 +790,7 @@ Sabine_Schreck5_6_withField_long_aroundInFieldtime_smooth <- Sabine_Schreck5_6_w
 #  labs(title="Sabine's distance to Schreck 5 and 6", colour="Location", x="",y="Distance [m]")
 
 ```
+
 Validating the robustness of the methodolical approach was undertaken by visualization and comparison of their different positions around the bean field during active WSS-2015-01. *(Lia)*
 
 ```{r compare Olga and Caroline and Sabine during Schreck time}
@@ -909,7 +855,60 @@ ggarrange(
   )
 ```
 
+Of additional interest was the relative change of distance during the same time period. It was calculated by grouping average daily distances and calculating their average change in %.
 
+
+```{r relative distance change}
+distance5_longerThanSchrecking_relChange <- Caroline_Schreck5_6_withField_long_aroundInFieldtime %>%
+  mutate(Week=lubridate::week(DatetimeUTC)) %>%
+  group_by(Week) %>%
+  arrange(desc(Week)) %>%
+  summarise(avg_dist = mean(distance5_6)) %>%
+  mutate(dist_perc= (avg_dist/lead(avg_dist) - 1) * 100) %>%
+  mutate(TierName="Caroline")
+
+distance5_longerThanSchrecking_relChange_olga <- Olga_Schreck5_6_withField_long_aroundInFieldtime %>%
+  mutate(Week=lubridate::week(DatetimeUTC)) %>%
+  group_by(Week) %>%
+  arrange(desc(Week)) %>%
+  summarise(avg_dist = mean(distance5_6)) %>%
+  mutate(dist_perc= (avg_dist/lead(avg_dist) - 1) * 100) %>%
+  mutate(TierName = "Olga")
+
+distance5_longerThanSchrecking_relChange_Sabine <- Sabine_Schreck5_6_withField_long_aroundInFieldtime %>%
+  mutate(Week=lubridate::week(DatetimeUTC)) %>%
+  group_by(Week) %>%
+  arrange(desc(Week)) %>%
+  summarise(avg_dist = mean(distance5_6)) %>%
+  mutate(dist_perc= (avg_dist/lead(avg_dist) - 1) * 100) %>%
+  mutate(TierName = "Sabine")
+
+relChange_all_3boars <- rbind(distance5_longerThanSchrecking_relChange,distance5_longerThanSchrecking_relChange_olga,distance5_longerThanSchrecking_relChange_Sabine)
+
+
+Relative_breaks <-
+  data.frame(start=(c(15,20,23,26)),
+             end=(c(20,23,26,32)),
+             colors=factor(1:4),
+             Phases=c("Before Schreck activity","During active Schreck 5","During active Schreck 6","After Schreck activity"))
+
+ggplot() +
+  geom_rect(data = Relative_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+                ymax = Inf,
+                fill = Phases),
+            alpha = 0.2) +
+  geom_line(data=relChange_all_3boars, aes(Week,dist_perc, color=TierName)) + labs(y="Change in distance [%]", title="Relative change in distance from WSS-2015-01") + theme_classic() 
+  #geom_vline(xintercept=20, linetype="dashed")
+
+#Looking at avg distance
+#ggplot(distance5_longerThanSchrecking_relChange,aes(week, avg_dist)) + geom_line()
+#Looking at change in distance
+#ggplot(distance5_longerThanSchrecking_relChange_olga,aes(week,dist_perc)) +
+#  geom_line() + labs(y="Change in distance [%]")
+```
 
 ## In the field vs. out of the field before, during and after approach
 In this approach the time of a boar inside a certain area is compared to the time spent outside of this area. The idea behind this approach was to gather information out of a rather large dataset that is relevant for a farmer. Furthermore, this approach should provide some relative numbers with which a conclusion might be reached as to weather or not the scare-off measures have an effect on the boars. 
