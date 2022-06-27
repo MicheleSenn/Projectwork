@@ -959,16 +959,6 @@ Caroline_field_inout_after <- bind_rows(Caroline_field_after,intersectafter)
 
 ```
 
-```{r plot Caroline}
-# beforeduringafter <- Caroline_field_inout_before %>% add_column(Caroline_field_inout_during$inField)
-# 
-# #plot
-# Caroline_field_inout_during %>%
-#   ggplot(aes(Date, share_entries, fill = Remaining)) +
-#   geom_col()
-```
-
-
 ```{r Sabine in the field vs not in the field during SChreck time}
 
 Sabine_Schrecktime <- wildschwein_sf %>%
@@ -1145,6 +1135,15 @@ Olga_field_inout_after <- bind_rows(Olga_field_after,intersectafter)
 
 ```
 
+```{r plot beforeduringafter in field}
+# beforeduringafter <- data.frame(Caroline = c ("before"= 0.03, "during"= 2, "after"= 0.4), Sabine = c("before"= 0, "during"= 0.9, "after"= 0.4), Olga = c("before"= 0.4, "during"= 2, "after"= 0.7))
+
+beforeduringafter <- data.frame(before = c ("Caroline"= 0.03, "Sabine"= 0, "Olga"= 0.4), during = c(2, 0.9, 2), after = c(0.4, 0.4, 0.7))
+
+dd <- cbind(beforeduringafter$before,beforeduringafter$during, beforeduringafter$after)
+barplot(dd, beside=T,  names.arg=c('before','during','after'), legend = c("Caroline", "Sabine", "Olga"),xlim = c(0, 21), ylab = "time spent in field (%)")
+
+```
 
 # Discussion
 Using the distance of boar to Schreck approach has the disadvantage that there is no way of showing that an effect was due to the Schreck and not simply a coincidence. This approach is good for getting a first idea of the boars movement and to select the Schrecks and boars with which to continue in further analysis. It shows which boars were in the vicinity of a Schreck and could therefore possibly have been affected by it.
