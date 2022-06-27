@@ -860,20 +860,37 @@ First the Schreck and boar for this approach had to be selected. It had be Schre
 
 The question which this approach seeks to answer is:
 How much time does a boar spend in the field before the Schreck (in %), during and after? *(Michèle)*
-```{r in the field vs not in the field during SChreck time}
-#Im Feld drin = TRUE --> alle in inter_sel_5
+
+Schreck 5 and 6 is in a bean field (as described above). Caroline seems to be spending 0.03 % of her time in that field before the Schreck was put there, 2 % of her time during the Schrecks active period and 0.4 % of her time after the Schrecks active period.
+
+Sabine seems to be spending 0 % of her time in that field before the Schreck was put there, 0.9 % of her time during the Schrecks active period and 0.4 % of her time after the Schrecks active period.
+
+Olga seems to be spending 0.4 % of her time in that field before the Schreck was put there, 2 % of her time during the Schrecks active period and 0.7 % of her time after the Schrecks active period.
+
+```{r Caroline in the field vs not in the field during SChreck time}
+st_intersects(schreck5, forest)
+
+fieldforschreck5 <- forest %>%
+  filter(FieldID==195)
+
+Caroline_Schrecktime <- wildschwein_sf %>%
+  filter(TierName == "Caroline", DatetimeUTC > "2015-05-20", DatetimeUTC < "2015-06-12")
+
+Caroline_field <- st_disjoint(fieldforschreck5,Caroline_Schrecktime)
 
 
-disjoint_195andSchreck5 <- st_disjoint(forest_bohnen195,distance5_Caroline_Schrecktime)
+Caroline_field_during <- Caroline_Schrecktime[Caroline_field[[1]],]
 
-disjoint_caroline_5 <- distance5_Caroline_Schrecktime[disjoint_195andSchreck5[[1]],]
+CarolineIntersect <- st_intersects(fieldforschreck5,Caroline_Schrecktime)
 
+intersect <- Caroline_Schrecktime[CarolineIntersect[[1]],]
 
-#nun die ausserhalb mit 0 und die innerhalb mit 1 ergänzen
-disjoint_caroline_5$inField <- 0
-inter_sel_5$inField <- 1
-#append the two data sets again with their new columns
-Caroline_Schreck5_withField <- bind_rows(disjoint_caroline_5,inter_sel_5)
+#out of field = 0 in field = 1 
+Caroline_field_during$inField <- 0
+intersect$inField <- 1
+
+#append 
+Caroline_field_inout_during <- bind_rows(Caroline_field_during,intersect)
 
   
 
@@ -882,12 +899,257 @@ Caroline_Schreck5_withField <- bind_rows(disjoint_caroline_5,inter_sel_5)
 print(47/2207*100)
 # during Schreck time she spends 2 % of her time in the field.
 
-# now the same for before and after
+```
 
-#Idea: also display graphically the distribution of "In" and "Not In" Before, during and after
+```{r Caroline in the field vs not in the field before SChreck time}
+
+Caroline_Schrecktime_before <- wildschwein_sf %>%
+  filter(TierName == "Caroline", DatetimeUTC < "2015-05-20")
+
+Caroline_field <- st_disjoint(fieldforschreck5,Caroline_Schrecktime_before)
+
+Caroline_field_before <- Caroline_Schrecktime_before[Caroline_field[[1]],]
+
+CarolineIntersectbefore <- st_intersects(fieldforschreck5,Caroline_Schrecktime_before)
+
+intersectbefore <- Caroline_Schrecktime_before[CarolineIntersectbefore[[1]],]
+
+#out of field = 0 in field = 1 
+Caroline_field_before$inFieldbefore <- 0
+intersectbefore$inFieldbefore <- 1
+
+#append 
+Caroline_field_inout_before <- bind_rows(Caroline_field_before,intersectbefore)
+
+  
+
+
+#4 from 14789 Data points are in the field
+#print(4/14789*100)
+# during Schreck time she spends 0.03 % of her time in the field.
+
+```
+
+```{r Caroline in the field vs not in the field after SChreck time}
+
+Caroline_Schrecktime_after <- wildschwein_sf %>%
+  filter(TierName == "Caroline", DatetimeUTC > "2015-06-12")
+
+Caroline_field <- st_disjoint(fieldforschreck5,Caroline_Schrecktime_after)
+
+Caroline_field_after <- Caroline_Schrecktime_after[Caroline_field[[1]],]
+
+CarolineIntersectafter <- st_intersects(fieldforschreck5,Caroline_Schrecktime_after)
+
+intersectafter <- Caroline_Schrecktime_after[CarolineIntersectafter[[1]],]
+
+#out of field = 0 in field = 1 
+Caroline_field_after$inField <- 0
+intersectafter$inField <- 1
+
+#append 
+Caroline_field_inout_after <- bind_rows(Caroline_field_after,intersectafter)
+
+  
+
+
+#156 from 39029 Data points are in the field
+#print(156/39029*100)
+# during Schreck time she spends 0.4 % of her time in the field.
+
+```
+
+```{r plot Caroline}
+# beforeduringafter <- Caroline_field_inout_before %>% add_column(Caroline_field_inout_during$inField)
+# 
+# #plot
+# Caroline_field_inout_during %>%
+#   ggplot(aes(Date, share_entries, fill = Remaining)) +
+#   geom_col()
 ```
 
 
+```{r Sabine in the field vs not in the field during SChreck time}
+
+Sabine_Schrecktime <- wildschwein_sf %>%
+  filter(TierName == "Sabine", DatetimeUTC > "2015-05-20", DatetimeUTC < "2015-06-12")
+
+Sabine_field <- st_disjoint(fieldforschreck5,Sabine_Schrecktime)
+
+
+Sabine_field_during <- Sabine_Schrecktime[Sabine_field[[1]],]
+
+SabineIntersect <- st_intersects(fieldforschreck5,Sabine_Schrecktime)
+
+intersect <- Sabine_Schrecktime[SabineIntersect[[1]],]
+
+#out of field = 0 in field = 1 
+Sabine_field_during$inField <- 0
+intersect$inField <- 1
+
+#append 
+Sabine_field_inout_during <- bind_rows(Sabine_field_during,intersect)
+
+  
+
+
+#19 from 2207 Data points are in the field
+print(19/2207*100)
+# during Schreck time she spends 0.9 % of her time in the field.
+
+```
+
+```{r Sabine in the field vs not in the field before SChreck time}
+
+Sabine_Schrecktime_before <- wildschwein_sf %>%
+  filter(TierName == "Sabine", DatetimeUTC < "2015-05-20")
+
+Sabine_field <- st_disjoint(fieldforschreck5,Sabine_Schrecktime_before)
+
+Sabine_field_before <- Sabine_Schrecktime_before[Sabine_field[[1]],]
+
+SabineIntersectbefore <- st_intersects(fieldforschreck5,Sabine_Schrecktime_before)
+
+intersectbefore <- Sabine_Schrecktime_before[SabineIntersectbefore[[1]],]
+
+#out of field = 0 in field = 1 
+Sabine_field_before$inField <- 0
+intersectbefore$inField <- 1
+
+#append 
+Sabine_field_inout_before <- bind_rows(Sabine_field_before,intersectbefore)
+
+  
+
+
+#0 from 16165 Data points are in the field
+#print(0/16165*100)
+# during Schreck time she spends 0 % of her time in the field.
+
+```
+
+```{r Sabine in the field vs not in the field after SChreck time}
+
+Caroline_Schrecktime_after <- wildschwein_sf %>%
+  filter(TierName == "Caroline", DatetimeUTC > "2015-06-12")
+
+Caroline_field <- st_disjoint(fieldforschreck5,Caroline_Schrecktime_after)
+
+Caroline_field_after <- Caroline_Schrecktime_after[Caroline_field[[1]],]
+
+CarolineIntersectafter <- st_intersects(fieldforschreck5,Caroline_Schrecktime_after)
+
+intersectafter <- Caroline_Schrecktime_after[CarolineIntersectafter[[1]],]
+
+#out of field = 0 in field = 1 
+Caroline_field_after$inField <- 0
+intersectafter$inField <- 1
+
+#append 
+Caroline_field_inout_after <- bind_rows(Caroline_field_after,intersectafter)
+
+  
+
+
+#156 from 39029 Data points are in the field
+print(156/39029*100)
+# during Schreck time she spends 0.4 % of her time in the field.
+
+```
+
+```{r Olga in the field vs not in the field during SChreck time}
+
+Olga_Schrecktime <- wildschwein_sf %>%
+  filter(TierName == "Olga", DatetimeUTC > "2015-05-20", DatetimeUTC < "2015-06-12")
+
+Olga_field <- st_disjoint(fieldforschreck5,Olga_Schrecktime)
+
+
+Olga_field_during <- Olga_Schrecktime[Olga_field[[1]],]
+
+OlgaIntersect <- st_intersects(fieldforschreck5,Olga_Schrecktime)
+
+intersect <- Olga_Schrecktime[OlgaIntersect[[1]],]
+
+#out of field = 0 in field = 1 
+Olga_field_during$inField <- 0
+intersect$inField <- 1
+
+#append 
+Olga_field_inout_during <- bind_rows(Olga_field_during,intersect)
+
+  
+
+
+#42 from 2205 Data points are in the field
+#print(42/2205*100)
+# during Schreck time she spends 2 % of her time in the field.
+
+```
+
+```{r Olga in the field vs not in the field before SChreck time}
+
+Olga_Schrecktime_before <- wildschwein_sf %>%
+  filter(TierName == "Olga", DatetimeUTC < "2015-05-20")
+
+Olga_field <- st_disjoint(fieldforschreck5,Olga_Schrecktime_before)
+
+Olga_field_before <- Olga_Schrecktime_before[Olga_field[[1]],]
+
+OlgaIntersectbefore <- st_intersects(fieldforschreck5,Olga_Schrecktime_before)
+
+intersectbefore <- Olga_Schrecktime_before[OlgaIntersectbefore[[1]],]
+
+#out of field = 0 in field = 1 
+Olga_field_before$inField <- 0
+intersectbefore$inField <- 1
+
+#append 
+Olga_field_inout_before <- bind_rows(Olga_field_before,intersectbefore)
+
+  
+
+
+#7 from 1921 Data points are in the field
+#print(7/1921*100)
+# during Schreck time she spends 0.4 % of her time in the field.
+
+```
+
+```{r Olga in the field vs not in the field after SChreck time}
+
+Olga_Schrecktime_after <- wildschwein_sf %>%
+  filter(TierName == "Olga", DatetimeUTC > "2015-06-12")
+
+Olga_field <- st_disjoint(fieldforschreck5,Olga_Schrecktime_after)
+
+Olga_field_after <- Olga_Schrecktime_after[Olga_field[[1]],]
+
+OlgaIntersectafter <- st_intersects(fieldforschreck5,Olga_Schrecktime_after)
+
+intersectafter <- Olga_Schrecktime_after[OlgaIntersectafter[[1]],]
+
+#out of field = 0 in field = 1 
+Olga_field_after$inField <- 0
+intersectafter$inField <- 1
+
+#append 
+Olga_field_inout_after <- bind_rows(Olga_field_after,intersectafter)
+
+  
+
+
+#140 from 19826 Data points are in the field
+#print(140/19826*100)
+# during Schreck time she spends 0.7 % of her time in the field.
+
+```
+
+
+# Discussion
+Using the distance of boar to Schreck approach has the disadvantage that there is no way of showing that an effect was due to the Schreck and not simply a coincidence. This approach is good for getting a first idea of the boars movement and to select the Schrecks and boars with which to continue in further analysis. It shows which boars were in the vicinity of a Schreck and could therefore possibly have been affected by it.
+Discuss distance vs. displacement.
+Discuss smoothing --> necessary? Comparison between sampling size reduction and rolling window method.
 
 
 # Discussion
