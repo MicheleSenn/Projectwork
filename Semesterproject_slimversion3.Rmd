@@ -863,7 +863,7 @@ How much time does a boar spend in the field before the Schreck (in %), during a
 
 Schreck 5 and 6 is in a bean field (as described above). Caroline seems to be spending 0.03 % of her time in that field before the Schreck was put there, 2 % of her time during the Schrecks active period and 0.4 % of her time after the Schrecks active period.
 
-Sabine seems to be spending 0 % of her time in that field before the Schreck was put there, 0.9 % of her time during the Schrecks active period and 0.4 % of her time after the Schrecks active period.
+Sabine seems to be spending 0 % of her time in that field before the Schreck was put there, 0.9 % of her time during the Schrecks active period and 3 % of her time after the Schrecks active period.
 
 Olga seems to be spending 0.4 % of her time in that field before the Schreck was put there, 2 % of her time during the Schrecks active period and 0.7 % of her time after the Schrecks active period.
 
@@ -1020,30 +1020,30 @@ Sabine_field_inout_before <- bind_rows(Sabine_field_before,intersectbefore)
 
 ```{r Sabine in the field vs not in the field after SChreck time}
 
-Caroline_Schrecktime_after <- wildschwein_sf %>%
-  filter(TierName == "Caroline", DatetimeUTC > "2015-06-12")
+Sabine_Schrecktime_after <- wildschwein_sf %>%
+  filter(TierName == "Sabine", DatetimeUTC > "2015-06-12")
 
-Caroline_field <- st_disjoint(fieldforschreck5,Caroline_Schrecktime_after)
+Sabine_field <- st_disjoint(fieldforschreck5,Sabine_Schrecktime_after)
 
-Caroline_field_after <- Caroline_Schrecktime_after[Caroline_field[[1]],]
+Sabine_field_after <- Sabine_Schrecktime_after[Sabine_field[[1]],]
 
-CarolineIntersectafter <- st_intersects(fieldforschreck5,Caroline_Schrecktime_after)
+SabineIntersectafter <- st_intersects(fieldforschreck5,Sabine_Schrecktime_after)
 
-intersectafter <- Caroline_Schrecktime_after[CarolineIntersectafter[[1]],]
+intersectafter <- Sabine_Schrecktime_after[SabineIntersectafter[[1]],]
 
 #out of field = 0 in field = 1 
-Caroline_field_after$inField <- 0
+Sabine_field_after$inField <- 0
 intersectafter$inField <- 1
 
 #append 
-Caroline_field_inout_after <- bind_rows(Caroline_field_after,intersectafter)
+Sabine_field_inout_after <- bind_rows(Sabine_field_after,intersectafter)
 
   
 
 
-#156 from 39029 Data points are in the field
-print(156/39029*100)
-# during Schreck time she spends 0.4 % of her time in the field.
+#126 from 4372 Data points are in the field
+print(126/4372*100)
+# during Schreck time she spends 3 % of her time in the field.
 
 ```
 
@@ -1135,18 +1135,61 @@ Olga_field_inout_after <- bind_rows(Olga_field_after,intersectafter)
 
 ```
 
-```{r plot beforeduringafter in field}
+```{r plot beforeduringafter in field percentage}
 # beforeduringafter <- data.frame(Caroline = c ("before"= 0.03, "during"= 2, "after"= 0.4), Sabine = c("before"= 0, "during"= 0.9, "after"= 0.4), Olga = c("before"= 0.4, "during"= 2, "after"= 0.7))
 
-beforeduringafter <- data.frame(before = c ("Caroline"= 0.03, "Sabine"= 0, "Olga"= 0.4), during = c(2, 0.9, 2), after = c(0.4, 0.4, 0.7))
+beforeduringafter <- data.frame(before = c ("Caroline"= 0.03, "Sabine"= 0, "Olga"= 0.4), during = c(2, 0.9, 2), after = c(0.4, 3, 0.7))
 
 dd <- cbind(beforeduringafter$before,beforeduringafter$during, beforeduringafter$after)
 barplot(dd, beside=T,  names.arg=c('before','during','after'), legend = c("Caroline", "Sabine", "Olga"),xlim = c(0, 21), ylab = "time spent in field (%)")
 
 ```
 
+In order to validate this their wherabouts were plotted before, during and after the Schrecks active period. To visualize weather or not they were inside the field in which the Schreck was placed, the area of the field is marked in the plot.
+
+```{r Caroline beforeduringafter plot inoutside field}
+#Caroline
+ggarrange(
+  ggplot(fieldforschreck5)+geom_sf(aes(fill=Frucht)) +
+    geom_sf(data=Caroline_Schrecktime_before, size = 0.2) + labs(title="Caroline before Schrecktime") + theme_classic(), 
+  ggplot(fieldforschreck5)+geom_sf(aes(fill=Frucht)) +
+    geom_sf(data=Caroline_Schrecktime, size = 0.2) + labs(title="Caroline during Schrecktime") + theme_classic(), 
+  ggplot(fieldforschreck5)+geom_sf(aes(fill=Frucht)) +
+    geom_sf(data=Caroline_Schrecktime_after, size = 0.2) + labs(title="Caroline after Schrecktime") + theme_classic() 
+)
+
+```
+
+```{r Sabine beforeduringafter plot inoutside field}
+#Sabine
+ggarrange(
+  ggplot(fieldforschreck5)+geom_sf(aes(fill=Frucht)) +
+    geom_sf(data=Sabine_Schrecktime_before, size = 0.2) + labs(title="Sabine before Schrecktime") + theme_classic(), 
+  ggplot(fieldforschreck5)+geom_sf(aes(fill=Frucht)) +
+    geom_sf(data=Sabine_Schrecktime, size = 0.2) + labs(title="Sabine during Schrecktime") + theme_classic(), 
+  ggplot(fieldforschreck5)+geom_sf(aes(fill=Frucht)) +
+    geom_sf(data=Sabine_Schrecktime_after, size = 0.2) + labs(title="Sabine after Schrecktime") + theme_classic() 
+)
+
+```
+
+```{r Olga beforeduringafter plot inoutside field}
+
+#Olga
+ggarrange(
+  ggplot(fieldforschreck5)+geom_sf(aes(fill=Frucht)) +
+    geom_sf(data=Olga_Schrecktime_before, size = 0.2) + labs(title="Olga before Schrecktime") + theme_classic(), 
+  ggplot(fieldforschreck5)+geom_sf(aes(fill=Frucht)) +
+    geom_sf(data=Olga_Schrecktime, size = 0.2) + labs(title="Olga during Schrecktime") + theme_classic(), 
+  ggplot(fieldforschreck5)+geom_sf(aes(fill=Frucht)) +
+    geom_sf(data=Olga_Schrecktime_after, size = 0.2) + labs(title="Olga after Schrecktime") + theme_classic() 
+)
+
+```
+
 # Discussion
 Using the distance of boar to Schreck approach has the disadvantage that there is no way of showing that an effect was due to the Schreck and not simply a coincidence. This approach is good for getting a first idea of the boars movement and to select the Schrecks and boars with which to continue in further analysis. It shows which boars were in the vicinity of a Schreck and could therefore possibly have been affected by it.
+
 Discuss distance vs. displacement.
 Discuss smoothing --> necessary? Comparison between sampling size reduction and rolling window method.
 
