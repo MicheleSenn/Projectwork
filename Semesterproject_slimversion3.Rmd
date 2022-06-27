@@ -263,6 +263,7 @@ distance5_longerThanSchrecking$distance_Schreck5 <- as.numeric(st_distance(dista
 ggplot(distance5_longerThanSchrecking,aes(DatetimeUTC,distance_Schreck5)) + geom_point() + labs(y ="Distance to WSS-2015-01 [m]", x="",title="Caroline's distance during whole tracking time") + theme_classic()
 ```
 
+
 Zooming in for better understanding of the pattern:
 
 ```{r Caroline zoom in}
@@ -274,7 +275,9 @@ distance5_4days_Caroline$distance_Schreck5 <- as.numeric(st_distance(distance5_4
 ggplot(distance5_4days_Caroline,aes(DatetimeUTC,distance_Schreck5)) + geom_point() + labs(y ="Distance to WSS-2015-01 [m]", x="",title="Caroline's distance during 4 days") + theme_classic()
 ```
 
+
 Caroline's moving pattern shows her staying in one place during the days (mostly between 6-9 am to around 6pm). That's most likely when she's sleeping. Movements are only at night, which was to be expected of a nocturnal animal. *(Lia)*
+
 
 As a next step, finding which kind of field this Schreck WSS-2015-01 is in, was done with the dataset "Feldaufnahmen_Fanel" which provides geographical data about the agricultural fields in Fanel.
 The intersection of Schreck and corresponding field was located using "st_intersects" from the sf-package. *(Lia)*
@@ -564,6 +567,62 @@ ggarrange(
 )
 
 #annotate_figure(plot_rolling_window_Caroline, text_grob("Caroline's distance to Schreck 5 and 6", face="bold", size=20))
+```
+
+
+Of additional interest was the relative change of distance during the same time period. It was calculated by grouping average daily distances and calculating their average change in %.
+
+
+```{r relative distance change}
+distance5_longerThanSchrecking_relChange <- Caroline_Schreck5_6_withField_long_aroundInFieldtime %>%
+  mutate(Week=lubridate::week(DatetimeUTC)) %>%
+  group_by(Week) %>%
+  arrange(desc(Week)) %>%
+  summarise(avg_dist = mean(distance5_6)) %>%
+  mutate(dist_perc= (avg_dist/lead(avg_dist) - 1) * 100) %>%
+  mutate(TierName="Caroline")
+
+distance5_longerThanSchrecking_relChange_olga <- Olga_Schreck5_6_withField_long_aroundInFieldtime %>%
+  mutate(Week=lubridate::week(DatetimeUTC)) %>%
+  group_by(Week) %>%
+  arrange(desc(Week)) %>%
+  summarise(avg_dist = mean(distance5_6)) %>%
+  mutate(dist_perc= (avg_dist/lead(avg_dist) - 1) * 100) %>%
+  mutate(TierName = "Olga")
+
+distance5_longerThanSchrecking_relChange_Sabine <- Sabine_Schreck5_6_withField_long_aroundInFieldtime %>%
+  mutate(Week=lubridate::week(DatetimeUTC)) %>%
+  group_by(Week) %>%
+  arrange(desc(Week)) %>%
+  summarise(avg_dist = mean(distance5_6)) %>%
+  mutate(dist_perc= (avg_dist/lead(avg_dist) - 1) * 100) %>%
+  mutate(TierName = "Sabine")
+
+relChange_all_3boars <- rbind(distance5_longerThanSchrecking_relChange,distance5_longerThanSchrecking_relChange_olga,distance5_longerThanSchrecking_relChange_Sabine)
+
+
+Relative_breaks <-
+  data.frame(start=(c(15,20,23,26)),
+             end=(c(20,23,26,32)),
+             colors=factor(1:4),
+             Phases=c("Before Schreck activity","During active Schreck 5","During active Schreck 6","After Schreck activity"))
+
+ggplot() +
+  geom_rect(data = Relative_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+                ymax = Inf,
+                fill = Phases),
+            alpha = 0.2) +
+  geom_line(data=relChange_all_3boars, aes(Week,dist_perc, color=TierName)) + labs(y="Change in distance [%]", title="Relative change in distance from WSS-2015-01") + theme_classic() 
+  #geom_vline(xintercept=20, linetype="dashed")
+
+#Looking at avg distance
+#ggplot(distance5_longerThanSchrecking_relChange,aes(week, avg_dist)) + geom_line()
+#Looking at change in distance
+#ggplot(distance5_longerThanSchrecking_relChange_olga,aes(week,dist_perc)) +
+#  geom_line() + labs(y="Change in distance [%]")
 ```
 
 Olga's and Sabine's data were prepared following the same steps as was done with Caroline (preparation steps not shown). *(Lia)*
