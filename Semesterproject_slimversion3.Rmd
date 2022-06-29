@@ -1,6 +1,6 @@
 ---
 title: Scare-off measures against wild boars 
-subtitle: computational movement analysis
+subtitle: Computational Movement Analysis
 author: Lia Baumann and Michele Senn
 output: html_document
 ---
@@ -25,7 +25,7 @@ library(ggpubr)
 ```
 
 # Abstract
-This project aims to develop a method for modelling the behavior of wild boars who have been in contact with scare-off measures. The hypothesis is that their behavior can be modeled by comparing the average time they spent in a certain field before the scare-off measure called "Schreck" was put into action, during and after. A second approach of calculating the distance of the boar to the Schreck will also be shown in this project.
+This project aims to develop a method for modelling the behavior of wild boars who have been in contact with scare-off measures. The hypothesis is that their behavior can be modeled by their distance to the corresponding Schreck, as well as comparing the average time they spent in a certain field before the scare-off measure called "Schreck" was put into action, during and after.
 
 --> fill in the results
 
@@ -35,35 +35,33 @@ This project aims to develop a method for modelling the behavior of wild boars w
 ## Research Question
 Once a scare-off measure has been set into action, it needs to be examined weather or not it has an effect. Therefore, the following research question was formulated:
 
-How can the behavior of the boars who had been in contact with a Schreck be modeled?
+How can the behavior of the boars who had been in contact with a Schreck be modelled?
 
-The hypothesis is that their behavior can be modeled by comparing the average time they spent in a certain field before the scare-off measure called "Schreck" was put into action, during and after. A second approach of calculating the distance of the boar to the Schreck will also be shown in this project.
+The hypothesis is that their behavior can be modeled by their distance to the corresponding Schreck, as well as comparing the average time they spent in a certain field before the scare-off measure called "Schreck" was put into action, during and after.
+
+Additionally, a second question was formulated, which was used to limit the scope of the research question:
+Can a return pattern to the location of the Schreck be modelled?
 
 ## Data
-In order to achieve this project's goal it is necessary (at least 6 weeks). The data has to be of different times of day and of several individuals in a similar location.
+Data about the "Schrecks", about the boars movement tracking and field data about the placement of the Schreck was used in this project.
 
 ## Analytical concepts
-The analytical concepts used in this project are as follows.
-EDA was used for plotting the data in order to get an idea of what the data looks like and finding patterns like which individual is affected by which Schreck.
-Distances to Scare-Off-Location over time were calculated using the ST_Distance() function, which returns the shortest distance that separates two geometries.
-Trajectories with Moving Window Method were used to remove static points.
-Spatial and time overlaps between the tracked animals were plotted.
-A binary approach was used to find returning patterns by building a "In the Field / not in the Field" vs. distance to Schreck graph.
+Spatial and time overlaps between the tracked animals were plotted to get an idea of what the data looks like and finding patterns like which individual is affected by which Schreck.
+Distances to Scare-Off-Location over time were calculated using the st_distance() function, which returns the shortest distance that separates two geometries.
+The function st_intersects() provides intersection of geographical data points.
+With the Rolling Window method rollmean(), sampling size was reduced and compared to a sampling size reduction by omitting observations.
+To find returning patterns by building a "In the Field / not in the Field" vs. distance to Schreck graph, the application of joins and disjoints and appending a column with the binary data was implemented.
 
 ## R concepts
-The modeling was done using the following concepts and packages:
-
-Spatial objects were created with the r-package "sf".
-
+The modelling was done using the following concepts and packages:
+Spatial objects were created and manipulated with the r-package "sf".
 Raster data and background maps were plotted and visualized with these r-packages: "ggplot2"
-
 For the reshaping and transforming of data the r-package "tidyverse" was used.
 
 ## Risk analysis
-
-The scope is considered a risk because of the amount of behaviors that could potentially be analysed. It is important to only analyse whats needed in order to answer the research question of this project.
+The scope is considered a risk because of the amount of behaviors that could potentially be analysed. It is therefore advised to limit the scope. It was done by using a secondary research question.
 The Interpretation of behaviors might be vague or false because an emerging pattern is only correlated but not causal.
-Technical difficulties could also pose a risk, e.g. when handling too much data, choosing irrelevant thresholds or interpretation issues.
+Technical difficulties could also pose a risk, e.g. when handling too much data in the pre-processing stage, choosing irrelevant thresholds or interpretation issues (semantic annotations).
 Possibly, the different measures don't show the same effects. It might be necessary to distinguish between measures in order to draw inferences.
 
 Disclaimer:
@@ -277,7 +275,7 @@ ggplot(distance5_4days_Caroline,aes(DatetimeUTC,distance_Schreck5)) + geom_point
 ```
 
 
-Caroline's moving pattern shows her staying in one place during the days (mostly between 6-9 am to around 6pm). That's most likely when she's sleeping. Movements, or better to say: changing of distances, are happening only at night, which was to be expected of a nocturnal animal. *(Lia)*
+Caroline's moving pattern shows her staying in one place during the days (mostly between 6-9 am to around 6pm). Speculation: That's most likely when she's sleeping. Movements, or better to say: changing of distances, are happening only at night, which was to be expected of a nocturnal animal. *(Lia)*
 
 
 ## 2.4 Relating locations to environment and defining field
@@ -1294,28 +1292,49 @@ ggarrange(
 
 # 3. Discussion
 ## 3.1 Distance to conceptualize movement
-Using the distance of boar to Schreck approach has the disadvantage that there is no way of showing that an effect was due to the Schreck and not simply a coincidence. This approach is good for getting a first idea of the boars movement and to select the Schrecks and boars with which to continue in further analysis. It shows which boars were in the vicinity of a Schreck and could therefore possibly have been affected by it.
+*(Lia)* As the results show, all boars moved in a 0 to 1500 m radius around the Schreck before the sound started, moved around it in a 0 to 1000 m radius during standard mode and increased radius when switching to aggressive and then quiet mode (= after sounding). Caroline's and Olga's movements could be compared, whereas Sabine moved in a different way.
+Distance was chosen to conceptualize movement, when plotting against the time on the x axis. The question is, if it can be considered **useful** in order to conceptualize an actual pattern. Additionally, validity of the relationships might not be general enough. With such a small analysis (3 boars with one Schreck), it could easily capture only a peculiarity of the current data. (2)
 
-Discuss distance vs. displacement.
-Discuss smoothing --> necessary? Comparison between sampling size reduction and rolling window method.
+*(Lia)* The above explained topic was assessed by using another way of conceptualizing the distance: looking at the relative change of distance in relation to the last day or week (Idea from (4)). It could be considered as distinguishing between first order and second order effects (3).
+Looking at the resulting graphs, it can't be concluded that this measure provides a more useful pattern. At least, the findings from the distance graphs can be reproduced this way (especially the similarity between Olga and Caroline) which could be considered as a validation step.
 
-## 3.2 Validation
-- comparison with other projects
-- face validity with Nils?
-Rykiel, E. J. (1996). Testing ecological models: the meaning of validation. Ecological modelling, 90(3), 229-244.
+# 3.2 In Field vs. Not In Field
+*(Lia)* The original concept to annotate the times when the boars were inside of the bean field resulted in a creation of point at "in Field" moments. The binary display of In vs. Not In didn't provide any useful pattern so it was omitted from the project. In the results, red points can be seen and followed, and interestingly, the boars were visiting the field even during Schreck time. Not even the aggressive mode during activity stopped them from returing to the field.
+This concept could start the analysis of finding returing patterns, though validity
+
+## 3.3 Smoothing methods
+*(Lia)* Counting as an interesting finding was the fact that the boars seemed to reduce and increase their distance on a daily basis, which could relate to their behaviors (sleeping outside of the field and moving back during their active days). This semantic annotation is purely speculative, as it was not further analysed (5).
+In order to reduce this cycling data overload, smoothing methods very used to show general patterns that would naturally decrease the degree of granularity (6).
+One of these methods was subsetting the data to every 50th or 150th element.
+The second option was the rolling window method that uses a mean from different window sizes, for this project set at k=c(10,100,150). The outputs of these two methods are slightly different but all increased readability of the general trend in the distances.
+
+Subsetting and reducing sample size to every 150th observation was used for the result, mainly due to the highest degree of readability.
+
+## 3.4 Validation
+Validation was carried out derived from options in the Rykiel paper (1). It consisted mainly of replotting data either with a subset of the data or in comparison with other parameters (e.g. IDs oder boars).
+
+## 3.5 Problems and solutions
+Before actual conceptualization could take place, a lot of time was invested to find the affected boars, which was necessary to continue the work on the research question.
 
 # Outlook / further steps
-- Context of data (weather, maps, topological...)
+- Context of data (weather, maps, topological...) (3)
+- Segmentation of trajectories so behavior patterns can be classified. Ruling out inactive times might show more distinct patterns or at least serve as validation method. (6)
+- Could the displacement as an additional alternative to distance and change in distance provide alternative and more meaningful patterns?
 
 
 # References
-https://statisticsglobe.com/draw-ggplot2-plot-different-background-colors-region-r
+(1) Rykiel, E. J. (1996). Testing ecological models: the meaning of validation. Ecological modelling, 90(3), 229-244.
+(2) T4 – Defining & detecting patterns, Patrick Laube
+(3) T5 – Context, context, context, Patrick Laube
+(4) Molloy, J., Schatzmann, T., Schoeman, B., Tchervenkov, C., Hintermann, B., & Axhausen, K. W. (2021). Observed impacts of the Covid-19 first wave on travel behaviour in Switzerland based on a large GPS panel. Transport Policy, 104, 43-51.
+(5) SHAMOUN-BARANES, J., et al. 2012. From Sensor Data to Animal Behaviour: An Oystercatcher Example. PLoS ONE, 7(5), e37997
+(6) Laube, Patrick, and Ross S. Purves. 2011. “How Fast Is a Cow? Cross - Scale Analysis of Movement Data.” Transactions in GIS 15 (3): 401–18. https://doi.org/10.1111/j.1467-9671.2011.01256.x.
 
 # From Patrick's project intro:
 
 Your report shall:
 – cover how you went about investigating your research questions. Describe your data science ideas
-and how you implemented your ideas.
+and how you implemented your ideas. - done
 – present the results of your study and discuss them in the light of your research questions. What
 have you achieved and what would be further steps for future research?
 – report problems and limitations you encountered along the way and the solutions you chose to
