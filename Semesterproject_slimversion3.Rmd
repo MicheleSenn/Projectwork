@@ -12,7 +12,7 @@ output: html_document
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 ```
 
-```{r load wild boar data, include=FALSE}
+```{r load wild boar data and libraries, include=FALSE}
 #load packages
 library(devtools)
 #devtools::install_github("ComputationalMovementAnalysis/ComputationalMovementAnalysisData")
@@ -392,10 +392,10 @@ Caroline_Schreck6_withField$distance6 <- as.numeric(st_distance(Caroline_Schreck
 #this is now the pattern during Schreck time --> red points don't say a lot yet, just that she was in the field --> conceptualize better?
 ggarrange(
   ggplot() + geom_point(data=Caroline_Schreck5_withField,aes(DatetimeUTC,distance5)) +
-  geom_point(data=inter_sel_5,aes(DatetimeUTC,inField, colour="in Field")) + labs(title="Standard mode", y="Distance to WSS-2015-01 [m]", x="", colour="Location"),
+  geom_point(data=inter_sel_5,aes(DatetimeUTC,inField, colour="in Field")) + labs(title="Standard mode", y="Distance to WSS-2015-01 [m]", x="", colour="Location") + ylim(c(0,2100)),
   ggplot() + geom_point(data=Caroline_Schreck6_withField,aes(DatetimeUTC,distance6)) +
   geom_point(data=inter_sel_6,aes(DatetimeUTC,inField, colour="in Field")) + labs(title="Aggressive mode", y="", x="", colour="Location"),
-  common.legend=TRUE, legend="bottom", align="h"
+  common.legend=TRUE, legend="bottom"
 ) ##scaling of y axis not ok yet
 ```
 
@@ -931,7 +931,19 @@ distance5_longerThanSchrecking_relChange_Sabine_week <- Sabine_Schreck5_6_withFi
 
 relChange_all_3boars_week <- rbind(distance5_longerThanSchrecking_relChange_week,distance5_longerThanSchrecking_relChange_olga_week,distance5_longerThanSchrecking_relChange_Sabine_week)
 
-ggarrange(
+ggplot() +
+  geom_rect(data = Caroline_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+                ymax = Inf,
+                fill = Phases),
+            alpha = 0.2) +
+  geom_line(data=relChange_all_3boars_day, aes(day,dist_perc)) + labs(y="Change in distance [%]", title="Daily relative change in distance from WSS-2015-01", x="") + theme_classic() +
+  facet_grid(TierName~.)
+
+#geom_vline(xintercept=20, linetype="dashed"),
+
 ggplot() +
   geom_rect(data = Relative_breaks,
             aes(xmin = start,
@@ -940,20 +952,8 @@ ggplot() +
                 ymax = Inf,
                 fill = Phases),
             alpha = 0.2) +
-  geom_line(data=relChange_all_3boars_day, aes(day,dist_perc, color=TierName)) + labs(y="Change in distance [%]", title="Daily relative change in distance from WSS-2015-01") + theme_classic() 
-  #geom_vline(xintercept=20, linetype="dashed"),
-ggplot() +
-  geom_rect(data = Relative_breaks,
-            aes(xmin = start,
-                xmax = end,
-                ymin = - Inf,
-                ymax = Inf,
-                fill = Phases),
-            alpha = 0.2) +
-  geom_line(data=relChange_all_3boars_week, aes(Week,dist_perc, color=TierName)) + labs(y="Change in distance [%]", title="Weekly relative change in distance from WSS-2015-01") + theme_classic() 
-  #geom_vline(xintercept=20, linetype="dashed"),
-  nrow=2, common.legend=TRUE
-  )
+  geom_line(data=relChange_all_3boars_week, aes(Week,dist_perc)) + labs(y="Change in distance [%]", title="Weekly relative change in distance from WSS-2015-01", x="") + theme_classic() +
+  facet_grid(TierName~.)
 
 ```
 
