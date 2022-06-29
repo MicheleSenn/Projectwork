@@ -70,10 +70,10 @@ Disclaimer:
 Data preparation and conceptualization was divided between the two team members.
 The contributors were marked where possible.
 
-# Methods
+# 2. Methods
 
-## Data processing *(Lia)*
-The data was loaded and converted into the coordination system crs = 2056.To find out, which boars were affected by which Schreck, the datasets were both transformed into the same coordinate system using st_transform. They were subsequently plotted on top of each other to visualize the spatial overlap.
+## 2.1 Data pre-processing
+The data was loaded and converted into the coordination system crs = 2056. To find out, which boars were affected by which Schreck, the datasets were both transformed into the same coordinate system using st_transform. They were subsequently plotted on top of each other to visualize the spatial overlap. *(Lia)* 
 
 ```{r temporal overlap, eval=FALSE, include=FALSE}
 #load data and put into readable format
@@ -136,8 +136,7 @@ ggplot() +
   coord_sf(datum=2056)
 ```
 
-
-As a result, it was found that the animals were only tracked around the Schreck in the region of Fanel. As a consequence, all other Schreck data points were removed and the spatial overlap replotted to validate the finding. *(Lia)*
+Apparently, the animals were only tracked around the Schreck in the region of Fanel. As a consequence, all other Schreck data points were removed and the spatial overlap replotted to validate the finding. *(Lia)*
 
 ```{r filter all but region Fanel}
 #only Fanel
@@ -152,7 +151,7 @@ ggplot() +
 
 In order to combine the data about the Schreck locations and their corresponding agenda, or sounding time, they were joined by their matching column "id" with an inner join.
 Following this join, the agenda of all the "Schreck time" was visualized using an errorbar plot.
-Table xy shows a table of the possibly relevant Schrecks as they were active at some point during the boar tracking time. *(Lia)*
+Table 1 shows a table of the possibly relevant Schrecks as they were active at some point during the boar tracking time. *(Lia)*
 
 ```{r join schreck agendas fanel, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 agenda_fanel <- inner_join(schreck_locations_sf_fanel, schreck_agenda, by="id")
@@ -164,13 +163,13 @@ ggplot(agenda_fanel, aes(xmin = datum_on, xmax = datum_off, y=id )) +
 knitr::kable(agenda_fanel %>%
                filter(lubridate::year(datum_off)<2017) %>%
                select(id, datum_on, datum_off, modus),
-             caption = "Table of all Schrecks in region Fanel during boar tracking time"
+             caption = "Table 1: All Schrecks in region Fanel during boar tracking time"
              )
 ```
 
-## Selecting focus *(Lia)*
+## 2.2 Selection of focus
 In order to see which animals were tracked during the active period of the "Schreck", the boar data was filtered by the dates in which the Schreck were active.
-For the tracked boars, a distance between their coordinates and the Schreck coordinate was calculated using st_distance().
+For the tracked boars, a distance between their coordinates and the Schreck coordinate was calculated using st_distance(). In the following graph, one example of the resulting distances is shown. *(Lia)*
 
 ```{r distance to Schreck 1}
 #1 Schreck filter
@@ -185,13 +184,13 @@ wildschwein_schreck1$distance <- as.numeric(st_distance(wildschwein_schreck1,sch
 
 #ggplot
 
-ggplot(wildschwein_schreck1, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2014_04") + theme_classic()
+ggplot(wildschwein_schreck1, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2014_04") + theme_classic() + labs(x="",y="Distance to WSS_2014_04 [m]")
 ```
 
 
 Since it isn't known how close you would need to be to hear the Schreck, all of the five boars Caroline, Isabelle, Nicole, Sabine and Ueli could potentially have been affected.
 
-The same procedure was repeated for the other  Schrecks in the Fanel region (results not displayed). *(Lia)*
+Subsequenty, the same procedure was repeated for the other Schrecks in the Fanel region (results not displayed). *(Lia)*
 
 ```{r distance to Schreck 2, include=FALSE}
 #filter for schreck and running period
@@ -248,12 +247,14 @@ wildschwein_schreck10$distance <- as.numeric(st_distance(wildschwein_schreck10,s
 ggplot(wildschwein_schreck10, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2015_04")
 ```
 
-The analysis led to the conclusion that only one Schreck WSS_2015_04, first with standard mode and subsequently switching to aggressive mode, can provide enough data to be used for the modelling steps. Sabine, Olga and Caroline were tracked during the running time, and also before and after. *(Lia)*
+The analysis led to the conclusion that only one Schreck WSS_2015_04, first with standard mode and subsequently switching to aggressive mode, can provide enough data to be used for the modelling steps.
+**Sabine, Olga and Caroline** were tracked during the running time, and also before and after. *(Lia)*
+
 All following conceptual steps will be carried out with this focus.
 
 
-## Distance to Schreck approach
-Using the approach of calculating the distance of the boar to the Schreck provides insights about the movement radius around the Schreck during inactive and active times. *(Lia)*
+## 2.3 Movement conceptualization: Distance to Schreck
+Using the approach of calculating the distance of the boar to the Schreck plotted against the time provides insights about the movement radius around the Schreck during inactive and active times. *(Lia)*
 
 ```{r Caroline and Schreck 5}
 distance5_longerThanSchrecking <- wildschwein_sf %>%
@@ -276,10 +277,11 @@ ggplot(distance5_4days_Caroline,aes(DatetimeUTC,distance_Schreck5)) + geom_point
 ```
 
 
-Caroline's moving pattern shows her staying in one place during the days (mostly between 6-9 am to around 6pm). That's most likely when she's sleeping. Movements are only at night, which was to be expected of a nocturnal animal. *(Lia)*
+Caroline's moving pattern shows her staying in one place during the days (mostly between 6-9 am to around 6pm). That's most likely when she's sleeping. Movements, or better to say: changing of distances, are happening only at night, which was to be expected of a nocturnal animal. *(Lia)*
 
 
-As a next step, finding which kind of field this Schreck WSS-2015-01 is in, was done with the dataset "Feldaufnahmen_Fanel" which provides geographical data about the agricultural fields in Fanel.
+## 2.4 Relating locations to environment and defining field
+As a next step, finding which kind of field this Schreck WSS-2015-01 is in, was done with the additional vector dataset "Feldaufnahmen_Fanel.gpkg" which provides geographical vector data about the agricultural fields in Fanel.
 The intersection of Schreck and corresponding field was located using "st_intersects" from the sf-package. *(Lia)*
 
 
@@ -294,7 +296,7 @@ st_intersects(schreck5, forest) # sagt, wo sich der Punkt des Schrecks mit den F
 #Resultat: 272 -->FieldID 195
 #st_intersects(schreck6,forest) #same field
 
-st_intersects(schreck10,forest)
+#st_intersects(schreck10,forest)
 
 forest_bohnen195 <- forest %>%
   filter(FieldID==195)
@@ -302,7 +304,7 @@ forest_bohnen195 <- forest %>%
 ggplot(forest_bohnen195)+geom_sf(aes(fill=Frucht)) + geom_sf(data=schreck5) + labs(title="Intersection of WSS-2015-01 and field", subtitle= "Schreck is in a bean field") + theme_classic()
 ```
 
-The following graphs show Caroline's location around the bean field during active WSS-2015-01, first during standard mode and then during aggressive mode.
+The following graphs show Caroline's location around the bean field during active WSS-2015-01, first during standard mode and then during aggressive mode. These graphs seem to have an issue with scaling which makes it difficult to compare the spread of locations.
 
 ```{r Caroline during Schreck 5 and 6}
 #5+6 ist in einem Feld, wo Caroline rumgeht
@@ -344,7 +346,7 @@ ggarrange(
 ```
 
 
-As can be seen, WSS-2015-01 is in a bean field (mode standard and then aggressive). Caroline made some visits during Schreck time. *(Lia)*
+As can be seen, WSS-2015-01 is in a bean field (mode standard and then aggressive). Caroline made some visits during Schreck time.
 
 In a similar way, the positions outside the bean field could be found by subsetting the dataset with st_disjoint() from the sf-package. *(Lia)*
 
@@ -371,7 +373,7 @@ ggarrange(
 )
 ```
 
-Using the information about the inside and outside positions, respectively, and adding binary information (1= "in field", 0= "outside of field"), creates information about when Caroline was moving inside of the bean field and when not. *(Lia)*
+Using the information about the inside and outside positions, respectively, and adding binary information (1= "in field", 0= "outside of field"), creates information about when Caroline was moving inside of the bean field and when not. The following graphs depict this concept by showing red points where Caroline was inside of the bean field. *(Lia)*
 
 ```{r Caroline in and out}
 #nun die ausserhalb mit 0 und die innerhalb mit 1 ergänzen
@@ -397,7 +399,7 @@ ggarrange(
 ) ##scaling of y axis not ok yet
 ```
 
-To conceptualize the distances and movements not only during active Schreck times, but also before and after, the whole tracking time of Caroline was visualized. *(Lia)*
+To show the distances or movements, respectively, not only during active Schreck times, but also before and after, the whole tracking time of Caroline was visualized. *(Lia)*
 
 ```{r Caroline longer time span, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 Caroline_longerThanSchrecktime <- wildschwein_sf %>%
@@ -455,7 +457,11 @@ ggplot() + geom_point(data=Caroline_Schreck5_6_withField_long_aroundInFieldtime,
 #hier noch  zu ergänzen: Linien, wann die Schrecks aktiv sind (z.B. https://stackoverflow.com/questions/66825661/vertical-lines-for-data-points-in-geom-point-in-ggplot2-for-r)
 ```
 
-To conceptualize the active and inactive time of the Schreck, a background fill was used. Subsequently, it was tested if complexity could be reduced by reduction of sampling size *(Lia)*
+
+## 2.5 Displaying  influence of Schreck activity
+
+To conceptualize the active and inactive time of the Schreck, a background fill was used. *(Lia)*
+
 
 ```{r Caroline with background color}
  Caroline_breaks <-
@@ -484,6 +490,10 @@ Caroline_Schreck5_6_withField_long_aroundInFieldtime_smooth <- Caroline_Schreck5
 Caroline_Schreck5_6_withField_long_aroundInFieldtime_smooth2 <- Caroline_Schreck5_6_withField_long_aroundInFieldtime %>%
   dplyr::filter(row_number() %% 50 == 0)
 ```
+
+## 2.6 Evaluating complexity reduction
+
+Subsequently, it was tested if complexity could be reduced by reduction of sampling size to every 50th and 150th observation (choice based on visual inspection). As a methodological comparison, smoothing was computed using the Rolling Window approach with a k of 10, 100 and 150. *(Lia)*
 
 ```{r sampling size reduction Caroline}
 #plotten mit sampling size reduction
@@ -516,7 +526,6 @@ ggarrange(
 )
 ```
 
-As a methodological comparison, smoothing was computed using the Rolling Window approach. *(Lia)*
 
 ```{r rolling window Caroline}
 #Variante mit rolling window:
@@ -537,7 +546,7 @@ ggarrange(
             alpha = 0.5) + 
   geom_line(data=Caroline_Schreck5_6_withField_long_aroundInFieldtime,aes(as.Date(DatetimeUTC),rollmean2)) +
   geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
-  labs(subtitle="Rolling Mean = 10", colour="Location") +
+  labs(subtitle="Rolling Mean, k = 10", colour="Location") +
     rremove("y.title") + rremove("x.title"),
   ggplot() +
   geom_rect(data = Caroline_breaks,
@@ -549,7 +558,7 @@ ggarrange(
             alpha = 0.5) + 
   geom_line(data=Caroline_Schreck5_6_withField_long_aroundInFieldtime,aes(as.Date(DatetimeUTC),rollmean3)) +
   geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
-  labs(subtitle="Rolling Mean = 100", colour="Location") +
+  labs(subtitle="Rolling Mean, k = 100", colour="Location") +
     rremove("y.title") + rremove("x.title"),
   ggplot() +
   geom_rect(data = Caroline_breaks,
@@ -561,14 +570,13 @@ ggarrange(
             alpha = 0.5) + 
   geom_line(data=Caroline_Schreck5_6_withField_long_aroundInFieldtime,aes(as.Date(DatetimeUTC),rollmean4)) +
   geom_point(data=inter_sel_5_6_long_shorter,aes(as.Date(DatetimeUTC),inField, colour="In bean field")) +
-  labs(subtitle="Rolling Mean = 150", colour="Location") +
+  labs(subtitle="Rolling Mean, k = 150", colour="Location") +
     rremove("y.title") + rremove("x.title"),
   nrow=3, common.legend=TRUE, legend="right"
 )
-
-#annotate_figure(plot_rolling_window_Caroline, text_grob("Caroline's distance to Schreck 5 and 6", face="bold", size=20))
 ```
 
+## 2.7 Extension of analyses to more boars
 
 Olga's and Sabine's data were prepared following the same steps as was done with Caroline (preparation steps not shown). *(Lia)*
 
@@ -811,10 +819,14 @@ ggarrange(
 )
 ```
 
+## 2.8 Visualising relative change of distance to Schreck
 
-# Results
+For completisation of the movement conceptualization, an additional visualisation was computed. What if the distance cannot depict the movement pattern, but the relative change of the distance provides more insight? Following this question, the relative change of distance during the same time period was plotted. It was calculated by grouping average daily and weekly distances and calculating their average change in %. The resulting graphs will be shown in the chapter "Results". *(Lia)*
 
-The final conceptualization of movement patterns of the three female boars is depicted in the following graph. The red points correspond to the position being inside of the bean field with the Schreck WSS-2015-01. *(Lia)*
+
+# 3. Results
+
+The final conceptualization of movement patterns of the three female boars is depicted in the following graph. The red points correspond to the position being inside of the bean field with the Schreck WSS-2015-01. Sampling size reduction to every 150th observation was chosen due to a sufficient resolution. Losing the information in between seems to be an acceptable compromise for the increase in readability. *(Lia)*
 
 ```{r compare distances from all 3 animals, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 ggarrange(
@@ -855,11 +867,10 @@ ggarrange(
   )
 ```
 
-Of additional interest was the relative change of distance during the same time period. It was calculated by grouping average daily distances and calculating their average change in %.
 
 
 ```{r relative distance change}
-distance5_longerThanSchrecking_relChange <- Caroline_Schreck5_6_withField_long_aroundInFieldtime %>%
+distance5_longerThanSchrecking_relChange_week <- Caroline_Schreck5_6_withField_long_aroundInFieldtime %>%
   mutate(Week=lubridate::week(DatetimeUTC)) %>%
   group_by(Week) %>%
   arrange(desc(Week)) %>%
@@ -867,7 +878,7 @@ distance5_longerThanSchrecking_relChange <- Caroline_Schreck5_6_withField_long_a
   mutate(dist_perc= (avg_dist/lead(avg_dist) - 1) * 100) %>%
   mutate(TierName="Caroline")
 
-distance5_longerThanSchrecking_relChange_olga <- Olga_Schreck5_6_withField_long_aroundInFieldtime %>%
+distance5_longerThanSchrecking_relChange_olga_week <- Olga_Schreck5_6_withField_long_aroundInFieldtime %>%
   mutate(Week=lubridate::week(DatetimeUTC)) %>%
   group_by(Week) %>%
   arrange(desc(Week)) %>%
@@ -875,7 +886,7 @@ distance5_longerThanSchrecking_relChange_olga <- Olga_Schreck5_6_withField_long_
   mutate(dist_perc= (avg_dist/lead(avg_dist) - 1) * 100) %>%
   mutate(TierName = "Olga")
 
-distance5_longerThanSchrecking_relChange_Sabine <- Sabine_Schreck5_6_withField_long_aroundInFieldtime %>%
+distance5_longerThanSchrecking_relChange_Sabine_week <- Sabine_Schreck5_6_withField_long_aroundInFieldtime %>%
   mutate(Week=lubridate::week(DatetimeUTC)) %>%
   group_by(Week) %>%
   arrange(desc(Week)) %>%
@@ -883,7 +894,7 @@ distance5_longerThanSchrecking_relChange_Sabine <- Sabine_Schreck5_6_withField_l
   mutate(dist_perc= (avg_dist/lead(avg_dist) - 1) * 100) %>%
   mutate(TierName = "Sabine")
 
-relChange_all_3boars <- rbind(distance5_longerThanSchrecking_relChange,distance5_longerThanSchrecking_relChange_olga,distance5_longerThanSchrecking_relChange_Sabine)
+relChange_all_3boars_week <- rbind(distance5_longerThanSchrecking_relChange_week,distance5_longerThanSchrecking_relChange_olga_week,distance5_longerThanSchrecking_relChange_Sabine_week)
 
 
 Relative_breaks <-
@@ -900,14 +911,48 @@ ggplot() +
                 ymax = Inf,
                 fill = Phases),
             alpha = 0.2) +
-  geom_line(data=relChange_all_3boars, aes(Week,dist_perc, color=TierName)) + labs(y="Change in distance [%]", title="Relative change in distance from WSS-2015-01") + theme_classic() 
+  geom_line(data=relChange_all_3boars_week, aes(Week,dist_perc, color=TierName)) + labs(y="Change in distance [%]", title="Weekly relative change in distance from WSS-2015-01") + theme_classic() 
   #geom_vline(xintercept=20, linetype="dashed")
+  
+  #now for the daily:
+  
+  distance5_longerThanSchrecking_relChange_day <- Caroline_Schreck5_6_withField_long_aroundInFieldtime %>%
+  mutate(day=lubridate::date(DatetimeUTC)) %>%
+  group_by(day) %>%
+  arrange(desc(day)) %>%
+  summarise(avg_dist = mean(distance5_6)) %>%
+  mutate(dist_perc= (avg_dist/lead(avg_dist) - 1) * 100) %>%
+  mutate(TierName="Caroline")
 
-#Looking at avg distance
-#ggplot(distance5_longerThanSchrecking_relChange,aes(week, avg_dist)) + geom_line()
-#Looking at change in distance
-#ggplot(distance5_longerThanSchrecking_relChange_olga,aes(week,dist_perc)) +
-#  geom_line() + labs(y="Change in distance [%]")
+distance5_longerThanSchrecking_relChange_olga_day <- Olga_Schreck5_6_withField_long_aroundInFieldtime %>%
+  mutate(day=lubridate::date(DatetimeUTC)) %>%
+  group_by(day) %>%
+  arrange(desc(day)) %>%
+  summarise(avg_dist = mean(distance5_6)) %>%
+  mutate(dist_perc= (avg_dist/lead(avg_dist) - 1) * 100) %>%
+  mutate(TierName = "Olga")
+
+distance5_longerThanSchrecking_relChange_Sabine_day <- Sabine_Schreck5_6_withField_long_aroundInFieldtime %>%
+  mutate(day=lubridate::date(DatetimeUTC)) %>%
+  group_by(day) %>%
+  arrange(desc(day)) %>%
+  summarise(avg_dist = mean(distance5_6)) %>%
+  mutate(dist_perc= (avg_dist/lead(avg_dist) - 1) * 100) %>%
+  mutate(TierName = "Sabine")
+
+relChange_all_3boars_day <- rbind(distance5_longerThanSchrecking_relChange_day,distance5_longerThanSchrecking_relChange_olga_day,distance5_longerThanSchrecking_relChange_Sabine_day)
+
+
+  ggplot() +
+  geom_rect(data = Relative_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+                ymax = Inf,
+                fill = Phases),
+            alpha = 0.2) +
+  geom_line(data=relChange_all_3boars_day, aes(day,dist_perc, color=TierName)) + labs(y="Change in distance [%]", title="Daily relative change in distance from WSS-2015-01") + theme_classic() 
+  #geom_vline(xintercept=20, linetype="dashed")
 ```
 
 ## In the field vs. out of the field before, during and after approach
@@ -1245,17 +1290,12 @@ ggarrange(
 
 ```
 
-# Discussion
+# 3. Discussion
 Using the distance of boar to Schreck approach has the disadvantage that there is no way of showing that an effect was due to the Schreck and not simply a coincidence. This approach is good for getting a first idea of the boars movement and to select the Schrecks and boars with which to continue in further analysis. It shows which boars were in the vicinity of a Schreck and could therefore possibly have been affected by it.
 
 Discuss distance vs. displacement.
 Discuss smoothing --> necessary? Comparison between sampling size reduction and rolling window method.
 
-
-# Discussion
-Using the distance of boar to Schreck approach has the disadvantage that there is no way of showing that an effect was due to the Schreck and not simply a coincidence. This approach is good for getting a first idea of the boars movement and to select the Schrecks and boars with which to continue in further analysis. It shows which boars were in the vicinity of a Schreck and could therefore possibly have been affected by it.
-Discuss distance vs. displacement.
-Discuss smoothing --> necessary? Comparison between sampling size reduction and rolling window method.
 
 # Validation
 - comparison with other projects
