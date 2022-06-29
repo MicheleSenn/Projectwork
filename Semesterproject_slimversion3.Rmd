@@ -870,51 +870,13 @@ ggarrange(
 
 
 ```{r relative distance change}
-distance5_longerThanSchrecking_relChange_week <- Caroline_Schreck5_6_withField_long_aroundInFieldtime %>%
-  mutate(Week=lubridate::week(DatetimeUTC)) %>%
-  group_by(Week) %>%
-  arrange(desc(Week)) %>%
-  summarise(avg_dist = mean(distance5_6)) %>%
-  mutate(dist_perc= (avg_dist/lead(avg_dist) - 1) * 100) %>%
-  mutate(TierName="Caroline")
-
-distance5_longerThanSchrecking_relChange_olga_week <- Olga_Schreck5_6_withField_long_aroundInFieldtime %>%
-  mutate(Week=lubridate::week(DatetimeUTC)) %>%
-  group_by(Week) %>%
-  arrange(desc(Week)) %>%
-  summarise(avg_dist = mean(distance5_6)) %>%
-  mutate(dist_perc= (avg_dist/lead(avg_dist) - 1) * 100) %>%
-  mutate(TierName = "Olga")
-
-distance5_longerThanSchrecking_relChange_Sabine_week <- Sabine_Schreck5_6_withField_long_aroundInFieldtime %>%
-  mutate(Week=lubridate::week(DatetimeUTC)) %>%
-  group_by(Week) %>%
-  arrange(desc(Week)) %>%
-  summarise(avg_dist = mean(distance5_6)) %>%
-  mutate(dist_perc= (avg_dist/lead(avg_dist) - 1) * 100) %>%
-  mutate(TierName = "Sabine")
-
-relChange_all_3boars_week <- rbind(distance5_longerThanSchrecking_relChange_week,distance5_longerThanSchrecking_relChange_olga_week,distance5_longerThanSchrecking_relChange_Sabine_week)
-
 
 Relative_breaks <-
   data.frame(start=(c(15,20,23,26)),
              end=(c(20,23,26,32)),
              colors=factor(1:4),
              Phases=c("Before Schreck activity","During active Schreck 5","During active Schreck 6","After Schreck activity"))
-
-ggplot() +
-  geom_rect(data = Relative_breaks,
-            aes(xmin = start,
-                xmax = end,
-                ymin = - Inf,
-                ymax = Inf,
-                fill = Phases),
-            alpha = 0.2) +
-  geom_line(data=relChange_all_3boars_week, aes(Week,dist_perc, color=TierName)) + labs(y="Change in distance [%]", title="Weekly relative change in distance from WSS-2015-01") + theme_classic() 
-  #geom_vline(xintercept=20, linetype="dashed")
-  
-  #now for the daily:
+ #daily:
   
   distance5_longerThanSchrecking_relChange_day <- Caroline_Schreck5_6_withField_long_aroundInFieldtime %>%
   mutate(day=lubridate::date(DatetimeUTC)) %>%
@@ -942,8 +904,35 @@ distance5_longerThanSchrecking_relChange_Sabine_day <- Sabine_Schreck5_6_withFie
 
 relChange_all_3boars_day <- rbind(distance5_longerThanSchrecking_relChange_day,distance5_longerThanSchrecking_relChange_olga_day,distance5_longerThanSchrecking_relChange_Sabine_day)
 
+#weekly:
+distance5_longerThanSchrecking_relChange_week <- Caroline_Schreck5_6_withField_long_aroundInFieldtime %>%
+  mutate(Week=lubridate::week(DatetimeUTC)) %>%
+  group_by(Week) %>%
+  arrange(desc(Week)) %>%
+  summarise(avg_dist = mean(distance5_6)) %>%
+  mutate(dist_perc= (avg_dist/lead(avg_dist) - 1) * 100) %>%
+  mutate(TierName="Caroline")
 
-  ggplot() +
+distance5_longerThanSchrecking_relChange_olga_week <- Olga_Schreck5_6_withField_long_aroundInFieldtime %>%
+  mutate(Week=lubridate::week(DatetimeUTC)) %>%
+  group_by(Week) %>%
+  arrange(desc(Week)) %>%
+  summarise(avg_dist = mean(distance5_6)) %>%
+  mutate(dist_perc= (avg_dist/lead(avg_dist) - 1) * 100) %>%
+  mutate(TierName = "Olga")
+
+distance5_longerThanSchrecking_relChange_Sabine_week <- Sabine_Schreck5_6_withField_long_aroundInFieldtime %>%
+  mutate(Week=lubridate::week(DatetimeUTC)) %>%
+  group_by(Week) %>%
+  arrange(desc(Week)) %>%
+  summarise(avg_dist = mean(distance5_6)) %>%
+  mutate(dist_perc= (avg_dist/lead(avg_dist) - 1) * 100) %>%
+  mutate(TierName = "Sabine")
+
+relChange_all_3boars_week <- rbind(distance5_longerThanSchrecking_relChange_week,distance5_longerThanSchrecking_relChange_olga_week,distance5_longerThanSchrecking_relChange_Sabine_week)
+
+ggarrange(
+ggplot() +
   geom_rect(data = Relative_breaks,
             aes(xmin = start,
                 xmax = end,
@@ -952,7 +941,20 @@ relChange_all_3boars_day <- rbind(distance5_longerThanSchrecking_relChange_day,d
                 fill = Phases),
             alpha = 0.2) +
   geom_line(data=relChange_all_3boars_day, aes(day,dist_perc, color=TierName)) + labs(y="Change in distance [%]", title="Daily relative change in distance from WSS-2015-01") + theme_classic() 
-  #geom_vline(xintercept=20, linetype="dashed")
+  #geom_vline(xintercept=20, linetype="dashed"),
+ggplot() +
+  geom_rect(data = Relative_breaks,
+            aes(xmin = start,
+                xmax = end,
+                ymin = - Inf,
+                ymax = Inf,
+                fill = Phases),
+            alpha = 0.2) +
+  geom_line(data=relChange_all_3boars_week, aes(Week,dist_perc, color=TierName)) + labs(y="Change in distance [%]", title="Weekly relative change in distance from WSS-2015-01") + theme_classic() 
+  #geom_vline(xintercept=20, linetype="dashed"),
+  nrow=2, common.legend=TRUE
+  )
+
 ```
 
 ## In the field vs. out of the field before, during and after approach
@@ -1291,13 +1293,13 @@ ggarrange(
 ```
 
 # 3. Discussion
+## 3.1 Distance to conceptualize movement
 Using the distance of boar to Schreck approach has the disadvantage that there is no way of showing that an effect was due to the Schreck and not simply a coincidence. This approach is good for getting a first idea of the boars movement and to select the Schrecks and boars with which to continue in further analysis. It shows which boars were in the vicinity of a Schreck and could therefore possibly have been affected by it.
 
 Discuss distance vs. displacement.
 Discuss smoothing --> necessary? Comparison between sampling size reduction and rolling window method.
 
-
-# Validation
+## 3.2 Validation
 - comparison with other projects
 - face validity with Nils?
 Rykiel, E. J. (1996). Testing ecological models: the meaning of validation. Ecological modelling, 90(3), 229-244.
