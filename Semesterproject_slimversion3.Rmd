@@ -1324,11 +1324,11 @@ Validation was carried out derived from options in the Rykiel paper (1). It cons
 The project delivers a method to visualize the returning behavior before, during and after Schreck activity in a simplistic way. An open question remains, if the behavior was suitably modelled by distance and change in distance. The following next actions might help deriving more insights on the matter:
 - The inclusion of context data is suggested so more meaningful conclusions can be drawn. This would include weather data, maps, topological data, ... (3)
 - A possible next step could be segmentation of trajectories so behavior patterns can be classified. Ruling out inactive times might show more distinct patterns or at least serve as validation method. (6)
-- Could the displacement as an additional alternative to distance and change in distance provide alternative and more meaningful patterns?
+- Could the displacement as an additional alternative to distance and change in distance provide alternative and more meaningful patterns? *(Lia)*
 
 Also, it remains unvalidated if the findings are a pattern or mere peculiarity of the data. The next actions are suggested:
 - Data collection with a distinct research question about behavior and returning. During this time, tracking less animals during longer time spans and varying the Schreck activity in function of the boar's vicinity.
-- Extend the analysis with the existing data set to other boars and Schrecks (if at all possible).
+- Extend the analysis with the existing data set to other boars and Schrecks (if at all possible). *(Lia)*
 
 
 # References
