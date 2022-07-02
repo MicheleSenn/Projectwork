@@ -27,24 +27,35 @@ library(ggpubr)
 # Abstract
 This project aims to develop a method for modelling the behavior of wild boars who have been in contact with scare-off measures. The hypothesis is that their behavior can be modeled by their distance to the corresponding Schreck, as well as comparing the average time they spent in a certain field before the scare-off measure called "Schreck" was put into action, during and after.  
   
-As a result, the distance of three boars named Caroline, Olga and Sabine to a Schreck in the region Fanel (WSS-2015-01) was visualized. The model depicts also the Schreck activity, which changed from standard to aggressive mode, and the moments when the boars spent time inside of the bean field where the Schreck was located in.
+The distance of three boars named Caroline, Olga and Sabine to a Schreck in the region Fanel (WSS-2015-01) was visualized. The model depicts also the Schreck activity, which changed from standard to aggressive mode, and the moments when the boars spent time inside of the field where the Schreck was located.
 Additionally, the relative change in distance was shown as a second order effect.  
-The behavior could be modelled by distance in a simple way but it is still lacking validation and the amount of data might not have been enough to draw conclusions.
+Though the behavior could be modeled by distance in a simple way, it is still lacking validation and the amount of data might not have been enough to draw conclusions.
+*(both)*
 
 # Introduction
-This project aims to develop a method for modelling the behavior of wild boars who have been in contact with scare-off measures.
+Due to an exceptionally high rate of reproduction and an abundant food supply, the wild boar population in Switzerland has been growing for centuries. As the population grows, so does the damage. According to Stefan Suter, the challenges of wild boar management cannot be met by hunting measures alone. For a successful wild boar management, a holistic approach is important. Prevention methods and limited access to energy-rich food will limit the population growth in wild boars. The wild boar deterrent developed at the ZHAW uses alarm and warning calls from wild boars to keep them out of the fields. Previous methods like electric fences and hunting are often not effective, time-consuming and expensive.[7]
+*(Michele)*
+
+To test the effectiveness of the developed deterrents around 150 wild boars were caught and marked in the test areas Fanel - a nature reserve at Lake Neuchâtel, Klingnau reservoir and upper Fricktal. Of these, 36 wild boars were fitted with GPS-GSM transmitter collars to document their spatial behaviour. In addition, the damage on the fields was determined with the help of drone aerial photographs. The knowledge gained in this way serves as the basis for a sustainable boar management.[7]
+*(Michele)*
+
+This project aims to develop a method for modelling the behaviour of wild boars who have been in contact with scare-off measures. Research questions are formulated, and it is described how those were investigated and implemented. The results will be presented and discussed in the light of the research questions. Potential further steps for future research will also be addressed. Problems and limitations encountered along the way and the solutions to overcome these, be it limitations with respect to the data sources, the tools or any other source of limitation will also be discussed.
+*(Michele)*
 
 ## Research Question
 Once a scare-off measure has been set into action, it needs to be examined weather or not it has an effect. Therefore, the following research question was formulated:  
 **How can the behavior of the boars who had been in contact with a Schreck be modelled?**  
 
-The hypothesis is that their behavior can be modeled by their distance to the corresponding Schreck, as well as comparing the average time they spent in a certain field before the scare-off measure called "Schreck" was put into action, during and after.  
+The hypothesis is that their behavior can be modelled by their distance to the corresponding Schreck, as well as comparing the average time they spent in a certain field before the scare-off measure called "Schreck" was put into action, during and after. 
+*(Michele)*
 
 Additionally, a second question was formulated, which was used to limit the scope of the research question:  
 **How can a return pattern to the location of the Schreck be modelled?**
+*(Lia)*
 
 ## Data
 Data about the "Schrecks" and their activity agenda, about the boars movement tracking and field data about the placement of the Schreck was used in this project.
+*(both)*
 
 ## Analytical concepts
 Spatial and time overlaps between the tracked animals were plotted to get an idea of what the data looks like and finding patterns like which individual is affected by which Schreck.  
@@ -52,6 +63,7 @@ Distances to Scare-Off-Location over time were calculated using the st_distance(
 The function st_intersects() provides intersection of geographical data points.  
 With the Rolling Window method rollmean(), sampling size was reduced and compared to a sampling size reduction by omitting observations.  
 To find returning patterns by building a "In the Field / not in the Field" vs. distance to Schreck graph, the application of joins and disjoints and appending a column with the binary data was implemented.
+*(both)*
 
 ## R concepts
 The modelling was done using the following concepts and packages:
@@ -59,16 +71,14 @@ Spatial objects were created and manipulated with the r-package "sf".
 Raster data and background maps were plotted and visualized with these r-packages: "ggplot2"
 For the reshaping and transforming of data the r-package "tidyverse" was used.
 In the "zoo" package, the function rollmean() is contained, and arrangement of plots was partially done by using ggarrange() from "ggpubr".
+*(both)*
 
 ## Risk analysis
 The scope is considered a risk because of the amount of behaviors that could potentially be analysed. It is therefore advised to limit the scope. It was done by using a secondary research question.
 The Interpretation of behaviors might be vague or false because an emerging pattern is only correlated but not causal.
 Technical difficulties could also pose a risk, e.g. when handling too much data in the pre-processing stage, choosing irrelevant thresholds or interpretation issues (semantic annotations).
 Possibly, the different measures don't show the same effects. It might be necessary to distinguish between measures in order to draw inferences.
-
-Disclaimer:
-Data preparation and conceptualization was divided between the two team members.  
-The contributors were marked where possible.
+*(both)*
 
 # 2. Methods
 
@@ -232,7 +242,6 @@ affected_distance6 <- wildschwein_sf %>%
 ggplot(affected_distance6, aes(DatetimeUTC,distance, color=TierName)) + geom_point() + labs(title="Distance of the affected boars to Schreck WSS_2015_01") + theme_classic()
 ```
 
-
 ```{r distance to Schreck 10, eval=FALSE, include=FALSE}
 #filter
 schreck10 <- agenda_fanel[10,]
@@ -284,7 +293,6 @@ Caroline's moving pattern shows her staying in one place during the days (mostly
 As a next step, finding which kind of field this Schreck WSS-2015-01 is in, was done with the additional vector dataset "Feldaufnahmen_Fanel.gpkg" which provides geographical vector data about the agricultural fields in Fanel.  
 The intersection of Schreck and corresponding field was located using "st_intersects" from the sf-package. *(Lia)*
 
-
 ```{r Schreck 5 and 6 is in a bean field, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 forest <- read_sf("Feldaufnahmen_Fanel.gpkg")
 schreck5 <- agenda_fanel[5,]
@@ -323,7 +331,6 @@ ggarrange(
 )
 
 ```
-
 
 Looking at only the bean field:
 
@@ -526,7 +533,6 @@ ggarrange(
 )
 ```
 
-
 ```{r rolling window Caroline}
 #Variante mit rolling window:
 Caroline_Schreck5_6_withField_long_aroundInFieldtime$rollmean <- rollmean(Caroline_Schreck5_6_withField_long_aroundInFieldtime$distance5_6,2, NA, align="left")
@@ -603,7 +609,6 @@ inter_sel_6_olga <- distance6_Olga_Schrecktime[intersection_195andSchreck6_olga[
 
 #ggplot(forest_bohnen195) + geom_sf(aes(fill=Frucht))+ geom_sf(data=inter_sel_6_olga) + geom_sf(data=schreck6, aes(size=5)) + labs(title="Olga's positions in the bean field while Schreck 6 was active")
 ```
-
 
 ```{r Olga longer time span}
 Olga_longerThanSchrecktime <- wildschwein_sf %>%
@@ -761,7 +766,6 @@ Sabine_Schreck5_6_withField_long <- bind_rows(disjoint_Sabine_5_6_long,inter_sel
 #hier noch  zu ergänzen: Linien, wann die Schrecks aktiv sind (z.B. https://stackoverflow.com/questions/66825661/vertical-lines-for-data-points-in-geom-point-in-ggplot2-for-r)
 ```
 
-
 ```{r Sabine smaller timescale}
 Sabine_Schreck5_6_withField_long_aroundInFieldtime <- Sabine_Schreck5_6_withField_long %>%
   filter(DatetimeUTC>"2015-06-01")
@@ -823,6 +827,34 @@ ggarrange(
 
 For completisation of the movement conceptualization, an additional visualisation was computed. What if the distance cannot depict the movement pattern, but the relative change of the distance provides more insight? Following this question, the relative change of distance during the same time period was plotted. It was calculated by grouping average daily and weekly distances and calculating their average change in %. The resulting graphs will be shown in the chapter "Results". *(Lia)*
 
+## 2.9 In the field vs. out of the field before, during and after Schreck action
+
+In this approach the time of a boar inside a certain area is compared to the time spent outside of this area. The idea behind this approach was to gather information out of a rather large dataset that is relevant for a farmer and for the researcher, who but the scare-off measure called "Schreck" into place, to know if it has the effect of keeping the boars out of a certain area. Furthermore, this approach should provide some relative numbers with which a conclusion might be reached as to whether or not the scare-off measures have an effect on the boars. *(Michele)*
+
+The question which this approach seeks to answer is:
+How much time does a boar spend in the field before the Schreck (in %), during and after?
+
+A binary approach in form of a inside vs. outside the field was used. The defined area is a certain field. This will be done for the period before the Schreck was put into action, during and after. The percentage of time spent inside the field vs. outside the field can then be compared between the timespan of before the Schreck was put into action, during and after.
+*(Michele)*
+
+As a first step the Schreck and boars for this approach had to be selected. It had to be Schrecks and boars were several animals were in the vicinity of a Schreck during its running period were there's also enough tracking data of the boars movement from the period before the Schreck was put into action and from the period after the Schreck was active. This was done as described above. Schreck WSS_2015_01 was selected and the boars Caroline, Sabine and Olga, also as described in more detail above.
+*(Michele)*
+
+Next the area were the boars move around was mapped on a background map to get an idea of the terrain where the boars moved around.
+*(Michèle)*
+
+```{r map boars movement areas on a background map}
+library(terra)
+pk100_BE <- terra::rast("pk100_BE.tif")
+library(tmap)
+
+tm_shape(pk100_BE) + 
+  tm_rgb() +
+  tm_shape(wildschwein_convex_hull) +
+  tm_polygons(col = "TierID",alpha = 0.4,border.col = "red") +
+  tm_legend(bg.color = "white")
+```
+
 
 # 3. Results
 
@@ -866,8 +898,6 @@ ggarrange(
   ncol=1, nrow=3, legend="none",common.legend= TRUE
   )
 ```
-
-
 
 ```{r relative distance change}
 
@@ -957,22 +987,17 @@ ggplot() +
 
 ```
 
-## In the field vs. out of the field before, during and after approach
-In this approach the time of a boar inside a certain area is compared to the time spent outside of this area. The idea behind this approach was to gather information out of a rather large dataset that is relevant for a farmer. Furthermore, this approach should provide some relative numbers with which a conclusion might be reached as to weather or not the scare-off measures have an effect on the boars. 
-A binary approach in form of a inside vs. outside the field was used. The defined area is a certain field. This will be done for the period before the Schreck was put into action, during and after. The percentage of time spent inside the field vs. outside the field can then be compared between the timespan before, during and after.
+## In the field vs. out of the field before, during and after Schreck action
 
-First the Schreck and boar for this approach had to be selected. It had be Schrecks and boars were several animals were in the vicinity of a Schreck during its running period were there's also enough tracking data of the boars movement from the period before the Schreck was put into action and from the period after the Schreck was active. This was done as described above. Schreck number 5 and 6 respectively were selected and the boars Caroline, Sabine and Olga, also as described in more detail above.
+Schreck WSS-2015-01 is in a bean field (as described above). Caroline seems to be spending 0.03 % of her time in that field before the Schreck was put there, 2 % of her time during the Schrecks active period regardless if it's in aggressive mode or not and 0.1 % of her time after the Schrecks active period.
 
-The question which this approach seeks to answer is:
-How much time does a boar spend in the field before the Schreck (in %), during and after? *(Michèle)*
+Sabine seems to be spending 0 % of her time in that field before the Schreck was put there, 0.9 % of her time during the Schrecks active period while it was in normal mode, 7 % of her time while the Schreck is in aggressive mode and 0.2 % of her time after the Schrecks active period.
 
-Schreck 5 and 6 is in a bean field (as described above). Caroline seems to be spending 0.03 % of her time in that field before the Schreck was put there, 2 % of her time during the Schrecks active period and 0.4 % of her time after the Schrecks active period.
+Olga seems to be spending 0.4 % of her time in that field before the Schreck was put there, 2 % of her time during the Schrecks active period, 6 % of her time during the Schrecks active period in aggressive mode and 0.06 % of her time after the Schrecks active period.
+*(Michèle)*
 
-Sabine seems to be spending 0 % of her time in that field before the Schreck was put there, 0.9 % of her time during the Schrecks active period and 3 % of her time after the Schrecks active period.
+```{r Caroline in the field vs not in the field during SChreck time, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 
-Olga seems to be spending 0.4 % of her time in that field before the Schreck was put there, 2 % of her time during the Schrecks active period and 0.7 % of her time after the Schrecks active period.
-
-```{r Caroline in the field vs not in the field during SChreck time}
 st_intersects(schreck5, forest)
 
 fieldforschreck5 <- forest %>%
@@ -1001,12 +1026,46 @@ Caroline_field_inout_during <- bind_rows(Caroline_field_during,intersect)
 
 
 #47 from 2207 Data points are in the field
-print(47/2207*100)
+#print(47/2207*100)
 # during Schreck time she spends 2 % of her time in the field.
 
 ```
 
-```{r Caroline in the field vs not in the field before SChreck time}
+```{r Caroline in the field vs not in the field during SChreck time in aggressive mode, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+st_intersects(schreck5, forest)
+
+fieldforschreck5 <- forest %>%
+  filter(FieldID==195)
+
+Caroline_Schrecktimeag <- wildschwein_sf %>%
+  filter(TierName == "Caroline", DatetimeUTC > "2015-06-12", DatetimeUTC < "2015-07-01")
+
+Caroline_field <- st_disjoint(fieldforschreck5,Caroline_Schrecktime)
+
+
+Caroline_field_during <- Caroline_Schrecktimeag[Caroline_field[[1]],]
+
+CarolineIntersect <- st_intersects(fieldforschreck5,Caroline_Schrecktimeag)
+
+intersect <- Caroline_Schrecktimeag[CarolineIntersect[[1]],]
+
+#out of field = 0 in field = 1 
+Caroline_field_during$inField <- 0
+intersect$inField <- 1
+
+#append 
+Caroline_field_inout_duringaggressiv <- bind_rows(Caroline_field_during,intersect)
+
+  
+
+
+#113 from 1822 Data points are in the field
+#print(113/1822*100)
+# during Schreck time she spends 2 % of her time in the field.
+
+```
+
+```{r Caroline in the field vs not in the field before SChreck time, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 
 Caroline_Schrecktime_before <- wildschwein_sf %>%
   filter(TierName == "Caroline", DatetimeUTC < "2015-05-20")
@@ -1035,10 +1094,10 @@ Caroline_field_inout_before <- bind_rows(Caroline_field_before,intersectbefore)
 
 ```
 
-```{r Caroline in the field vs not in the field after SChreck time}
+```{r Caroline in the field vs not in the field after SChreck time, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 
 Caroline_Schrecktime_after <- wildschwein_sf %>%
-  filter(TierName == "Caroline", DatetimeUTC > "2015-06-12")
+  filter(TierName == "Caroline", DatetimeUTC > "2015-07-01")
 
 Caroline_field <- st_disjoint(fieldforschreck5,Caroline_Schrecktime_after)
 
@@ -1058,13 +1117,13 @@ Caroline_field_inout_after <- bind_rows(Caroline_field_after,intersectafter)
   
 
 
-#156 from 39029 Data points are in the field
-#print(156/39029*100)
-# during Schreck time she spends 0.4 % of her time in the field.
+#Data points are in the field
+#print(43/37207*100)
+# during Schreck time she spends 0.1 % of her time in the field.
 
 ```
 
-```{r Sabine in the field vs not in the field during SChreck time}
+```{r Sabine in the field vs not in the field during SChreck time, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 
 Sabine_Schrecktime <- wildschwein_sf %>%
   filter(TierName == "Sabine", DatetimeUTC > "2015-05-20", DatetimeUTC < "2015-06-12")
@@ -1089,12 +1148,42 @@ Sabine_field_inout_during <- bind_rows(Sabine_field_during,intersect)
 
 
 #19 from 2207 Data points are in the field
-print(19/2207*100)
+#print(19/2207*100)
 # during Schreck time she spends 0.9 % of her time in the field.
 
 ```
 
-```{r Sabine in the field vs not in the field before SChreck time}
+```{r Sabine in the field vs not in the field during SChreck time in aggressive mode, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+
+Sabine_Schrecktimeag <- wildschwein_sf %>%
+  filter(TierName == "Sabine", DatetimeUTC > "2015-06-12", DatetimeUTC < "2015-07-01")
+
+Sabine_field <- st_disjoint(fieldforschreck5,Sabine_Schrecktimeag)
+
+
+Sabine_field_during <- Sabine_Schrecktimeag[Sabine_field[[1]],]
+
+SabineIntersect <- st_intersects(fieldforschreck5,Sabine_Schrecktimeag)
+
+intersect <- Sabine_Schrecktimeag[SabineIntersect[[1]],]
+
+#out of field = 0 in field = 1 
+Sabine_field_during$inField <- 0
+intersect$inField <- 1
+
+#append 
+Sabine_field_inout_duringaggressiv <- bind_rows(Sabine_field_during,intersect)
+
+  
+
+
+# Data points are in the field
+#print(121/1824*100)
+# during Schreck time she spends 7 % of her time in the field.
+
+```
+
+```{r Sabine in the field vs not in the field before SChreck time, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 
 Sabine_Schrecktime_before <- wildschwein_sf %>%
   filter(TierName == "Sabine", DatetimeUTC < "2015-05-20")
@@ -1123,10 +1212,10 @@ Sabine_field_inout_before <- bind_rows(Sabine_field_before,intersectbefore)
 
 ```
 
-```{r Sabine in the field vs not in the field after SChreck time}
+```{r Sabine in the field vs not in the field after SChreck time, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 
 Sabine_Schrecktime_after <- wildschwein_sf %>%
-  filter(TierName == "Sabine", DatetimeUTC > "2015-06-12")
+  filter(TierName == "Sabine", DatetimeUTC > "2015-07-01")
 
 Sabine_field <- st_disjoint(fieldforschreck5,Sabine_Schrecktime_after)
 
@@ -1146,13 +1235,13 @@ Sabine_field_inout_after <- bind_rows(Sabine_field_after,intersectafter)
   
 
 
-#126 from 4372 Data points are in the field
-print(126/4372*100)
-# during Schreck time she spends 3 % of her time in the field.
+#Data points are in the field
+#print(5/2548*100)
+# during Schreck time she spends 0.2 % of her time in the field.
 
 ```
 
-```{r Olga in the field vs not in the field during SChreck time}
+```{r Olga in the field vs not in the field during SChreck time, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 
 Olga_Schrecktime <- wildschwein_sf %>%
   filter(TierName == "Olga", DatetimeUTC > "2015-05-20", DatetimeUTC < "2015-06-12")
@@ -1182,7 +1271,37 @@ Olga_field_inout_during <- bind_rows(Olga_field_during,intersect)
 
 ```
 
-```{r Olga in the field vs not in the field before SChreck time}
+```{r Olga in the field vs not in the field during SChreck time in aggressive mode, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+
+Olga_Schrecktimeag <- wildschwein_sf %>%
+  filter(TierName == "Olga", DatetimeUTC > "2015-06-12", DatetimeUTC < "2015-07-01")
+
+Olga_field <- st_disjoint(fieldforschreck5,Olga_Schrecktimeag)
+
+
+Olga_field_during <- Olga_Schrecktimeag[Olga_field[[1]],]
+
+OlgaIntersect <- st_intersects(fieldforschreck5,Olga_Schrecktimeag)
+
+intersect <- Olga_Schrecktimeag[OlgaIntersect[[1]],]
+
+#out of field = 0 in field = 1 
+Olga_field_during$inField <- 0
+intersect$inField <- 1
+
+#append 
+Olga_field_inout_duringaggressiv <- bind_rows(Olga_field_during,intersect)
+
+  
+
+
+#Data points are in the field
+#print(113/1822*100)
+# during Schreck time she spends 6 % of her time in the field.
+
+```
+
+```{r Olga in the field vs not in the field before SChreck time, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 
 Olga_Schrecktime_before <- wildschwein_sf %>%
   filter(TierName == "Olga", DatetimeUTC < "2015-05-20")
@@ -1211,10 +1330,10 @@ Olga_field_inout_before <- bind_rows(Olga_field_before,intersectbefore)
 
 ```
 
-```{r Olga in the field vs not in the field after SChreck time}
+```{r Olga in the field vs not in the field after SChreck time, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
 
 Olga_Schrecktime_after <- wildschwein_sf %>%
-  filter(TierName == "Olga", DatetimeUTC > "2015-06-12")
+  filter(TierName == "Olga", DatetimeUTC > "2015-07-01")
 
 Olga_field <- st_disjoint(fieldforschreck5,Olga_Schrecktime_after)
 
@@ -1234,23 +1353,65 @@ Olga_field_inout_after <- bind_rows(Olga_field_after,intersectafter)
   
 
 
-#140 from 19826 Data points are in the field
-#print(140/19826*100)
-# during Schreck time she spends 0.7 % of her time in the field.
+#Data points are in the field
+#print(11/18004*100)
+# during Schreck time she spends 0.06 % of her time in the field.
 
 ```
 
 ```{r plot beforeduringafter in field percentage}
-# beforeduringafter <- data.frame(Caroline = c ("before"= 0.03, "during"= 2, "after"= 0.4), Sabine = c("before"= 0, "during"= 0.9, "after"= 0.4), Olga = c("before"= 0.4, "during"= 2, "after"= 0.7))
 
-beforeduringafter <- data.frame(before = c ("Caroline"= 0.03, "Sabine"= 0, "Olga"= 0.4), during = c(2, 0.9, 2), after = c(0.4, 3, 0.7))
+beforeduringafter <- data.frame(before = c ("Caroline"= 0.03, "Sabine"= 0, "Olga"= 0.4), during = c(2, 0.9, 2), aggressivemode = c(2, 7, 6), after = c(0.1, 0.2, 0.06))
 
-dd <- cbind(beforeduringafter$before,beforeduringafter$during, beforeduringafter$after)
-barplot(dd, beside=T,  names.arg=c('before','during','after'), legend = c("Caroline", "Sabine", "Olga"),xlim = c(0, 21), ylab = "time spent in field (%)")
+dd <- cbind(beforeduringafter$before,beforeduringafter$during, beforeduringafter$aggressivemode, beforeduringafter$after)
+
+barplot(dd, beside=T,  names.arg=c('before','during','aggressivemode','after'), legend = c("Caroline", "Sabine", "Olga"),xlim = c(0, 21), ylab = "time spent in field (%)")
 
 ```
 
-In order to validate this their wherabouts were plotted before, during and after the Schrecks active period. To visualize weather or not they were inside the field in which the Schreck was placed, the area of the field is marked in the plot.
+To see if the boars presence or absence in the field was influenced by the Schreck or by the crop type, the percentage of the boar spent in a certain crop was plotted.
+It doesn't look like the boars favor the bean field, they seem to prefer oats.
+*(Michèle)*
+
+```{r preference of the boars in crop type}
+
+selectedboars <- wildschwein_sf %>%
+  filter(TierName == c("Caroline", "Sabine", "Olga"))
+
+boarsforest <-  st_join(selectedboars, forest)
+
+library(lubridate)
+library(forcats)
+
+wildschwein_smry <- boarsforest %>%
+  st_set_geometry(NULL) %>%
+  mutate(
+    hour = hour(round_date(DatetimeUTC,"hour")),
+    Frucht = ifelse(is.na(Frucht),"other",Frucht),
+    Frucht = fct_lump(Frucht, 5,other_level = "other"),
+  ) %>%
+  group_by(TierName ,hour,Frucht) %>%
+  count() %>%
+  ungroup() %>%
+  group_by(TierName , hour) %>%
+  mutate(perc = n / sum(n)) %>%
+  ungroup() %>%
+  mutate(
+    Frucht = fct_reorder(Frucht, n,sum, desc = TRUE)
+  )
+
+ggplot(wildschwein_smry, aes(hour,perc, fill = Frucht)) +
+  geom_col(width = 1) +
+  scale_y_continuous(name = "Percentage", labels = scales::percent_format()) +
+  scale_x_continuous(name = "Time (rounded to the nearest hour)") +
+  facet_wrap(~TierName ) +
+  theme_light() +
+  labs(title = "Percentages of samples in a given crop per hour")
+
+```
+
+In order to validate this their whereabouts were plotted before, during and after the Schrecks active period. To visualize whether or not they were inside the field in which the Schreck was placed, the area of the field is marked in the plot.
+*(Michèle)*
 
 ```{r Caroline beforeduringafter plot inoutside field}
 #Caroline
@@ -1259,6 +1420,8 @@ ggarrange(
     geom_sf(data=Caroline_Schrecktime_before, size = 0.2) + labs(title="Caroline before Schrecktime") + theme_classic(), 
   ggplot(fieldforschreck5)+geom_sf(aes(fill=Frucht)) +
     geom_sf(data=Caroline_Schrecktime, size = 0.2) + labs(title="Caroline during Schrecktime") + theme_classic(), 
+  ggplot(fieldforschreck5)+geom_sf(aes(fill=Frucht)) +
+        geom_sf(data=Caroline_Schrecktimeag, size = 0.2) + labs(title="Caroline during aggressive mode") + theme_classic(), 
   ggplot(fieldforschreck5)+geom_sf(aes(fill=Frucht)) +
     geom_sf(data=Caroline_Schrecktime_after, size = 0.2) + labs(title="Caroline after Schrecktime") + theme_classic() 
 )
@@ -1272,6 +1435,8 @@ ggarrange(
     geom_sf(data=Sabine_Schrecktime_before, size = 0.2) + labs(title="Sabine before Schrecktime") + theme_classic(), 
   ggplot(fieldforschreck5)+geom_sf(aes(fill=Frucht)) +
     geom_sf(data=Sabine_Schrecktime, size = 0.2) + labs(title="Sabine during Schrecktime") + theme_classic(), 
+  ggplot(fieldforschreck5)+geom_sf(aes(fill=Frucht)) +
+        geom_sf(data=Sabine_Schrecktimeag, size = 0.2) + labs(title="Sabine during aggressive mode") + theme_classic(), 
   ggplot(fieldforschreck5)+geom_sf(aes(fill=Frucht)) +
     geom_sf(data=Sabine_Schrecktime_after, size = 0.2) + labs(title="Sabine after Schrecktime") + theme_classic() 
 )
@@ -1287,12 +1452,24 @@ ggarrange(
   ggplot(fieldforschreck5)+geom_sf(aes(fill=Frucht)) +
     geom_sf(data=Olga_Schrecktime, size = 0.2) + labs(title="Olga during Schrecktime") + theme_classic(), 
   ggplot(fieldforschreck5)+geom_sf(aes(fill=Frucht)) +
+        geom_sf(data=Olga_Schrecktimeag, size = 0.2) + labs(title="Olga during aggressive mode") + theme_classic(), 
+  ggplot(fieldforschreck5)+geom_sf(aes(fill=Frucht)) +
     geom_sf(data=Olga_Schrecktime_after, size = 0.2) + labs(title="Olga after Schrecktime") + theme_classic() 
 )
 
 ```
 
 # 3. Discussion
+This project aimed to develop a method for modelling the behaviour of wild boars who have been in contact with scare-off measures. 
+Once a scare-off measure has been set into action, it needs to be examined weather or not it has an effect. Therefore, the following research questions were formulated:  
+**How can the behavior of the boars who had been in contact with a Schreck be modelled?**  
+
+
+**How can a return pattern to the location of the Schreck be modelled?**
+
+The hypothesis was that their behavior can be modelled by their distance to the corresponding Schreck, as well as comparing the average time they spent in a certain field before the scare-off measure called "Schreck" was put into action, during and after. 
+*(Michele)*
+
 ## 3.1 Distance to conceptualize movement
 As the results show, all boars moved in a 0 to 1500 m radius around the Schreck before the sound started, moved around it in a 0 to 1000 m radius during standard mode and increased radius when switching to aggressive and then quiet mode (= after sounding). Caroline's and Olga's movements could be compared, whereas Sabine moved in a different way.  
 Distance was chosen to conceptualize movement, when plotting against the time on the x axis. The question is, if it can be considered **useful** in order to conceptualize an actual pattern. Additionally, validity of the relationships might not be general enough. With such a small analysis (3 boars with one Schreck), it could easily capture only a peculiarity of the current data. (2) *(Lia)* 
@@ -1301,8 +1478,21 @@ The above explained topic was assessed by using another way of conceptualizing t
 Looking at the resulting graphs, it can't be concluded that this measure provides a more useful pattern. At least, the findings from the distance graphs can be reproduced this way (especially the similarity between Olga and Caroline) which could be considered as a validation step. *(Lia)* 
 
 # 3.2 In Field vs. Not In Field
-The original concept to annotate the times when the boars were inside of the bean field resulted in a creation of point at "in Field" moments. The binary display of In vs. Not In didn't provide any useful pattern so it was omitted from the project. In the results, red points can be seen and followed, and interestingly, the boars were visiting the field even during Schreck time. Not even the aggressive mode during activity stopped them from returing to the field.  
+The original concept to annotate the times when the boars were inside of the bean field resulted in a creation of point at "in Field" moments. The binary display of In vs. Not In didn't provide any useful pattern. In the results, red points can be seen and followed, and interestingly, the boars were visiting the field even during Schreck time. Not even the aggressive mode during activity stopped them from returning to the field.  
 This concept could start the analysis of finding returning patterns, though more validation would need to be executed. *(Lia)* 
+
+In this approach the time of a boar inside a certain area was compared to the time spent outside of this area, which should produce a conclusion out of a large dataset which is relevant and understandable for a farmer as well as for the researcher, who put the scare-off measures into place. It should provide a conclusive answer on whether or not the Schreck has the effect of keeping the boars out of a certain area. *(Michele)* 
+
+The question which this approach aimed to answer is:
+How much time does a boar spend in the field before the Schreck (in %), during and after?
+
+The In Field vs. Not In Field approach did reach the goal of answering this question. 
+All three boars seem to spend more time in the bean field when the Schreck was on, compared to before the Schreck was put there and even more once the Schreck was put into aggressive mode. The time spent in the field remained higher also after the Schreck was removed, compared to before the Schreck was even put into place. Not only does the Schreck seem to fail to reduce the percentage of the boars spent in the field, it seems to attract them. They spend more time in the field once the Schreck is on and even more when it goes into aggressive mode and keep coming back even after the Schreck was removed. *(Michele)*
+
+This method delivers relative numbers with which a conclusion can be reached. However for those percentages to be valid enough to reach a statistical conclusion and to decide if an observed effect is significant or not, more data would be needed. Several animals would need to be tracked during the same time period in the same area, so that the data could be compared and have some statistical weight and that finally an effect could be called significant. This poses a challenge however, since several animals would have to be caught and have a tracker attached to them at the same time, which might be unrealistic. Furthermore, those animals would have to move around in the same area, which is something the researchers have no control over. Therefore the data gained by tracking wild boars is difficult to interpret and should be weighted carefully. There might be a great number of reasons for an observed effect, such as the personality of the boar itself, the geographic region, the season, etc. 
+This approach can only deliver meaningful and reliable results, if a statistically significant number of individuals is tracked during the same time period and the same area. 
+If that is not possible, drone data on the caused damage might the more reliable indicator on the effectiveness of the Schrecks.
+*(Michele)*
 
 ## 3.3 Smoothing methods
 Counting as an interesting finding was the fact that the boars seemed to reduce and increase their distance on a daily basis, which could relate to their behaviors (sleeping outside of the field and moving back during their active days). This semantic annotation is purely speculative, as it was not further analysed (5).
@@ -1312,13 +1502,16 @@ The second option was the rolling window method that uses a mean from different 
 Subsetting and reducing sample size to every 150th observation was used for the result, mainly due to the highest degree of readability. *(Lia)* 
 
 ## 3.4 Validation
-Validation was carried out derived from options in the Rykiel paper (1). It consisted mainly of replotting data either with a subset of the data or in comparison with other parameters (e.g. IDs oder boars). *(Lia)* 
+Validation was carried out derived from options in the Rykiel paper (1). It consisted mainly of replotting data either with a subset of the data or in comparison with other parameters (e.g. IDs or boars). *(Lia)* 
 
 ## 3.5 Problems and possible solutions
-- Before actual conceptualization could take place, a lot of time was invested to find the affected boars and which Schrecks they were affected by, a necessary task to continue the work on the research question. Analysing data from another researcher without having accompanied the process means that more pre-processing and exploratory data analysis needs to be done. On the other hand, it might lead to finding unexpected patterns, because no expectations were present.  
+- Before actual conceptualization could take place, a lot of time was invested to find the affected boars and which Schrecks they were affected by, a necessary task to continue the work on the research question. Analyzing data from another researcher without having accompanied the process means that more pre-processing and exploratory data analysis needs to be done. On the other hand, it might lead to finding unexpected patterns, because no expectations were present.  
 - At this point, I'm not completely sure if the results are even remotely interesting or if it was merely a result in visualisation instead of pattern detection. Maybe these data don't allow the finding of patterns.  
 - Our initial research question was about finding returning patterns to the Schreck location. Even though the red points show movement inside the field even during active Schreck times, it might not have been the ideal display. So far, this has not yet been overcome.  
-- One main issue was the difficulty to estimate whether the animals would hear the Schrecks or not - does it depend on distance or is it more related to topological or environmental factors (e.g. wind, density of forest / field)? *(Lia)*
+- One main issue was the difficulty to estimate whether the animals would hear the Schrecks or not - does it depend on distance or is it more related to topological or environmental factors (e.g. wind, density of forest / field)? 
+*(Lia)*
+- Another big issue was that not enough individuals were tracked over the same time period, in the same area. It is therefore impossible to say if an observed effect is due to a coincidence, like a change in movement pattern of one individual boar, or if it is an effect of the Schreck.
+*(Michele)*
 
 # Outlook
 The project delivers a method to visualize the returning behavior before, during and after Schreck activity in a simplistic way. An open question remains, if the behavior was suitably modelled by distance and change in distance. The following next actions might help deriving more insights on the matter:  
@@ -1338,18 +1531,5 @@ Also, it remains unvalidated if the findings are a pattern or mere peculiarity o
 (4) Molloy, J., Schatzmann, T., Schoeman, B., Tchervenkov, C., Hintermann, B., & Axhausen, K. W. (2021). Observed impacts of the Covid-19 first wave on travel behaviour in Switzerland based on a large GPS panel. Transport Policy, 104, 43-51.  
 (5) SHAMOUN-BARANES, J., et al. 2012. From Sensor Data to Animal Behaviour: An Oystercatcher Example. PLoS ONE, 7(5), e37997  
 (6) Laube, Patrick, and Ross S. Purves. 2011. “How Fast Is a Cow? Cross - Scale Analysis of Movement Data.” Transactions in GIS 15 (3): 401–18. https://doi.org/10.1111/j.1467-9671.2011.01256.x.
+(7)Sutter, S. (2019).Wildschweinschäden mit akustischer Methode verhindern: https://www.zhaw.ch/storage/hochschule/medien/bildmaterial/Medienmitteilung_Wildschweinschreck.pdf
 
-```{r info text for Michèle}
-# From Patrick's project intro:
-
-#Your report shall:
-#– cover how you went about investigating your research questions. Describe your data science ideas
-#and how you implemented your ideas. - done
-#– present the results of your study and discuss them in the light of your research questions. What
-#have you achieved and what would be further steps for future research?
-#– report problems and limitations you encountered along the way and the solutions you chose to
-#overcome these, be it limitations with respect to the data sources, the tools or any other source of
-#limitation.
-#– discuss your data science choices in the light of the theory covered in the lectures, group works,
-#and your reading assignments.
-```
